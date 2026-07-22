@@ -1,0 +1,18 @@
+# Dependencies
+fresco-backend/node_modules/
+
+# Build output
+fresco-backend/dist/
+
+# Environment
+fresco-backend/.env
+
+# Logs
+fresco-backend/logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VS Code (optional)
+.vscode/
