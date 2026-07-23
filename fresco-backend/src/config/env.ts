@@ -9,6 +9,12 @@ const environmentSchema = z.object({
   MONGO_URI: z.string().trim().url("MONGO_URI must be a valid MongoDB URI."),
   LOG_LEVEL: z.enum(["error", "warn", "info", "http", "debug"]).default("info"),
   CORS_ORIGIN: z.string().trim().default("*"),
+  BCRYPT_SALT_ROUNDS: z.coerce
+    .number()
+    .int("BCRYPT_SALT_ROUNDS must be an integer.")
+    .min(10, "BCRYPT_SALT_ROUNDS must be at least 10.")
+    .max(15, "BCRYPT_SALT_ROUNDS must not exceed 15.")
+    .default(12),
 });
 
 const parsedEnvironment = environmentSchema.safeParse(process.env);
@@ -30,6 +36,7 @@ export const env = Object.freeze({
   port: parsedEnvironment.data.PORT,
   mongoUri: parsedEnvironment.data.MONGO_URI,
   logLevel: parsedEnvironment.data.LOG_LEVEL,
+  bcryptSaltRounds: parsedEnvironment.data.BCRYPT_SALT_ROUNDS,
   corsOrigin:
     corsOrigins.length === 0 || corsOrigins.includes("*") ? true : corsOrigins,
 });
