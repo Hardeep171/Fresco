@@ -9,6 +9,28 @@ const environmentSchema = z.object({
   MONGO_URI: z.string().trim().url("MONGO_URI must be a valid MongoDB URI."),
   LOG_LEVEL: z.enum(["error", "warn", "info", "http", "debug"]).default("info"),
   CORS_ORIGIN: z.string().trim().default("*"),
+  JWT_ACCESS_SECRET: z
+    .string()
+    .trim()
+    .min(32, "JWT_ACCESS_SECRET must be at least 32 characters long."),
+  JWT_ACCESS_EXPIRES_IN: z
+    .string()
+    .trim()
+    .regex(
+      /^[1-9]\d*[mhd]$/,
+      "JWT_ACCESS_EXPIRES_IN must be a positive duration such as 15m, 1h, or 7d.",
+    ),
+  JWT_REFRESH_SECRET: z
+    .string()
+    .trim()
+    .min(32, "JWT_REFRESH_SECRET must be at least 32 characters long."),
+  JWT_REFRESH_EXPIRES_IN: z
+    .string()
+    .trim()
+    .regex(
+      /^[1-9]\d*[mhd]$/,
+      "JWT_REFRESH_EXPIRES_IN must be a positive duration such as 15m, 1h, or 7d.",
+    ),
   BCRYPT_SALT_ROUNDS: z.coerce
     .number()
     .int("BCRYPT_SALT_ROUNDS must be an integer.")
@@ -36,6 +58,10 @@ export const env = Object.freeze({
   port: parsedEnvironment.data.PORT,
   mongoUri: parsedEnvironment.data.MONGO_URI,
   logLevel: parsedEnvironment.data.LOG_LEVEL,
+  jwtAccessSecret: parsedEnvironment.data.JWT_ACCESS_SECRET,
+  jwtAccessExpiresIn: parsedEnvironment.data.JWT_ACCESS_EXPIRES_IN,
+  jwtRefreshSecret: parsedEnvironment.data.JWT_REFRESH_SECRET,
+  jwtRefreshExpiresIn: parsedEnvironment.data.JWT_REFRESH_EXPIRES_IN,
   bcryptSaltRounds: parsedEnvironment.data.BCRYPT_SALT_ROUNDS,
   corsOrigin:
     corsOrigins.length === 0 || corsOrigins.includes("*") ? true : corsOrigins,
