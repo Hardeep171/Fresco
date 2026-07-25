@@ -57,6 +57,16 @@ export const loginSchema = z.object({
 });
 
 /**
+ * Reusable Zod validation schema for token refresh requests.
+ */
+export const refreshTokenSchema = z.object({
+  refreshToken: z
+    .string({ error: "Refresh token is required." })
+    .trim()
+    .min(1, { error: "Refresh token is required." }),
+});
+
+/**
  * Strongly typed TypeScript interface inferred from `registerSchema`.
  */
 export type RegisterInput = z.infer<typeof registerSchema>;
@@ -65,3 +75,8 @@ export type RegisterInput = z.infer<typeof registerSchema>;
  * Strongly typed TypeScript interface inferred from `loginSchema`.
  */
 export type LoginInput = z.infer<typeof loginSchema>;
+
+/**
+ * Strongly typed TypeScript interface inferred from `refreshTokenSchema`.
+ */
+export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>;

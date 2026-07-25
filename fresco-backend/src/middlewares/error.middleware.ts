@@ -15,6 +15,13 @@ const isMongoDuplicateKeyError = (error: unknown): error is MongoServerError => 
   return error instanceof Error && "code" in error && error.code === 11_000;
 };
 
+const isJwtError = (error: unknown): boolean => {
+  return (
+    error instanceof Error &&
+    (error.name === "JsonWebTokenError" || error.name === "TokenExpiredError")
+  );
+};
+
 const toApiError = (error: unknown): ApiError => {
   if (error instanceof ApiError) {
     return error;
@@ -27,6 +34,10 @@ const toApiError = (error: unknown): ApiError => {
     }));
 
     return new ApiError(StatusCodes.BAD_REQUEST, "Validation failed.", details);
+  }
+
+  if (isJwtError(error)) {
+    return new ApiError(StatusCodes.UNAUTHORIZED, "Invalid or expired refresh token.");
   }
 
   if (isMongoDuplicateKeyError(error)) {

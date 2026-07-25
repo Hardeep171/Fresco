@@ -4,7 +4,11 @@ import { StatusCodes } from "http-status-codes";
 import { authService } from "../services/auth.service.js";
 import { ApiResponse } from "../utils/api-response.js";
 import { asyncHandler } from "../utils/async-handler.js";
-import { loginSchema, registerSchema } from "../validators/auth.validator.js";
+import {
+  loginSchema,
+  refreshTokenSchema,
+  registerSchema,
+} from "../validators/auth.validator.js";
 
 /** Authentication controller handling HTTP requests for user authentication. */
 export const authController = {
@@ -42,9 +46,11 @@ export const authController = {
 
   /** Refresh access token using refresh token. */
   refreshToken: asyncHandler(async (req: Request, res: Response) => {
+    // Validate request body
+    const validatedData = refreshTokenSchema.parse(req.body);
+
     // Refresh access token
-    const { refreshToken } = req.body;
-    const refreshResult = await authService.refreshToken(refreshToken);
+    const refreshResult = await authService.refreshToken(validatedData.refreshToken);
 
     ApiResponse.send(
       res,
