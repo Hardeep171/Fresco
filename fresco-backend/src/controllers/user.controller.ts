@@ -5,6 +5,7 @@ import { userService } from "../services/user.service.js";
 import { ApiError } from "../utils/api-error.js";
 import { ApiResponse } from "../utils/api-response.js";
 import { asyncHandler } from "../utils/async-handler.js";
+import { updateProfileSchema } from "../validators/user.validator.js";
 
 /** User controller handling HTTP requests for User profile and management. */
 export const userController = {
@@ -22,6 +23,27 @@ export const userController = {
       res,
       StatusCodes.OK,
       "User profile fetched successfully",
+      { user },
+    );
+  }),
+
+  /** Update current authenticated user's profile. */
+  updateProfile: asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      throw new ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized");
+    }
+
+    // Validate request body
+    const validatedData = updateProfileSchema.parse(req.body);
+
+    const user = await userService.updateProfile(userId, validatedData);
+
+    ApiResponse.send(
+      res,
+      StatusCodes.OK,
+      "Profile updated successfully",
       { user },
     );
   }),

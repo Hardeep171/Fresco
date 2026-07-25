@@ -9,4 +9,7 @@ const router = Router();
 // Get current user profile
 router.get("/me", authenticate, userController.getCurrentUser);
 
+// Update user profile
+router.patch("/profile", authenticate, userController.updateProfile);
+
 export default router;
