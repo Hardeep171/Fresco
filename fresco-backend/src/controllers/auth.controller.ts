@@ -62,14 +62,11 @@ export const authController = {
 
   /** Logout user and clear session. */
   logout: asyncHandler(async (req: Request, res: Response) => {
+    // Validate request body
+    const validatedData = refreshTokenSchema.parse(req.body);
+
     // Logout user
-    const userId = req.user?.userId || req.body.userId;
-
-    if (!userId) {
-      throw new Error("User id is required");
-    }
-
-    const logoutResult = await authService.logout(userId);
+    const logoutResult = await authService.logout(validatedData.refreshToken);
 
     ApiResponse.send(
       res,

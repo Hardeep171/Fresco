@@ -105,10 +105,24 @@ export const authService = {
     return tokens;
   },
 
-  /** Clear user session. */
-  async logout(userId: string) {
-    // Clear refresh token
-    await authRepository.clearRefreshToken(userId);
+  /** Logs out a user by verifying and clearing their stored refresh token. */
+  async logout(refreshToken: string) {
+    // Verify token
+    const payload = await verifyRefreshToken(refreshToken);
+
+    // Find user with refresh token
+    const user = await authRepository.findUserByIdWithRefreshToken(payload.userId);
+    if (!user) {
+      throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid refresh token");
+    }
+
+    // Compare stored refresh token
+    if (user.refreshToken !== refreshToken) {
+      throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid refresh token");
+    }
+
+    // Clear refresh token in database
+    await authRepository.clearRefreshToken(user._id.toString());
 
     return {
       success: true,
