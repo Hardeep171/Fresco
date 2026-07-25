@@ -26,6 +26,16 @@ export const authRepository = {
   },
 
   /**
+   * Finds a user document by ID, explicitly selecting the refreshToken field.
+   *
+   * @param userId - The user's unique identifier.
+   * @returns Promise resolving to the user document if found, or null.
+   */
+  async findUserByIdWithRefreshToken(userId: string) {
+    return UserModel.findById(userId).select("+refreshToken").exec();
+  },
+
+  /**
    * Creates a new user document in the database using the strongly typed RegisterInput payload.
    *
    * @param userData - The strongly typed user creation payload.
