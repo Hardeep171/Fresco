@@ -5,13 +5,6 @@ import { authService } from "../services/auth.service.js";
 import { ApiResponse } from "../utils/api-response.js";
 import { asyncHandler } from "../utils/async-handler.js";
 
-interface AuthenticatedRequest extends Request {
-  user?: {
-    id?: string;
-    userId?: string;
-  };
-}
-
 /** Authentication controller handling HTTP requests for user authentication. */
 export const authController = {
   /** Register a new user. */
@@ -56,9 +49,9 @@ export const authController = {
   }),
 
   /** Logout user and clear session. */
-  logout: asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  logout: asyncHandler(async (req: Request, res: Response) => {
     // Logout user
-    const userId = req.user?.id || req.user?.userId || req.body.userId;
+    const userId = req.user?.userId || req.body.userId;
 
     if (!userId) {
       throw new Error("User id is required");
