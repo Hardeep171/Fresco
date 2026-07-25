@@ -4,13 +4,17 @@ import { StatusCodes } from "http-status-codes";
 import { authService } from "../services/auth.service.js";
 import { ApiResponse } from "../utils/api-response.js";
 import { asyncHandler } from "../utils/async-handler.js";
+import { loginSchema, registerSchema } from "../validators/auth.validator.js";
 
 /** Authentication controller handling HTTP requests for user authentication. */
 export const authController = {
   /** Register a new user. */
   register: asyncHandler(async (req: Request, res: Response) => {
+    // Validate request body
+    const validatedData = registerSchema.parse(req.body);
+
     // Register user
-    const registerResult = await authService.register(req.body);
+    const registerResult = await authService.register(validatedData);
 
     ApiResponse.send(
       res,
@@ -22,9 +26,11 @@ export const authController = {
 
   /** Authenticate user with email and password. */
   login: asyncHandler(async (req: Request, res: Response) => {
+    // Validate request body
+    const validatedData = loginSchema.parse(req.body);
+
     // Login user
-    const { email, password } = req.body;
-    const loginResult = await authService.login(email, password);
+    const loginResult = await authService.login(validatedData.email, validatedData.password);
 
     ApiResponse.send(
       res,

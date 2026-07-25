@@ -1,4 +1,6 @@
 import type { ErrorRequestHandler } from "express";
+import { StatusCodes } from "http-status-codes";
+import { ZodError } from "zod";
 
 import { env } from "../config/env.js";
 import { logger } from "../config/logger.js";
@@ -18,15 +20,24 @@ const toApiError = (error: unknown): ApiError => {
     return error;
   }
 
+  if (error instanceof ZodError) {
+    const details: ApiErrorDetail[] = error.issues.map((issue) => ({
+      field: issue.path.join("."),
+      message: issue.message,
+    }));
+
+    return new ApiError(StatusCodes.BAD_REQUEST, "Validation failed.", details);
+  }
+
   if (isMongoDuplicateKeyError(error)) {
     const field = Object.keys(error.keyValue ?? {})[0];
     const message = field ? `${field} already exists.` : "A record with this value already exists.";
     const details: ApiErrorDetail[] = field ? [{ field, message }] : [];
 
-    return new ApiError(409, message, details);
+    return new ApiError(StatusCodes.CONFLICT, message, details);
   }
 
-  return new ApiError(500, "Internal server error.");
+  return new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error.");
 };
 
 export const errorMiddleware: ErrorRequestHandler = (error, request, response, _next) => {

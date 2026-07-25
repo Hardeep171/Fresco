@@ -1,4 +1,7 @@
+import { StatusCodes } from "http-status-codes";
+
 import { authRepository } from "../repositories/auth.repository.js";
+import { ApiError } from "../utils/api-error.js";
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -23,7 +26,7 @@ export const authService = {
     // Check if user exists
     const existingUser = await authRepository.findUserByEmail(registerData.email);
     if (existingUser) {
-      throw new Error("User already exists");
+      throw new ApiError(StatusCodes.CONFLICT, "User already exists");
     }
 
     // Hash password
@@ -54,13 +57,13 @@ export const authService = {
     // Find user
     const user = await authRepository.findUserByEmail(email);
     if (!user) {
-      throw new Error("Invalid credentials");
+      throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid credentials");
     }
 
     // Compare password
     const isPasswordValid = await comparePassword(password, String(user.password));
     if (!isPasswordValid) {
-      throw new Error("Invalid credentials");
+      throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid credentials");
     }
 
     // Generate tokens
@@ -85,12 +88,12 @@ export const authService = {
     // Find user with refresh token
     const user = await authRepository.findUserByIdWithRefreshToken(payload.userId);
     if (!user) {
-      throw new Error("Invalid refresh token");
+      throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid refresh token");
     }
 
     // Compare stored refresh token
     if (user.refreshToken !== refreshToken) {
-      throw new Error("Invalid refresh token");
+      throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid refresh token");
     }
 
     // Generate tokens
