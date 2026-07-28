@@ -25,4 +25,32 @@ export const userRepository = {
       .select("-password -refreshToken")
       .exec();
   },
+
+  /**
+   * Finds a user document by ID including sensitive fields (password, refreshToken).
+   *
+   * @param userId - The user's unique identifier.
+   * @returns Promise resolving to the user document if found, or null.
+   */
+  async findUserByIdWithPasswordAndRefreshToken(userId: string) {
+    return UserModel.findById(userId).select("+password +refreshToken").exec();
+  },
+
+  /**
+   * Updates a user's password and clears the stored refresh token in a single operation.
+   *
+   * @param userId - The user's unique identifier.
+   * @param hashedPassword - The hashed new password.
+   * @returns Promise resolving to the updated user document if found, or null.
+   */
+  async updatePasswordAndClearRefreshToken(userId: string, hashedPassword: string) {
+    return UserModel.findByIdAndUpdate(
+      userId,
+      {
+        password: hashedPassword,
+        $unset: { refreshToken: 1 },
+      },
+      { new: true },
+    ).exec();
+  },
 };

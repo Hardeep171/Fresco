@@ -38,3 +38,20 @@ export const updateProfileSchema = z
 
 /** Strongly typed interface inferred from `updateProfileSchema`. */
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+
+/**
+ * Reusable Zod validation schema for changing password.
+ */
+export const changePasswordSchema = z.object({
+  currentPassword: z
+    .string({ error: "Current password is required." })
+    .min(8, { error: "Current password must be at least 8 characters long." }),
+
+  newPassword: z
+    .string({ error: "New password is required." })
+    .min(8, { error: "New password must be at least 8 characters long." }),
+});
+
+/** Strongly typed interface inferred from `changePasswordSchema`. */
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+

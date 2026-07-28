@@ -12,4 +12,7 @@ router.get("/me", authenticate, userController.getCurrentUser);
 // Update user profile
 router.patch("/profile", authenticate, userController.updateProfile);
 
+// Change user password
+router.patch("/change-password", authenticate, userController.changePassword);
+
 export default router;
