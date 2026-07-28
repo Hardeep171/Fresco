@@ -57,6 +57,8 @@ export const UserSchema = new Schema(
     profileImage: { type: String, trim: true },
     lastLogin: { type: Date },
     refreshToken: { type: String, select: false },
+    passwordResetToken: { type: String, select: false },
+    passwordResetTokenExpiresAt: { type: Date, select: false },
     createdBy: { type: Schema.Types.ObjectId, ref: "User" },
     updatedBy: { type: Schema.Types.ObjectId, ref: "User" },
     deletedAt: { type: Date, default: null },
@@ -71,10 +73,14 @@ export const UserSchema = new Schema(
         const serializedUser = returnedObject as {
           password?: unknown;
           refreshToken?: unknown;
+          passwordResetToken?: unknown;
+          passwordResetTokenExpiresAt?: unknown;
         };
 
         delete serializedUser.password;
         delete serializedUser.refreshToken;
+        delete serializedUser.passwordResetToken;
+        delete serializedUser.passwordResetTokenExpiresAt;
       },
     },
     toObject: {
@@ -83,10 +89,14 @@ export const UserSchema = new Schema(
         const serializedUser = returnedObject as {
           password?: unknown;
           refreshToken?: unknown;
+          passwordResetToken?: unknown;
+          passwordResetTokenExpiresAt?: unknown;
         };
 
         delete serializedUser.password;
         delete serializedUser.refreshToken;
+        delete serializedUser.passwordResetToken;
+        delete serializedUser.passwordResetTokenExpiresAt;
       },
     },
   },

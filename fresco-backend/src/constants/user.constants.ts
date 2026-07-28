@@ -26,3 +26,6 @@ export const DEFAULT_USER_ROLE: UserRole = "CUSTOMER";
 
 /** Default status assigned when a user is created. */
 export const DEFAULT_USER_STATUS: UserStatus = "ACTIVE";
+
+/** Expiry duration for password reset token in minutes. */
+export const RESET_PASSWORD_TOKEN_EXPIRY_MINUTES = 15;

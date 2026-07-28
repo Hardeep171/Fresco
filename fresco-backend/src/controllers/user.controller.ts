@@ -7,6 +7,8 @@ import { ApiResponse } from "../utils/api-response.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import {
   changePasswordSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
   updateProfileSchema,
 } from "../validators/user.validator.js";
 
@@ -72,6 +74,39 @@ export const userController = {
       res,
       StatusCodes.OK,
       "Password changed successfully. Please log in again.",
+      undefined,
+    );
+  }),
+
+  /** Handle forgot password request. */
+  forgotPassword: asyncHandler(async (req: Request, res: Response) => {
+    // Validate request body
+    const validatedData = forgotPasswordSchema.parse(req.body);
+
+    await userService.forgotPassword(validatedData.email);
+
+    ApiResponse.send(
+      res,
+      StatusCodes.OK,
+      "If an account exists for this email, a password reset link has been sent.",
+      undefined,
+    );
+  }),
+
+  /** Handle reset password request. */
+  resetPassword: asyncHandler(async (req: Request, res: Response) => {
+    // Validate request body
+    const validatedData = resetPasswordSchema.parse(req.body);
+
+    await userService.resetPassword(
+      validatedData.token,
+      validatedData.newPassword,
+    );
+
+    ApiResponse.send(
+      res,
+      StatusCodes.OK,
+      "Password reset successfully. Please log in again.",
       undefined,
     );
   }),

@@ -55,3 +55,35 @@ export const changePasswordSchema = z.object({
 /** Strongly typed interface inferred from `changePasswordSchema`. */
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 
+/**
+ * Reusable Zod validation schema for forgot password request.
+ */
+export const forgotPasswordSchema = z.object({
+  email: z
+    .string({ error: "Email address is required." })
+    .trim()
+    .toLowerCase()
+    .email({ error: "Invalid email address format." }),
+});
+
+/** Strongly typed interface inferred from `forgotPasswordSchema`. */
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+
+/**
+ * Reusable Zod validation schema for reset password request.
+ */
+export const resetPasswordSchema = z.object({
+  token: z
+    .string({ error: "Password reset token is required." })
+    .trim()
+    .min(1, { error: "Password reset token is required." }),
+
+  newPassword: z
+    .string({ error: "New password is required." })
+    .min(8, { error: "New password must be at least 8 characters long." }),
+});
+
+/** Strongly typed interface inferred from `resetPasswordSchema`. */
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
+

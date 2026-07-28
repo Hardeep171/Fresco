@@ -1,5 +1,8 @@
+import crypto from "node:crypto";
+
 import { StatusCodes } from "http-status-codes";
 
+import { RESET_PASSWORD_TOKEN_EXPIRY_MINUTES } from "../constants/user.constants.js";
 import { userRepository } from "../repositories/user.repository.js";
 import { ApiError } from "../utils/api-error.js";
 import { comparePassword, hashPassword } from "../utils/password.js";
@@ -86,5 +89,64 @@ export const userService = {
     const hashedPassword = await hashPassword(newPassword);
 
     await userRepository.updatePasswordAndClearRefreshToken(userId, hashedPassword);
+  },
+
+  /**
+   * Generates a password reset token for a user with matching email address.
+   *
+   * @param email - User email address.
+   */
+  async forgotPassword(email: string): Promise<void> {
+    const user = await userRepository.findUserByEmail(email);
+
+    if (!user) {
+      return;
+    }
+
+    const rawResetToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto.createHash("sha256").update(rawResetToken).digest("hex");
+
+    const expiresAt = new Date(
+      Date.now() + RESET_PASSWORD_TOKEN_EXPIRY_MINUTES * 60 * 1000,
+    );
+
+    await userRepository.savePasswordResetToken(
+      user._id.toString(),
+      hashedToken,
+      expiresAt,
+    );
+
+    // TODO: EmailService will send the rawResetToken to user's email address
+  },
+
+  /**
+   * Resets password using a valid password reset token and clears tokens.
+   *
+   * @param token - Raw password reset token.
+   * @param newPassword - Plaintext new password.
+   * @throws {ApiError} 400 if token is invalid or expired.
+   */
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    const user = await userRepository.findUserByPasswordResetToken(hashedToken);
+
+    if (
+      !user ||
+      !user.passwordResetTokenExpiresAt ||
+      new Date(user.passwordResetTokenExpiresAt as Date).getTime() <= Date.now()
+    ) {
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        "Invalid or expired password reset token",
+      );
+    }
+
+    const hashedPassword = await hashPassword(newPassword);
+
+    await userRepository.resetPasswordAndClearTokens(
+      user._id.toString(),
+      hashedPassword,
+    );
   },
 };

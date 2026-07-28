@@ -15,4 +15,10 @@ router.patch("/profile", authenticate, userController.updateProfile);
 // Change user password
 router.patch("/change-password", authenticate, userController.changePassword);
 
+// Request password reset token (Public)
+router.post("/forgot-password", userController.forgotPassword);
+
+// Reset password using token (Public)
+router.post("/reset-password", userController.resetPassword);
+
 export default router;
