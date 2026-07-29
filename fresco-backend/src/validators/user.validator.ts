@@ -86,4 +86,18 @@ export const resetPasswordSchema = z.object({
 /** Strongly typed interface inferred from `resetPasswordSchema`. */
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 
+/**
+ * Reusable Zod validation schema for email verification request.
+ */
+export const verifyEmailSchema = z.object({
+  token: z
+    .string({ error: "Email verification token is required." })
+    .trim()
+    .min(1, { error: "Email verification token is required." }),
+});
+
+/** Strongly typed interface inferred from `verifyEmailSchema`. */
+export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
+
+
 

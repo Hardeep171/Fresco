@@ -21,4 +21,8 @@ router.post("/forgot-password", userController.forgotPassword);
 // Reset password using token (Public)
 router.post("/reset-password", userController.resetPassword);
 
+// Verify email using token (Public)
+router.post("/verify-email", userController.verifyEmail);
+
 export default router;
+

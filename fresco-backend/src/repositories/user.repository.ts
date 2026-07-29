@@ -121,4 +121,60 @@ export const userRepository = {
       { new: true },
     ).exec();
   },
+
+  /**
+   * Saves the hashed email verification token and expiration date for a user.
+   *
+   * @param userId - The user's unique identifier.
+   * @param emailVerificationToken - Hashed email verification token.
+   * @param emailVerificationTokenExpiresAt - Expiration timestamp.
+   * @returns Promise resolving to the updated user document if found, or null.
+   */
+  async saveEmailVerificationToken(
+    userId: string,
+    emailVerificationToken: string,
+    emailVerificationTokenExpiresAt: Date,
+  ) {
+    return UserModel.findByIdAndUpdate(
+      userId,
+      {
+        emailVerificationToken,
+        emailVerificationTokenExpiresAt,
+      },
+      { new: true },
+    ).exec();
+  },
+
+  /**
+   * Finds a user document by hashed email verification token, explicitly selecting emailVerificationToken and emailVerificationTokenExpiresAt.
+   *
+   * @param emailVerificationToken - Hashed email verification token.
+   * @returns Promise resolving to the user document if found, or null.
+   */
+  async findUserByEmailVerificationToken(emailVerificationToken: string) {
+    return UserModel.findOne({ emailVerificationToken })
+      .select("+emailVerificationToken +emailVerificationTokenExpiresAt")
+      .exec();
+  },
+
+  /**
+   * Atomically marks user email as verified and clears email verification token fields.
+   *
+   * @param userId - The user's unique identifier.
+   * @returns Promise resolving to the updated user document if found, or null.
+   */
+  async verifyEmailAndClearToken(userId: string) {
+    return UserModel.findByIdAndUpdate(
+      userId,
+      {
+        isEmailVerified: true,
+        $unset: {
+          emailVerificationToken: 1,
+          emailVerificationTokenExpiresAt: 1,
+        },
+      },
+      { new: true },
+    ).exec();
+  },
 };
+

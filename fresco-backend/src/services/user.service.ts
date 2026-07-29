@@ -2,7 +2,10 @@ import crypto from "node:crypto";
 
 import { StatusCodes } from "http-status-codes";
 
-import { RESET_PASSWORD_TOKEN_EXPIRY_MINUTES } from "../constants/user.constants.js";
+import {
+  EMAIL_VERIFICATION_TOKEN_EXPIRY_HOURS,
+  RESET_PASSWORD_TOKEN_EXPIRY_MINUTES,
+} from "../constants/user.constants.js";
 import { userRepository } from "../repositories/user.repository.js";
 import { ApiError } from "../utils/api-error.js";
 import { comparePassword, hashPassword } from "../utils/password.js";
@@ -149,4 +152,40 @@ export const userService = {
       hashedPassword,
     );
   },
+
+  /**
+   * Verifies a user's email address using a valid email verification token.
+   *
+   * @param token - Raw email verification token.
+   * @throws {ApiError} 400 if token is invalid or expired.
+   * @throws {ApiError} 400 if email is already verified.
+   */
+  async verifyEmail(token: string): Promise<void> {
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    const user = await userRepository.findUserByEmailVerificationToken(hashedToken);
+
+    if (
+      !user ||
+      !user.emailVerificationTokenExpiresAt ||
+      new Date(user.emailVerificationTokenExpiresAt as Date).getTime() <= Date.now()
+    ) {
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        "Invalid or expired email verification token",
+      );
+    }
+
+    if (user.isEmailVerified) {
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        "Email is already verified",
+      );
+    }
+
+    await userRepository.verifyEmailAndClearToken(user._id.toString());
+
+    // TODO: EmailService will send confirmation/welcome email upon successful email verification
+  },
 };
+

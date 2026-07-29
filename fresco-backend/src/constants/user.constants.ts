@@ -29,3 +29,6 @@ export const DEFAULT_USER_STATUS: UserStatus = "ACTIVE";
 
 /** Expiry duration for password reset token in minutes. */
 export const RESET_PASSWORD_TOKEN_EXPIRY_MINUTES = 15;
+
+/** Expiry duration for email verification token in hours. */
+export const EMAIL_VERIFICATION_TOKEN_EXPIRY_HOURS = 24;

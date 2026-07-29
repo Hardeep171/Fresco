@@ -53,6 +53,8 @@ export const UserSchema = new Schema(
       default: DEFAULT_USER_STATUS,
     },
     isEmailVerified: { type: Boolean, default: false },
+    emailVerificationToken: { type: String, select: false },
+    emailVerificationTokenExpiresAt: { type: Date, select: false },
     isPhoneVerified: { type: Boolean, default: false },
     profileImage: { type: String, trim: true },
     lastLogin: { type: Date },
@@ -75,12 +77,16 @@ export const UserSchema = new Schema(
           refreshToken?: unknown;
           passwordResetToken?: unknown;
           passwordResetTokenExpiresAt?: unknown;
+          emailVerificationToken?: unknown;
+          emailVerificationTokenExpiresAt?: unknown;
         };
 
         delete serializedUser.password;
         delete serializedUser.refreshToken;
         delete serializedUser.passwordResetToken;
         delete serializedUser.passwordResetTokenExpiresAt;
+        delete serializedUser.emailVerificationToken;
+        delete serializedUser.emailVerificationTokenExpiresAt;
       },
     },
     toObject: {
@@ -91,12 +97,16 @@ export const UserSchema = new Schema(
           refreshToken?: unknown;
           passwordResetToken?: unknown;
           passwordResetTokenExpiresAt?: unknown;
+          emailVerificationToken?: unknown;
+          emailVerificationTokenExpiresAt?: unknown;
         };
 
         delete serializedUser.password;
         delete serializedUser.refreshToken;
         delete serializedUser.passwordResetToken;
         delete serializedUser.passwordResetTokenExpiresAt;
+        delete serializedUser.emailVerificationToken;
+        delete serializedUser.emailVerificationTokenExpiresAt;
       },
     },
   },

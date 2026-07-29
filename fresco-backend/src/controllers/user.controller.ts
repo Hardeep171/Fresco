@@ -10,6 +10,7 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
   updateProfileSchema,
+  verifyEmailSchema,
 } from "../validators/user.validator.js";
 
 /** User controller handling HTTP requests for User profile and management. */
@@ -110,4 +111,20 @@ export const userController = {
       undefined,
     );
   }),
+
+  /** Handle email verification request. */
+  verifyEmail: asyncHandler(async (req: Request, res: Response) => {
+    // Validate request body
+    const validatedData = verifyEmailSchema.parse(req.body);
+
+    await userService.verifyEmail(validatedData.token);
+
+    ApiResponse.send(
+      res,
+      StatusCodes.OK,
+      "Email verified successfully.",
+      undefined,
+    );
+  }),
 };
+
