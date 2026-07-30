@@ -40,6 +40,10 @@ const toApiError = (error: unknown): ApiError => {
     return new ApiError(StatusCodes.UNAUTHORIZED, "Invalid or expired refresh token.");
   }
 
+  if (error instanceof Error && error.name === "CastError") {
+    return new ApiError(StatusCodes.BAD_REQUEST, "Invalid ID format.");
+  }
+
   if (isMongoDuplicateKeyError(error)) {
     const field = Object.keys(error.keyValue ?? {})[0];
     const message = field ? `${field} already exists.` : "A record with this value already exists.";
