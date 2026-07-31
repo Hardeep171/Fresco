@@ -5,6 +5,7 @@ import authRouter from "./auth.routes.js";
 import categoryRouter from "./category.routes.js";
 import garmentRouter from "./garment.routes.js";
 import { healthRouter } from "./health.routes.js";
+import serviceRouter from "./service.routes.js";
 import userRouter from "./user.routes.js";
 
 const apiRouter = Router();
@@ -15,5 +16,6 @@ apiRouter.use("/users", userRouter);
 apiRouter.use("/addresses", addressRouter);
 apiRouter.use("/categories", categoryRouter);
 apiRouter.use("/garments", garmentRouter);
+apiRouter.use("/services", serviceRouter);
 
 export { apiRouter };
