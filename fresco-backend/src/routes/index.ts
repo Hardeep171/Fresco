@@ -5,6 +5,7 @@ import authRouter from "./auth.routes.js";
 import categoryRouter from "./category.routes.js";
 import garmentRouter from "./garment.routes.js";
 import { healthRouter } from "./health.routes.js";
+import pricingRouter from "./pricing.routes.js";
 import serviceRouter from "./service.routes.js";
 import userRouter from "./user.routes.js";
 
@@ -17,5 +18,6 @@ apiRouter.use("/addresses", addressRouter);
 apiRouter.use("/categories", categoryRouter);
 apiRouter.use("/garments", garmentRouter);
 apiRouter.use("/services", serviceRouter);
+apiRouter.use("/pricing", pricingRouter);
 
 export { apiRouter };
