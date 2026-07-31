@@ -1,6 +1,29 @@
 import { z } from "zod";
 
 import { ADDRESS_LABELS } from "../constants/address.constants.js";
+import {
+  ADDRESS_LINE_MAX_LENGTH,
+  ADDRESS_LINE_MIN_LENGTH,
+  CITY_MAX_LENGTH,
+  CITY_MIN_LENGTH,
+  COUNTRY_MAX_LENGTH,
+  COUNTRY_MIN_LENGTH,
+  FULL_NAME_MAX_LENGTH,
+  FULL_NAME_MIN_LENGTH,
+  LATITUDE_MAX,
+  LATITUDE_MIN,
+  LONGITUDE_MAX,
+  LONGITUDE_MIN,
+  OBJECT_ID_REGEX,
+  PHONE_MAX_LENGTH,
+  PHONE_MIN_LENGTH,
+  PHONE_REGEX,
+  POSTAL_CODE_MAX_LENGTH,
+  POSTAL_CODE_MIN_LENGTH,
+  POSTAL_CODE_REGEX,
+  STATE_MAX_LENGTH,
+  STATE_MIN_LENGTH,
+} from "../constants/validation.constants.js";
 
 /**
  * Reusable Zod validation schema for creating a new address.
@@ -13,21 +36,21 @@ export const createAddressSchema = z.object({
   fullName: z
     .string({ error: "Full name is required." })
     .trim()
-    .min(2, { error: "Full name must be at least 2 characters long." })
-    .max(100, { error: "Full name cannot exceed 100 characters." }),
+    .min(FULL_NAME_MIN_LENGTH, { error: "Full name must be at least 2 characters long." })
+    .max(FULL_NAME_MAX_LENGTH, { error: "Full name cannot exceed 100 characters." }),
 
   phone: z
     .string({ error: "Phone number is required." })
     .trim()
-    .regex(/^[0-9+\-\s()]+$/, { error: "Invalid phone number." })
-    .min(10, { error: "Phone number must be at least 10 characters long." })
-    .max(15, { error: "Phone number cannot exceed 15 characters." }),
+    .regex(PHONE_REGEX, { error: "Invalid phone number." })
+    .min(PHONE_MIN_LENGTH, { error: "Phone number must be at least 10 characters long." })
+    .max(PHONE_MAX_LENGTH, { error: "Phone number cannot exceed 15 characters." }),
 
   addressLine1: z
     .string({ error: "Address line 1 is required." })
     .trim()
-    .min(5, { error: "Address line 1 must be at least 5 characters long." })
-    .max(200, { error: "Address line 1 cannot exceed 200 characters." }),
+    .min(ADDRESS_LINE_MIN_LENGTH, { error: "Address line 1 must be at least 5 characters long." })
+    .max(ADDRESS_LINE_MAX_LENGTH, { error: "Address line 1 cannot exceed 200 characters." }),
 
   addressLine2: z.string().trim().optional(),
 
@@ -36,39 +59,39 @@ export const createAddressSchema = z.object({
   city: z
     .string({ error: "City is required." })
     .trim()
-    .min(2, { error: "City must be at least 2 characters long." })
-    .max(100, { error: "City cannot exceed 100 characters." }),
+    .min(CITY_MIN_LENGTH, { error: "City must be at least 2 characters long." })
+    .max(CITY_MAX_LENGTH, { error: "City cannot exceed 100 characters." }),
 
   state: z
     .string({ error: "State is required." })
     .trim()
-    .min(2, { error: "State must be at least 2 characters long." })
-    .max(100, { error: "State cannot exceed 100 characters." }),
+    .min(STATE_MIN_LENGTH, { error: "State must be at least 2 characters long." })
+    .max(STATE_MAX_LENGTH, { error: "State cannot exceed 100 characters." }),
 
   postalCode: z
     .string({ error: "Postal code is required." })
     .trim()
-    .regex(/^[A-Za-z0-9\s-]+$/, { error: "Invalid postal code." })
-    .min(3, { error: "Postal code must be at least 3 characters long." })
-    .max(15, { error: "Postal code cannot exceed 15 characters." }),
+    .regex(POSTAL_CODE_REGEX, { error: "Invalid postal code." })
+    .min(POSTAL_CODE_MIN_LENGTH, { error: "Postal code must be at least 3 characters long." })
+    .max(POSTAL_CODE_MAX_LENGTH, { error: "Postal code cannot exceed 15 characters." }),
 
   country: z
     .string()
     .trim()
-    .min(2, { error: "Country must be at least 2 characters long." })
-    .max(100, { error: "Country cannot exceed 100 characters." })
+    .min(COUNTRY_MIN_LENGTH, { error: "Country must be at least 2 characters long." })
+    .max(COUNTRY_MAX_LENGTH, { error: "Country cannot exceed 100 characters." })
     .optional(),
 
   latitude: z
     .number({ error: "Latitude must be a number." })
-    .min(-90, { error: "Latitude must be between -90 and 90." })
-    .max(90, { error: "Latitude must be between -90 and 90." })
+    .min(LATITUDE_MIN, { error: "Latitude must be between -90 and 90." })
+    .max(LATITUDE_MAX, { error: "Latitude must be between -90 and 90." })
     .optional(),
 
   longitude: z
     .number({ error: "Longitude must be a number." })
-    .min(-180, { error: "Longitude must be between -180 and 180." })
-    .max(180, { error: "Longitude must be between -180 and 180." })
+    .min(LONGITUDE_MIN, { error: "Longitude must be between -180 and 180." })
+    .max(LONGITUDE_MAX, { error: "Longitude must be between -180 and 180." })
     .optional(),
 
   isDefault: z.boolean().optional(),
@@ -88,7 +111,7 @@ export const addressIdParamSchema = z.object({
   id: z
     .string({ error: "Address ID is required." })
     .trim()
-    .regex(/^[0-9a-fA-F]{24}$/, { error: "Invalid Address ID format." }),
+    .regex(OBJECT_ID_REGEX, { error: "Invalid Address ID format." }),
 });
 
 /** Strongly typed interface inferred from `createAddressSchema`. */

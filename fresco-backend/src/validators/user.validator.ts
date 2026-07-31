@@ -1,5 +1,12 @@
 import { z } from "zod";
 
+import {
+  MOBILE_PHONE_REGEX,
+  NAME_MAX_LENGTH,
+  NAME_MIN_LENGTH,
+  PASSWORD_MIN_LENGTH,
+} from "../constants/validation.constants.js";
+
 /**
  * Reusable Zod validation schema for updating user profile.
  * Requires at least one updatable field (firstName, lastName, or phone).
@@ -9,21 +16,21 @@ export const updateProfileSchema = z
     firstName: z
       .string()
       .trim()
-      .min(2, { error: "First name must be at least 2 characters long." })
-      .max(50, { error: "First name cannot exceed 50 characters." })
+      .min(NAME_MIN_LENGTH, { error: "First name must be at least 2 characters long." })
+      .max(NAME_MAX_LENGTH, { error: "First name cannot exceed 50 characters." })
       .optional(),
 
     lastName: z
       .string()
       .trim()
-      .min(2, { error: "Last name must be at least 2 characters long." })
-      .max(50, { error: "Last name cannot exceed 50 characters." })
+      .min(NAME_MIN_LENGTH, { error: "Last name must be at least 2 characters long." })
+      .max(NAME_MAX_LENGTH, { error: "Last name cannot exceed 50 characters." })
       .optional(),
 
     phone: z
       .string()
       .trim()
-      .regex(/^\d{10}$/, { error: "Phone number must be a valid 10-digit mobile number." })
+      .regex(MOBILE_PHONE_REGEX, { error: "Phone number must be a valid 10-digit mobile number." })
       .optional(),
   })
   .refine(
@@ -45,11 +52,11 @@ export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export const changePasswordSchema = z.object({
   currentPassword: z
     .string({ error: "Current password is required." })
-    .min(8, { error: "Current password must be at least 8 characters long." }),
+    .min(PASSWORD_MIN_LENGTH, { error: "Current password must be at least 8 characters long." }),
 
   newPassword: z
     .string({ error: "New password is required." })
-    .min(8, { error: "New password must be at least 8 characters long." }),
+    .min(PASSWORD_MIN_LENGTH, { error: "New password must be at least 8 characters long." }),
 });
 
 /** Strongly typed interface inferred from `changePasswordSchema`. */
@@ -80,7 +87,7 @@ export const resetPasswordSchema = z.object({
 
   newPassword: z
     .string({ error: "New password is required." })
-    .min(8, { error: "New password must be at least 8 characters long." }),
+    .min(PASSWORD_MIN_LENGTH, { error: "New password must be at least 8 characters long." }),
 });
 
 /** Strongly typed interface inferred from `resetPasswordSchema`. */
@@ -98,6 +105,3 @@ export const verifyEmailSchema = z.object({
 
 /** Strongly typed interface inferred from `verifyEmailSchema`. */
 export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
-
-
-
