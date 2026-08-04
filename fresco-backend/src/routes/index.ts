@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import addressRouter from "./address.routes.js";
 import authRouter from "./auth.routes.js";
+import cartRouter from "./cart.routes.js";
 import categoryRouter from "./category.routes.js";
 import garmentRouter from "./garment.routes.js";
 import { healthRouter } from "./health.routes.js";
@@ -19,5 +20,6 @@ apiRouter.use("/categories", categoryRouter);
 apiRouter.use("/garments", garmentRouter);
 apiRouter.use("/services", serviceRouter);
 apiRouter.use("/pricing", pricingRouter);
+apiRouter.use("/cart", cartRouter);
 
 export { apiRouter };

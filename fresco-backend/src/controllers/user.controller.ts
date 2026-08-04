@@ -20,7 +20,7 @@ export const userController = {
     const userId = req.user?.userId;
 
     if (!userId) {
-      throw new ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized");
+      throw new ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized"); 
     }
 
     const user = await userService.getCurrentUser(userId);
