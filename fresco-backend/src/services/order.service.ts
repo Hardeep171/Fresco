@@ -132,6 +132,37 @@ function validateOrderStatusTransition(
   return true;
 }
 
+/**
+ * Internal helper to execute an order status transition after validating state lifecycle rules.
+ *
+ * @param orderId - Order ID to transition.
+ * @param nextStatus - Target OrderStatus value.
+ * @returns Promise resolving to the updated order plain object.
+ * @throws {ApiError} 404 Not Found if order does not exist.
+ * @throws {ApiError} 400 Bad Request if status transition is invalid.
+ */
+async function transitionOrderStatus(
+  orderId: string,
+  nextStatus: OrderStatus,
+) {
+  const existingOrder = await ensureOrderExists(orderId);
+
+  validateOrderStatusTransition(
+    existingOrder.status as OrderStatus,
+    nextStatus,
+  );
+
+  const updatedOrder = await orderRepository.updateOrder(orderId, {
+    status: nextStatus,
+  });
+
+  if (!updatedOrder) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "Order not found");
+  }
+
+  return updatedOrder;
+}
+
 /** Service providing business logic for Order module. */
 export const orderService = {
   /**
@@ -305,6 +336,18 @@ export const orderService = {
     await ensureActiveUser(userId);
     return orderRepository.findOrdersByUser(userId);
   },
+  /**
+   * Internal service method for executing order status transitions for system or module workflows.
+   *
+   * @param orderId - Order ID to transition.
+   * @param nextStatus - Target OrderStatus value.
+   * @returns Promise resolving to the updated order plain object.
+   * @throws {ApiError} 404 Not Found if order does not exist.
+   * @throws {ApiError} 400 Bad Request if status transition is invalid.
+   */
+  async transitionOrderStatus(orderId: string, nextStatus: OrderStatus) {
+    return transitionOrderStatus(orderId, nextStatus);
+  },
 
   /**
    * Updates an order's lifecycle status after validating allowed status transitions.
@@ -316,22 +359,7 @@ export const orderService = {
    * @throws {ApiError} 400 Bad Request if status transition is invalid.
    */
   async updateOrderStatus(orderId: string, status: OrderStatus) {
-    const existingOrder = await ensureOrderExists(orderId);
-
-    validateOrderStatusTransition(
-      existingOrder.status as OrderStatus,
-      status,
-    );
-
-    const updatedOrder = await orderRepository.updateOrder(orderId, {
-      status,
-    });
-
-    if (!updatedOrder) {
-      throw new ApiError(StatusCodes.NOT_FOUND, "Order not found");
-    }
-
-    return updatedOrder;
+    return transitionOrderStatus(orderId, status);
   },
 
   /**
@@ -380,19 +408,6 @@ export const orderService = {
       );
     }
 
-    validateOrderStatusTransition(
-      existingOrder.status as OrderStatus,
-      "CANCELLED",
-    );
-
-    const updatedOrder = await orderRepository.updateOrder(orderId, {
-      status: "CANCELLED",
-    });
-
-    if (!updatedOrder) {
-      throw new ApiError(StatusCodes.NOT_FOUND, "Order not found");
-    }
-
-    return updatedOrder;
+    return transitionOrderStatus(orderId, "CANCELLED");
   },
 };

@@ -10,6 +10,8 @@ import orderRouter from "./order.routes.js";
 import pricingRouter from "./pricing.routes.js";
 import serviceRouter from "./service.routes.js";
 import userRouter from "./user.routes.js";
+import assignmentRouter from "./assignment.routes.js";
+import deliveryTaskRouter from "./delivery-task.routes.js";
 
 const apiRouter = Router();
 
@@ -23,5 +25,7 @@ apiRouter.use("/services", serviceRouter);
 apiRouter.use("/pricing", pricingRouter);
 apiRouter.use("/cart", cartRouter);
 apiRouter.use("/orders", orderRouter);
+apiRouter.use("/assignments", assignmentRouter);
+apiRouter.use("/delivery-tasks", deliveryTaskRouter);
 
 export { apiRouter };
