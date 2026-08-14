@@ -6,6 +6,7 @@ import { ApiResponse } from "../utils/api-response.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import {
   createServiceSchema,
+  getServicesQuerySchema,
   serviceIdParamSchema,
   updateServiceSchema,
 } from "../validators/service.validator.js";
@@ -29,11 +30,7 @@ export const serviceController = {
 
   /** Retrieve services, optionally filtering by active status. */
   getServices: asyncHandler(async (req: Request, res: Response) => {
-    const filters = {
-      ...(req.query.isActive !== undefined && {
-        isActive: req.query.isActive === "true",
-      }),
-    };
+    const filters = getServicesQuerySchema.parse(req.query);
 
     const services = await serviceService.getServices(filters);
 

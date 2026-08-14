@@ -74,6 +74,13 @@ export const orderIdParamSchema = z.object({
   id: objectIdSchema,
 });
 
+/** Reusable Zod schema for querying orders list. */
+export const getOrdersQuerySchema = z.object({
+  status: z.enum(ORDER_STATUSES).optional(),
+  paymentStatus: z.enum(PAYMENT_STATUSES).optional(),
+  userId: objectIdSchema.optional(),
+});
+
 /** Strongly typed interface inferred from `createOrderSchema`. */
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;
 
@@ -82,3 +89,6 @@ export type UpdateOrderInput = z.infer<typeof updateOrderSchema>;
 
 /** Strongly typed interface inferred from `orderIdParamSchema`. */
 export type OrderIdParamInput = z.infer<typeof orderIdParamSchema>;
+
+/** Strongly typed interface inferred from `getOrdersQuerySchema`. */
+export type GetOrdersQueryInput = z.infer<typeof getOrdersQuerySchema>;

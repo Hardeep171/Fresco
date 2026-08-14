@@ -93,7 +93,7 @@ export const paymentRepository = {
     };
 
     return PaymentModel.findOneAndUpdate(filter, data, {
-      new: true,
+      returnDocument: "after",
       runValidators: true,
     })
       .lean()
@@ -134,7 +134,7 @@ export const paymentRepository = {
     }
 
     return PaymentModel.findOneAndUpdate(filter, update, {
-      new: true,
+      returnDocument: "after",
       runValidators: true,
     })
       .lean()
@@ -160,7 +160,7 @@ export const paymentRepository = {
         $pull: { refunds: { _id: new Types.ObjectId(String(refundId)) } },
         $set: { status },
       },
-      { new: true, runValidators: true },
+      { returnDocument: "after", runValidators: true },
     )
       .lean()
       .exec();

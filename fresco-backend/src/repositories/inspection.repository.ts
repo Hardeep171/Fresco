@@ -60,7 +60,7 @@ export const inspectionRepository = {
    */
   async updateInspection(id: string, data: Partial<Inspection>) {
     return InspectionModel.findByIdAndUpdate(id, data, {
-      new: true,
+      returnDocument: "after",
       runValidators: true,
     })
       .lean()
@@ -77,7 +77,7 @@ export const inspectionRepository = {
     return InspectionModel.findByIdAndUpdate(
       id,
       { isActive: false },
-      { new: true, runValidators: true },
+      { returnDocument: "after", runValidators: true },
     )
       .lean()
       .exec();

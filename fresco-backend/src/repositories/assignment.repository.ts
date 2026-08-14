@@ -83,7 +83,7 @@ export const assignmentRepository = {
    */
   async updateAssignment(id: string, data: Partial<Assignment>) {
     return AssignmentModel.findByIdAndUpdate(id, data, {
-      new: true,
+      returnDocument: "after",
       runValidators: true,
     })
       .lean()
@@ -100,7 +100,7 @@ export const assignmentRepository = {
     return AssignmentModel.findByIdAndUpdate(
       id,
       { isActive: false },
-      { new: true, runValidators: true },
+      { returnDocument: "after", runValidators: true },
     )
       .lean()
       .exec();

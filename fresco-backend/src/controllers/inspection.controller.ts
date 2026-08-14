@@ -1,16 +1,13 @@
 import type { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
-import type { InspectionStatus } from "../constants/inspection.constants.js";
-import {
-  inspectionService,
-  type InspectionFilters,
-} from "../services/inspection.service.js";
+import { inspectionService } from "../services/inspection.service.js";
 import { ApiError } from "../utils/api-error.js";
 import { ApiResponse } from "../utils/api-response.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import {
   createInspectionSchema,
+  getInspectionsQuerySchema,
   inspectionIdParamSchema,
   orderIdParamSchema,
   updateInspectionSchema,
@@ -57,20 +54,7 @@ export const inspectionController = {
 
   /** Retrieve order inspections based on query filter criteria. */
   getInspections: asyncHandler(async (req: Request, res: Response) => {
-    const filters: InspectionFilters = {
-      ...(req.query.orderId && {
-        orderId: req.query.orderId as string,
-      }),
-      ...(req.query.inspectorId && {
-        inspectorId: req.query.inspectorId as string,
-      }),
-      ...(req.query.status && {
-        status: req.query.status as InspectionStatus,
-      }),
-      ...(req.query.isActive !== undefined && {
-        isActive: req.query.isActive === "true",
-      }),
-    };
+    const filters = getInspectionsQuerySchema.parse(req.query);
 
     const inspections = await inspectionService.getInspections(filters);
 

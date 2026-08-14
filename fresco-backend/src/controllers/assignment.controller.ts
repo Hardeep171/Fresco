@@ -1,10 +1,6 @@
 import type { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
-import type {
-  AssignmentStatus,
-  AssignmentType,
-} from "../constants/assignment.constants.js";
 import { assignmentService } from "../services/assignment.service.js";
 import { ApiError } from "../utils/api-error.js";
 import { ApiResponse } from "../utils/api-response.js";
@@ -12,6 +8,7 @@ import { asyncHandler } from "../utils/async-handler.js";
 import {
   assignmentIdParamSchema,
   createAssignmentSchema,
+  getAssignmentsQuerySchema,
   updateAssignmentStatusSchema,
 } from "../validators/assignment.validator.js";
 
@@ -56,20 +53,7 @@ export const assignmentController = {
 
   /** Retrieve assignments based on query filter criteria. */
   getAssignments: asyncHandler(async (req: Request, res: Response) => {
-    const filters = {
-      ...(req.query.partnerId && {
-        partnerId: req.query.partnerId as string,
-      }),
-      ...(req.query.assignmentType && {
-        assignmentType: req.query.assignmentType as AssignmentType,
-      }),
-      ...(req.query.status && {
-        status: req.query.status as AssignmentStatus,
-      }),
-      ...(req.query.isActive !== undefined && {
-        isActive: req.query.isActive === "true",
-      }),
-    };
+    const filters = getAssignmentsQuerySchema.parse(req.query);
 
     const assignments = await assignmentService.getAssignments(filters);
 

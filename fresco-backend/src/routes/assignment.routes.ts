@@ -1,7 +1,8 @@
 import { Router } from "express";
 
 import { assignmentController } from "../controllers/assignment.controller.js";
-import { authenticate } from "../middlewares/auth.middleware.js";
+import { ADMIN_ROLES } from "../constants/user.constants.js";
+import { authenticate, authorize } from "../middlewares/auth.middleware.js";
 
 /** Express router for Assignment endpoints. */
 const router = Router();
@@ -13,13 +14,17 @@ router.use(authenticate);
 router.get("/partner", assignmentController.getPartnerAssignments);
 
 // Assign a delivery partner to an order (admin use)
-router.post("/", assignmentController.assignPartner);
+router.post("/", authorize(ADMIN_ROLES), assignmentController.assignPartner);
 
-// Get all assignments with optional query filters
-router.get("/", assignmentController.getAssignments);
+// Get all assignments with optional query filters (admin use)
+router.get("/", authorize(ADMIN_ROLES), assignmentController.getAssignments);
 
-// Get single assignment by ID
-router.get("/:id", assignmentController.getAssignmentById);
+// Get single assignment by ID (admin use)
+router.get(
+  "/:id",
+  authorize(ADMIN_ROLES),
+  assignmentController.getAssignmentById,
+);
 
 // Accept an assignment by ID (delivery partner operation)
 router.patch("/:id/accept", assignmentController.acceptAssignment);
@@ -27,10 +32,18 @@ router.patch("/:id/accept", assignmentController.acceptAssignment);
 // Complete an assignment by ID (delivery partner operation)
 router.patch("/:id/complete", assignmentController.completeAssignment);
 
-// Update assignment status by ID
-router.patch("/:id/status", assignmentController.updateAssignmentStatus);
+// Update assignment status by ID (admin use)
+router.patch(
+  "/:id/status",
+  authorize(ADMIN_ROLES),
+  assignmentController.updateAssignmentStatus,
+);
 
-// Disable assignment by ID (soft delete)
-router.delete("/:id", assignmentController.disableAssignment);
+// Disable assignment by ID (soft delete, admin use)
+router.delete(
+  "/:id",
+  authorize(ADMIN_ROLES),
+  assignmentController.disableAssignment,
+);
 
 export default router;

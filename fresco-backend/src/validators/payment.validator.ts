@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import {
   PAYMENT_METHODS,
+  PAYMENT_STATUSES,
   REFUND_REASON_MAX_LENGTH,
 } from "../constants/payment.constants.js";
 import { objectIdSchema } from "../lib/validation.js";
@@ -54,6 +55,15 @@ export const retryPaymentSchema = z.object({
   }),
 });
 
+/** Reusable Zod schema for querying payments list. */
+export const getPaymentsQuerySchema = z.object({
+  status: z.enum(PAYMENT_STATUSES).optional(),
+  paymentMethod: z.enum(PAYMENT_METHODS).optional(),
+  customerId: objectIdSchema.optional(),
+  orderId: objectIdSchema.optional(),
+  receivedByPartnerId: objectIdSchema.optional(),
+});
+
 /** Strongly typed interface inferred from `createPaymentSchema`. */
 export type CreatePaymentInput = z.infer<typeof createPaymentSchema>;
 
@@ -71,3 +81,6 @@ export type OrderIdParamInput = z.infer<typeof orderIdParamSchema>;
 
 /** Strongly typed interface inferred from `retryPaymentSchema`. */
 export type RetryPaymentInput = z.infer<typeof retryPaymentSchema>;
+
+/** Strongly typed interface inferred from `getPaymentsQuerySchema`. */
+export type GetPaymentsQueryInput = z.infer<typeof getPaymentsQuerySchema>;

@@ -5,7 +5,7 @@ import {
   ASSIGNMENT_STATUSES,
   ASSIGNMENT_TYPES,
 } from "../constants/assignment.constants.js";
-import { objectIdSchema } from "../lib/validation.js";
+import { booleanQuerySchema, objectIdSchema } from "../lib/validation.js";
 
 /** Reusable Zod validation schema for creating a new assignment. */
 export const createAssignmentSchema = z.object({
@@ -31,6 +31,14 @@ export const assignmentIdParamSchema = z.object({
   id: objectIdSchema,
 });
 
+/** Reusable Zod validation schema for querying assignments. */
+export const getAssignmentsQuerySchema = z.object({
+  partnerId: objectIdSchema.optional(),
+  assignmentType: z.enum(ASSIGNMENT_TYPES).optional(),
+  status: z.enum(ASSIGNMENT_STATUSES).optional(),
+  isActive: booleanQuerySchema,
+});
+
 /** Strongly typed interface inferred from `createAssignmentSchema`. */
 export type CreateAssignmentInput = z.infer<typeof createAssignmentSchema>;
 
@@ -41,3 +49,8 @@ export type UpdateAssignmentStatusInput = z.infer<
 
 /** Strongly typed interface inferred from `assignmentIdParamSchema`. */
 export type AssignmentIdParamInput = z.infer<typeof assignmentIdParamSchema>;
+
+/** Strongly typed interface inferred from `getAssignmentsQuerySchema`. */
+export type GetAssignmentsQueryInput = z.infer<
+  typeof getAssignmentsQuerySchema
+>;

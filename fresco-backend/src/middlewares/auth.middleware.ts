@@ -40,3 +40,21 @@ export const authenticate = asyncHandler(
     next();
   },
 );
+
+/** Role authorization middleware factory enforcing user role permissions. */
+export const authorize = (allowedRoles: string[]) => {
+  return (req: Request, _res: Response, next: NextFunction) => {
+    if (!req.user) {
+      throw new ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized");
+    }
+
+    if (!allowedRoles.includes(req.user.role)) {
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        "You are not authorized to perform this action",
+      );
+    }
+
+    next();
+  };
+};

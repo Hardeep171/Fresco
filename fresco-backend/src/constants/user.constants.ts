@@ -15,6 +15,14 @@ export const USER_ROLES = [
 /** Union of all permitted user roles. */
 export type UserRole = (typeof USER_ROLES)[number];
 
+/** Administrative roles permitted to execute management actions. */
+export const ADMIN_ROLES: UserRole[] = [
+  "SUPER_ADMIN",
+  "ADMIN",
+  "CITY_MANAGER",
+  "BRANCH_MANAGER",
+];
+
 /** Permitted lifecycle statuses for a FRESCO user. */
 export const USER_STATUSES = ["ACTIVE", "INACTIVE", "BLOCKED"] as const;
 

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { PRICE_MIN_VALUE } from "../constants/pricing.constants.js";
-import { objectIdSchema } from "../lib/validation.js";
+import { booleanQuerySchema, objectIdSchema } from "../lib/validation.js";
 
 /**
  * Reusable Zod validation schema for creating a new pricing entry.
@@ -28,12 +28,16 @@ export const createPricingSchema = z.object({
  */
 export const updatePricingSchema = createPricingSchema.partial();
 
-/**
- * Reusable Zod validation schema for pricing ID parameter.
- * Validates that `id` is a valid MongoDB ObjectId.
- */
+/** Reusable Zod validation schema for pricing ID parameter. */
 export const pricingIdParamSchema = z.object({
   id: objectIdSchema,
+});
+
+/** Reusable Zod validation schema for querying pricing records list. */
+export const getPricingQuerySchema = z.object({
+  garmentId: objectIdSchema.optional(),
+  serviceId: objectIdSchema.optional(),
+  isActive: booleanQuerySchema,
 });
 
 /** Strongly typed interface inferred from `createPricingSchema`. */
@@ -44,3 +48,6 @@ export type UpdatePricingInput = z.infer<typeof updatePricingSchema>;
 
 /** Strongly typed interface inferred from `pricingIdParamSchema`. */
 export type PricingIdParamInput = z.infer<typeof pricingIdParamSchema>;
+
+/** Strongly typed interface inferred from `getPricingQuerySchema`. */
+export type GetPricingQueryInput = z.infer<typeof getPricingQuerySchema>;

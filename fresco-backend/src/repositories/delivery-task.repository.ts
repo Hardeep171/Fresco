@@ -73,7 +73,7 @@ export const deliveryTaskRepository = {
    */
   async updateTask(id: string, data: Partial<DeliveryTask>) {
     return DeliveryTaskModel.findByIdAndUpdate(id, data, {
-      new: true,
+      returnDocument: "after",
       runValidators: true,
     })
       .lean()
@@ -90,7 +90,7 @@ export const deliveryTaskRepository = {
     return DeliveryTaskModel.findByIdAndUpdate(
       id,
       { isActive: false },
-      { new: true, runValidators: true },
+      { returnDocument: "after", runValidators: true },
     )
       .lean()
       .exec();

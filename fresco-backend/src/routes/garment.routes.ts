@@ -1,7 +1,8 @@
 import { Router } from "express";
 
 import { garmentController } from "../controllers/garment.controller.js";
-import { authenticate } from "../middlewares/auth.middleware.js";
+import { ADMIN_ROLES } from "../constants/user.constants.js";
+import { authenticate, authorize } from "../middlewares/auth.middleware.js";
 
 /** Express router for Garment endpoints. */
 const router = Router();
@@ -15,15 +16,35 @@ router.get("/:id", garmentController.getGarmentById);
 
 // Admin protected routes (write operations)
 // Create a new garment
-router.post("/", authenticate, garmentController.createGarment);
+router.post(
+  "/",
+  authenticate,
+  authorize(ADMIN_ROLES),
+  garmentController.createGarment,
+);
 
 // Update garment by ID
-router.patch("/:id", authenticate, garmentController.updateGarment);
+router.patch(
+  "/:id",
+  authenticate,
+  authorize(ADMIN_ROLES),
+  garmentController.updateGarment,
+);
 
 // Enable garment by ID
-router.patch("/:id/enable", authenticate, garmentController.enableGarment);
+router.patch(
+  "/:id/enable",
+  authenticate,
+  authorize(ADMIN_ROLES),
+  garmentController.enableGarment,
+);
 
 // Disable garment by ID (soft delete)
-router.delete("/:id", authenticate, garmentController.disableGarment);
+router.delete(
+  "/:id",
+  authenticate,
+  authorize(ADMIN_ROLES),
+  garmentController.disableGarment,
+);
 
 export default router;

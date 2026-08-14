@@ -5,7 +5,11 @@ import {
   GARMENT_NAME_MAX_LENGTH,
   GARMENT_NAME_MIN_LENGTH,
 } from "../constants/garment.constants.js";
-import { createNameSchema, objectIdSchema } from "../lib/validation.js";
+import {
+  booleanQuerySchema,
+  createNameSchema,
+  objectIdSchema,
+} from "../lib/validation.js";
 
 /**
  * Reusable Zod validation schema for creating a new garment.
@@ -44,12 +48,15 @@ export const createGarmentSchema = z.object({
  */
 export const updateGarmentSchema = createGarmentSchema.partial();
 
-/**
- * Reusable Zod validation schema for garment ID parameter.
- * Validates that `id` is a valid MongoDB ObjectId.
- */
+/** Reusable Zod validation schema for garment ID parameter. */
 export const garmentIdParamSchema = z.object({
   id: objectIdSchema,
+});
+
+/** Reusable Zod validation schema for querying garments list. */
+export const getGarmentsQuerySchema = z.object({
+  categoryId: objectIdSchema.optional(),
+  isActive: booleanQuerySchema,
 });
 
 /** Strongly typed interface inferred from `createGarmentSchema`. */
@@ -60,3 +67,6 @@ export type UpdateGarmentInput = z.infer<typeof updateGarmentSchema>;
 
 /** Strongly typed interface inferred from `garmentIdParamSchema`. */
 export type GarmentIdParamInput = z.infer<typeof garmentIdParamSchema>;
+
+/** Strongly typed interface inferred from `getGarmentsQuerySchema`. */
+export type GetGarmentsQueryInput = z.infer<typeof getGarmentsQuerySchema>;

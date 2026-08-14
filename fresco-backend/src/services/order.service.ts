@@ -10,7 +10,9 @@ import {
   type OrderStatus,
   type PaymentStatus,
 } from "../constants/order.constants.js";
+import { ADMIN_ROLES, type UserRole } from "../constants/user.constants.js";
 import { type Order } from "../models/order.model.js";
+import { assignmentRepository } from "../repositories/assignment.repository.js";
 import { cartRepository } from "../repositories/cart.repository.js";
 import { garmentRepository } from "../repositories/garment.repository.js";
 import { orderRepository } from "../repositories/order.repository.js";
@@ -315,14 +317,59 @@ export const orderService = {
   },
 
   /**
-   * Retrieves a single order by its unique identifier.
+   * Retrieves a single order by its unique identifier, validating user authorization if user context is provided.
    *
    * @param orderId - Order ID to retrieve.
+   * @param user - Optional requesting user context containing userId and role.
    * @returns Promise resolving to the matching order plain object.
    * @throws {ApiError} 404 Not Found if order does not exist.
+   * @throws {ApiError} 403 Forbidden if requesting user is not authorized to view this order.
    */
-  async getOrderById(orderId: string) {
-    return ensureOrderExists(orderId);
+  async getOrderById(
+    orderId: string,
+    user?: { userId: string; role: string },
+  ) {
+    const order = await ensureOrderExists(orderId);
+
+    if (user) {
+      const role = user.role as UserRole;
+      if (ADMIN_ROLES.includes(role)) {
+        return order;
+      }
+
+      if (role === "CUSTOMER") {
+        if (String(order.userId) !== user.userId) {
+          throw new ApiError(
+            StatusCodes.FORBIDDEN,
+            "You are not authorized to view this order",
+          );
+        }
+        return order;
+      }
+
+      if (role === "DELIVERY_PARTNER") {
+        const assignments = await assignmentRepository.findAssignments({
+          orderId: new Types.ObjectId(orderId),
+          partnerId: new Types.ObjectId(user.userId),
+          isActive: true,
+        });
+
+        if (!assignments || assignments.length === 0) {
+          throw new ApiError(
+            StatusCodes.FORBIDDEN,
+            "You are not authorized to view this order",
+          );
+        }
+        return order;
+      }
+
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        "You are not authorized to view this order",
+      );
+    }
+
+    return order;
   },
 
   /**

@@ -1,20 +1,14 @@
 import type { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
-import type {
-  TaskStatus,
-  TaskType,
-} from "../constants/delivery-task.constants.js";
-import {
-  deliveryTaskService,
-  type DeliveryTaskFilters,
-} from "../services/delivery-task.service.js";
+import { deliveryTaskService } from "../services/delivery-task.service.js";
 import { ApiError } from "../utils/api-error.js";
 import { ApiResponse } from "../utils/api-response.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import {
   createDeliveryTaskSchema,
   deliveryTaskIdParamSchema,
+  getDeliveryTasksQuerySchema,
   updateTaskStatusSchema,
 } from "../validators/delivery-task.validator.js";
 
@@ -59,20 +53,7 @@ export const deliveryTaskController = {
 
   /** Retrieve delivery tasks based on query filter criteria. */
   getTasks: asyncHandler(async (req: Request, res: Response) => {
-    const filters: DeliveryTaskFilters = {
-      ...(req.query.partnerId && {
-        partnerId: req.query.partnerId as string,
-      }),
-      ...(req.query.taskType && {
-        taskType: req.query.taskType as TaskType,
-      }),
-      ...(req.query.status && {
-        status: req.query.status as TaskStatus,
-      }),
-      ...(req.query.isActive !== undefined && {
-        isActive: req.query.isActive === "true",
-      }),
-    };
+    const filters = getDeliveryTasksQuerySchema.parse(req.query);
 
     const tasks = await deliveryTaskService.getTasks(filters);
 

@@ -64,7 +64,7 @@ export const orderRepository = {
    */
   async updateOrder(orderId: string, data: Partial<Order>) {
     return OrderModel.findByIdAndUpdate(orderId, data, {
-      new: true,
+      returnDocument: "after",
       runValidators: true,
     })
       .lean()

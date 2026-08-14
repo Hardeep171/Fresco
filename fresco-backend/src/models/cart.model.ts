@@ -77,8 +77,6 @@ export const CartSchema = new Schema(
   },
 );
 
-CartSchema.index({ userId: 1 });
-
 export type CartItem = InferSchemaType<typeof CartItemSchema>;
 export type Cart = InferSchemaType<typeof CartSchema>;
 

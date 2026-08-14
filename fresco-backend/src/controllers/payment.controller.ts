@@ -1,20 +1,14 @@
 import type { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
-import type {
-  PaymentMethod,
-  PaymentStatus,
-} from "../constants/payment.constants.js";
-import {
-  paymentService,
-  type PaymentFilters,
-} from "../services/payment.service.js";
+import { paymentService } from "../services/payment.service.js";
 import { ApiError } from "../utils/api-error.js";
 import { ApiResponse } from "../utils/api-response.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import {
   createPaymentSchema,
   createRefundSchema,
+  getPaymentsQuerySchema,
   orderIdParamSchema,
   paymentIdParamSchema,
   receivePaymentSchema,
@@ -204,23 +198,7 @@ export const paymentController = {
 
   /** Retrieve payment records based on query filter criteria. */
   getPayments: asyncHandler(async (req: Request, res: Response) => {
-    const filters: PaymentFilters = {
-      ...(req.query.status && {
-        status: req.query.status as PaymentStatus,
-      }),
-      ...(req.query.paymentMethod && {
-        paymentMethod: req.query.paymentMethod as PaymentMethod,
-      }),
-      ...(req.query.customerId && {
-        customerId: req.query.customerId as string,
-      }),
-      ...(req.query.orderId && {
-        orderId: req.query.orderId as string,
-      }),
-      ...(req.query.receivedByPartnerId && {
-        receivedByPartnerId: req.query.receivedByPartnerId as string,
-      }),
-    };
+    const filters = getPaymentsQuerySchema.parse(req.query);
 
     const payments = await paymentService.getPayments(filters);
 

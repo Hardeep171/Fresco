@@ -1,13 +1,13 @@
 import type { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
-import type { OrderStatus, PaymentStatus } from "../constants/order.constants.js";
 import { orderService } from "../services/order.service.js";
 import { ApiError } from "../utils/api-error.js";
 import { ApiResponse } from "../utils/api-response.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import {
   createOrderSchema,
+  getOrdersQuerySchema,
   orderIdParamSchema,
   updateOrderSchema,
 } from "../validators/order.validator.js";
@@ -50,17 +50,7 @@ export const orderController = {
 
   /** Retrieve all orders across the system (admin use). */
   getOrders: asyncHandler(async (req: Request, res: Response) => {
-    const filters = {
-      ...(req.query.status && {
-        status: req.query.status as OrderStatus,
-      }),
-      ...(req.query.paymentStatus && {
-        paymentStatus: req.query.paymentStatus as PaymentStatus,
-      }),
-      ...(req.query.userId && {
-        userId: String(req.query.userId),
-      }),
-    };
+    const filters = getOrdersQuerySchema.parse(req.query);
 
     const orders = await orderService.getOrders(filters);
 
@@ -72,12 +62,18 @@ export const orderController = {
     );
   }),
 
-  /** Retrieve a single order by ID. */
+  /** Retrieve a single order by ID after validating user authorization. */
   getOrderById: asyncHandler(async (req: Request, res: Response) => {
+    const userId = getAuthenticatedUserId(req);
+    const role = req.user?.role;
+
     // Validate route parameters
     const { id } = orderIdParamSchema.parse(req.params);
 
-    const order = await orderService.getOrderById(id);
+    const order = await orderService.getOrderById(id, {
+      userId,
+      role: role as string,
+    });
 
     ApiResponse.send(
       res,

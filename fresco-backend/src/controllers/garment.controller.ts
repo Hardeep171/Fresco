@@ -7,6 +7,7 @@ import { asyncHandler } from "../utils/async-handler.js";
 import {
   createGarmentSchema,
   garmentIdParamSchema,
+  getGarmentsQuerySchema,
   updateGarmentSchema,
 } from "../validators/garment.validator.js";
 
@@ -29,14 +30,7 @@ export const garmentController = {
 
   /** Retrieve garments, optionally filtering by category ID and active status. */
   getGarments: asyncHandler(async (req: Request, res: Response) => {
-    const filters = {
-      ...(req.query.categoryId && {
-        categoryId: String(req.query.categoryId),
-      }),
-      ...(req.query.isActive !== undefined && {
-        isActive: req.query.isActive === "true",
-      }),
-    };
+    const filters = getGarmentsQuerySchema.parse(req.query);
 
     const garments = await garmentService.getGarments(filters);
 

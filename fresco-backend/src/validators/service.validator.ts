@@ -5,7 +5,11 @@ import {
   SERVICE_NAME_MAX_LENGTH,
   SERVICE_NAME_MIN_LENGTH,
 } from "../constants/service.constants.js";
-import { createNameSchema, objectIdSchema } from "../lib/validation.js";
+import {
+  booleanQuerySchema,
+  createNameSchema,
+  objectIdSchema,
+} from "../lib/validation.js";
 
 /**
  * Reusable Zod validation schema for creating a new service.
@@ -42,12 +46,14 @@ export const createServiceSchema = z.object({
  */
 export const updateServiceSchema = createServiceSchema.partial();
 
-/**
- * Reusable Zod validation schema for service ID parameter.
- * Validates that `id` is a valid MongoDB ObjectId.
- */
+/** Reusable Zod validation schema for service ID parameter. */
 export const serviceIdParamSchema = z.object({
   id: objectIdSchema,
+});
+
+/** Reusable Zod validation schema for querying services list. */
+export const getServicesQuerySchema = z.object({
+  isActive: booleanQuerySchema,
 });
 
 /** Strongly typed interface inferred from `createServiceSchema`. */
@@ -58,3 +64,6 @@ export type UpdateServiceInput = z.infer<typeof updateServiceSchema>;
 
 /** Strongly typed interface inferred from `serviceIdParamSchema`. */
 export type ServiceIdParamInput = z.infer<typeof serviceIdParamSchema>;
+
+/** Strongly typed interface inferred from `getServicesQuerySchema`. */
+export type GetServicesQueryInput = z.infer<typeof getServicesQuerySchema>;

@@ -1,7 +1,8 @@
 import { Router } from "express";
 
 import { serviceController } from "../controllers/service.controller.js";
-import { authenticate } from "../middlewares/auth.middleware.js";
+import { ADMIN_ROLES } from "../constants/user.constants.js";
+import { authenticate, authorize } from "../middlewares/auth.middleware.js";
 
 /** Express router for Service endpoints. */
 const router = Router();
@@ -15,15 +16,35 @@ router.get("/:id", serviceController.getServiceById);
 
 // Admin protected routes (write operations)
 // Create a new service
-router.post("/", authenticate, serviceController.createService);
+router.post(
+  "/",
+  authenticate,
+  authorize(ADMIN_ROLES),
+  serviceController.createService,
+);
 
 // Update service by ID
-router.patch("/:id", authenticate, serviceController.updateService);
+router.patch(
+  "/:id",
+  authenticate,
+  authorize(ADMIN_ROLES),
+  serviceController.updateService,
+);
 
 // Enable service by ID
-router.patch("/:id/enable", authenticate, serviceController.enableService);
+router.patch(
+  "/:id/enable",
+  authenticate,
+  authorize(ADMIN_ROLES),
+  serviceController.enableService,
+);
 
 // Disable service by ID (soft delete)
-router.delete("/:id", authenticate, serviceController.disableService);
+router.delete(
+  "/:id",
+  authenticate,
+  authorize(ADMIN_ROLES),
+  serviceController.disableService,
+);
 
 export default router;

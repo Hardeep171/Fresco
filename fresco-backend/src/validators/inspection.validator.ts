@@ -4,9 +4,10 @@ import {
   INSPECTION_ADJUSTMENT_REASON_MAX_LENGTH,
   INSPECTION_DAMAGE_NOTES_MAX_LENGTH,
   INSPECTION_NOTES_MAX_LENGTH,
+  INSPECTION_STATUSES,
   ITEM_CONDITIONS,
 } from "../constants/inspection.constants.js";
-import { objectIdSchema } from "../lib/validation.js";
+import { booleanQuerySchema, objectIdSchema } from "../lib/validation.js";
 
 /** Reusable Zod schema for individual inspection item input validation. */
 export const inspectionItemInputSchema = z.object({
@@ -104,6 +105,14 @@ export const orderIdParamSchema = z.object({
   orderId: objectIdSchema,
 });
 
+/** Reusable Zod schema for querying order inspections list. */
+export const getInspectionsQuerySchema = z.object({
+  orderId: objectIdSchema.optional(),
+  inspectorId: objectIdSchema.optional(),
+  status: z.enum(INSPECTION_STATUSES).optional(),
+  isActive: booleanQuerySchema,
+});
+
 /** Strongly typed interface inferred from `createInspectionSchema`. */
 export type CreateInspectionInput = z.infer<typeof createInspectionSchema>;
 
@@ -115,3 +124,8 @@ export type InspectionIdParamInput = z.infer<typeof inspectionIdParamSchema>;
 
 /** Strongly typed interface inferred from `orderIdParamSchema`. */
 export type OrderIdParamInput = z.infer<typeof orderIdParamSchema>;
+
+/** Strongly typed interface inferred from `getInspectionsQuerySchema`. */
+export type GetInspectionsQueryInput = z.infer<
+  typeof getInspectionsQuerySchema
+>;

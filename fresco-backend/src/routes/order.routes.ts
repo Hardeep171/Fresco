@@ -1,7 +1,8 @@
 import { Router } from "express";
 
 import { orderController } from "../controllers/order.controller.js";
-import { authenticate } from "../middlewares/auth.middleware.js";
+import { ADMIN_ROLES } from "../constants/user.constants.js";
+import { authenticate, authorize } from "../middlewares/auth.middleware.js";
 
 /** Express router for Order endpoints. */
 const router = Router();
@@ -16,16 +17,24 @@ router.get("/", orderController.getUserOrders);
 router.post("/", orderController.createOrder);
 
 // Get all orders across the system (admin use) - must precede /:id
-router.get("/all", orderController.getOrders);
+router.get("/all", authorize(ADMIN_ROLES), orderController.getOrders);
 
-// Get single order by ID
+// Get single order by ID (Ownership / authorization verified in controller/service)
 router.get("/:id", orderController.getOrderById);
 
-// Update order lifecycle status
-router.patch("/:id/status", orderController.updateOrderStatus);
+// Update order lifecycle status (admin use)
+router.patch(
+  "/:id/status",
+  authorize(ADMIN_ROLES),
+  orderController.updateOrderStatus,
+);
 
-// Update order payment status
-router.patch("/:id/payment-status", orderController.updatePaymentStatus);
+// Update order payment status (admin use)
+router.patch(
+  "/:id/payment-status",
+  authorize(ADMIN_ROLES),
+  orderController.updatePaymentStatus,
+);
 
 // Cancel order by ID
 router.patch("/:id/cancel", orderController.cancelOrder);
