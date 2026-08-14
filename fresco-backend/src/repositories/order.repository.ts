@@ -16,13 +16,16 @@ export const orderRepository = {
   },
 
   /**
-   * Finds order documents matching the specified filter criteria.
+   * Finds order documents matching the specified filter criteria, sorted by creation date descending.
    *
    * @param filters - Optional query filter parameters.
    * @returns Promise resolving to an array of matching order plain objects.
    */
-  async findOrder(filters: FilterQuery<Order> = {}) {
-    return OrderModel.find(filters).sort({ createdAt: -1 }).lean().exec();
+  async findOrders(filters: FilterQuery<Order> = {}) {
+    return OrderModel.find(filters)
+      .sort({ createdAt: -1 })
+      .lean()
+      .exec();
   },
 
   /**
@@ -36,27 +39,17 @@ export const orderRepository = {
   },
 
   /**
-   * Finds a single order document by its unique order number.
-   *
-   * @param orderNumber - The unique order number string.
-   * @returns Promise resolving to the matching order plain object if found, or null.
-   */
-  async findOrderByOrderNumber(orderNumber: string) {
-    return OrderModel.findOne({ orderNumber }).lean().exec();
-  },
-
-  /**
-   * Finds order documents belonging to a specific user.
+   * Finds all order documents for a specific user matching optional filters, sorted by creation date descending.
    *
    * @param userId - The user's unique identifier.
-   * @param filters - Optional query filter parameters.
-   * @returns Promise resolving to an array of matching user order plain objects.
+   * @param filters - Optional additional query filter parameters.
+   * @returns Promise resolving to an array of matching order plain objects.
    */
   async findOrdersByUser(
     userId: string | Types.ObjectId,
     filters: FilterQuery<Order> = {},
   ) {
-    return OrderModel.find({ userId, ...filters })
+    return OrderModel.find({ ...filters, userId })
       .sort({ createdAt: -1 })
       .lean()
       .exec();
@@ -71,21 +64,11 @@ export const orderRepository = {
    */
   async updateOrder(orderId: string, data: Partial<Order>) {
     return OrderModel.findByIdAndUpdate(orderId, data, {
-      new: true,
+      returnDocument: "after",
       runValidators: true,
     })
       .lean()
       .exec();
-  },
-
-  /**
-   * Deletes an order document by ID.
-   *
-   * @param orderId - The order's unique identifier.
-   * @returns Promise resolving to the deleted order plain object if found, or null.
-   */
-  async deleteOrder(orderId: string) {
-    return OrderModel.findByIdAndDelete(orderId).lean().exec();
   },
 
   /**

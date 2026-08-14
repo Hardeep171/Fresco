@@ -8,6 +8,7 @@ export const ORDER_STATUSES = [
   "CONFIRMED",
   "PICKUP_ASSIGNED",
   "PICKED_UP",
+  "UNDER_INSPECTION",
   "IN_PROCESS",
   "READY_FOR_DELIVERY",
   "OUT_FOR_DELIVERY",
@@ -43,3 +44,10 @@ export const DEFAULT_ORDER_TAX = 0;
 
 /** Default delivery charge value for a newly created order. */
 export const DEFAULT_ORDER_DELIVERY_CHARGE = 0;
+
+/** Minimum quantity required for an item in an order. */
+export const MIN_ORDER_ITEM_QUANTITY = 1;
+
+/** Maximum length permitted for order special instructions. */
+export const ORDER_SPECIAL_INSTRUCTIONS_MAX_LENGTH = 500;
+

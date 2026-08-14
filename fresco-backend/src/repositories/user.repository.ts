@@ -21,7 +21,7 @@ export const userRepository = {
    * @returns Promise resolving to the updated user document if found, or null.
    */
   async updateUserProfile(userId: string, updateData: UpdateProfileInput) {
-    return UserModel.findByIdAndUpdate(userId, updateData, { new: true })
+    return UserModel.findByIdAndUpdate(userId, updateData, { returnDocument: "after" })
       .select("-password -refreshToken")
       .exec();
   },
@@ -50,7 +50,7 @@ export const userRepository = {
         password: hashedPassword,
         $unset: { refreshToken: 1 },
       },
-      { new: true },
+      { returnDocument: "after" },
     ).exec();
   },
 
@@ -83,7 +83,7 @@ export const userRepository = {
         passwordResetToken,
         passwordResetTokenExpiresAt,
       },
-      { new: true },
+      { returnDocument: "after" },
     ).exec();
   },
 
@@ -118,7 +118,7 @@ export const userRepository = {
           refreshToken: 1,
         },
       },
-      { new: true },
+      { returnDocument: "after" },
     ).exec();
   },
 
@@ -141,7 +141,7 @@ export const userRepository = {
         emailVerificationToken,
         emailVerificationTokenExpiresAt,
       },
-      { new: true },
+      { returnDocument: "after" },
     ).exec();
   },
 
@@ -173,7 +173,7 @@ export const userRepository = {
           emailVerificationTokenExpiresAt: 1,
         },
       },
-      { new: true },
+      { returnDocument: "after" },
     ).exec();
   },
 };

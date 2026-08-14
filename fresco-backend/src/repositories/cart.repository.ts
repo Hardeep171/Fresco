@@ -54,7 +54,7 @@ export const cartRepository = {
    */
   async updateCart(cartId: string, data: Partial<Cart>) {
     return CartModel.findByIdAndUpdate(cartId, data, {
-      new: true,
+      returnDocument: "after",
       runValidators: true,
     })
       .lean()

@@ -56,7 +56,7 @@ export const authRepository = {
     return UserModel.findByIdAndUpdate(
       userId,
       { refreshToken },
-      { new: true },
+      { returnDocument: "after" },
     )
       .select("+refreshToken")
       .exec();
@@ -72,7 +72,7 @@ export const authRepository = {
     return UserModel.findByIdAndUpdate(
       userId,
       { $unset: { refreshToken: 1 } },
-      { new: true },
+      { returnDocument: "after" },
     ).exec();
   },
 };

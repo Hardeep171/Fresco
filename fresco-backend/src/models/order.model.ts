@@ -1,18 +1,99 @@
 import { model, Schema, type InferSchemaType } from "mongoose";
 
+import { DEFAULT_COUNTRY } from "../constants/address.constants.js";
 import {
   DEFAULT_ORDER_DELIVERY_CHARGE,
   DEFAULT_ORDER_DISCOUNT,
   DEFAULT_ORDER_STATUS,
   DEFAULT_ORDER_TAX,
   DEFAULT_PAYMENT_STATUS,
+  MIN_ORDER_ITEM_QUANTITY,
+  ORDER_SPECIAL_INSTRUCTIONS_MAX_LENGTH,
   ORDER_STATUSES,
   PAYMENT_STATUSES,
 } from "../constants/order.constants.js";
 
+/** Schema for items contained within an order. */
+export const OrderItemSchema = new Schema(
+  {
+    garmentId: {
+      type: Schema.Types.ObjectId,
+      ref: "Garment",
+      required: true,
+    },
+    serviceId: {
+      type: Schema.Types.ObjectId,
+      ref: "Service",
+      required: true,
+    },
+    garmentName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    serviceName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    quantity: {
+      type: Number,
+      required: true,
+      min: MIN_ORDER_ITEM_QUANTITY,
+    },
+    unitPrice: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    totalPrice: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+  },
+  { _id: false },
+);
+
+/** Schema snapshot for financial and pricing details of an order. */
+export const PricingSnapshotSchema = new Schema(
+  {
+    subtotal: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    discount: {
+      type: Number,
+      required: true,
+      default: DEFAULT_ORDER_DISCOUNT,
+      min: 0,
+    },
+    tax: {
+      type: Number,
+      required: true,
+      default: DEFAULT_ORDER_TAX,
+      min: 0,
+    },
+    deliveryCharge: {
+      type: Number,
+      required: true,
+      default: DEFAULT_ORDER_DELIVERY_CHARGE,
+      min: 0,
+    },
+    totalAmount: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+  },
+  { _id: false },
+);
+
+/** Schema snapshot for address information associated with an order. */
 export const AddressSnapshotSchema = new Schema(
   {
-    name: {
+    fullName: {
       type: String,
       required: true,
       trim: true,
@@ -22,9 +103,13 @@ export const AddressSnapshotSchema = new Schema(
       required: true,
       trim: true,
     },
-    street: {
+    addressLine1: {
       type: String,
       required: true,
+      trim: true,
+    },
+    addressLine2: {
+      type: String,
       trim: true,
     },
     landmark: {
@@ -50,113 +135,52 @@ export const AddressSnapshotSchema = new Schema(
       type: String,
       required: true,
       trim: true,
+      default: DEFAULT_COUNTRY,
+    },
+    latitude: {
+      type: Number,
+    },
+    longitude: {
+      type: Number,
     },
   },
   { _id: false },
 );
 
-export const OrderItemSnapshotSchema = new Schema(
-  {
-    garmentId: {
-      type: Schema.Types.ObjectId,
-      ref: "Garment",
-      required: true,
-    },
-    garmentName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    serviceId: {
-      type: Schema.Types.ObjectId,
-      ref: "Service",
-      required: true,
-    },
-    serviceName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    quantity: {
-      type: Number,
-      required: true,
-      min: 1,
-    },
-    unitPrice: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-    subtotal: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-  },
-  { _id: false },
-);
-
-export const StatusHistorySchema = new Schema(
-  {
-    status: {
-      type: String,
-      enum: ORDER_STATUSES,
-      required: true,
-    },
-    changedAt: {
-      type: Date,
-      default: Date.now,
-      required: true,
-    },
-  },
-  { _id: false },
-);
-
+/** Schema for FRESCO customer orders. */
 export const OrderSchema = new Schema(
   {
-    orderNumber: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-    },
     userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      index: true,
     },
-    addressSnapshot: {
+    items: {
+      type: [OrderItemSchema],
+      required: true,
+      validate: {
+        validator: (items: unknown[]) => Array.isArray(items) && items.length > 0,
+        message: "Order must contain at least one item.",
+      },
+    },
+    pricing: {
+      type: PricingSnapshotSchema,
+      required: true,
+    },
+    pickupAddress: {
       type: AddressSnapshotSchema,
       required: true,
     },
-    items: {
-      type: [OrderItemSnapshotSchema],
+    deliveryAddress: {
+      type: AddressSnapshotSchema,
       required: true,
     },
-    subtotal: {
-      type: Number,
+    status: {
+      type: String,
+      enum: ORDER_STATUSES,
+      default: DEFAULT_ORDER_STATUS,
       required: true,
-      min: 0,
-    },
-    discount: {
-      type: Number,
-      default: DEFAULT_ORDER_DISCOUNT,
-      min: 0,
-    },
-    tax: {
-      type: Number,
-      default: DEFAULT_ORDER_TAX,
-      min: 0,
-    },
-    deliveryCharge: {
-      type: Number,
-      default: DEFAULT_ORDER_DELIVERY_CHARGE,
-      min: 0,
-    },
-    totalAmount: {
-      type: Number,
-      required: true,
-      min: 0,
     },
     paymentStatus: {
       type: String,
@@ -164,23 +188,16 @@ export const OrderSchema = new Schema(
       default: DEFAULT_PAYMENT_STATUS,
       required: true,
     },
-    orderStatus: {
-      type: String,
-      enum: ORDER_STATUSES,
-      default: DEFAULT_ORDER_STATUS,
-      required: true,
+    pickupDate: {
+      type: Date,
     },
-    statusHistory: {
-      type: [StatusHistorySchema],
-      default: [],
+    deliveryDate: {
+      type: Date,
     },
-    notes: {
+    specialInstructions: {
       type: String,
       trim: true,
-    },
-    placedAt: {
-      type: Date,
-      default: Date.now,
+      maxlength: ORDER_SPECIAL_INSTRUCTIONS_MAX_LENGTH,
     },
   },
   {
@@ -201,16 +218,13 @@ export const OrderSchema = new Schema(
   },
 );
 
-OrderSchema.index({ orderNumber: 1 }, { unique: true });
-OrderSchema.index({ userId: 1 });
-OrderSchema.index({ orderStatus: 1 });
+// Indexes for optimized query performance
+OrderSchema.index({ userId: 1, createdAt: -1 });
+OrderSchema.index({ status: 1, createdAt: -1 });
+OrderSchema.index({ userId: 1, status: 1 });
 OrderSchema.index({ paymentStatus: 1 });
 OrderSchema.index({ createdAt: -1 });
-OrderSchema.index({ userId: 1, createdAt: -1 });
 
-export type AddressSnapshot = InferSchemaType<typeof AddressSnapshotSchema>;
-export type OrderItemSnapshot = InferSchemaType<typeof OrderItemSnapshotSchema>;
-export type StatusHistory = InferSchemaType<typeof StatusHistorySchema>;
 export type Order = InferSchemaType<typeof OrderSchema>;
 
 export const OrderModel = model<Order>("Order", OrderSchema);

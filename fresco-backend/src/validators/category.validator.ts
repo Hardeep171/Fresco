@@ -5,7 +5,11 @@ import {
   CATEGORY_NAME_MAX_LENGTH,
   CATEGORY_NAME_MIN_LENGTH,
 } from "../constants/category.constants.js";
-import { createNameSchema, objectIdSchema } from "../lib/validation.js";
+import {
+  booleanQuerySchema,
+  createNameSchema,
+  objectIdSchema,
+} from "../lib/validation.js";
 
 /**
  * Reusable Zod validation schema for creating a new category.
@@ -42,12 +46,14 @@ export const createCategorySchema = z.object({
  */
 export const updateCategorySchema = createCategorySchema.partial();
 
-/**
- * Reusable Zod validation schema for category ID parameter.
- * Validates that `id` is a valid MongoDB ObjectId.
- */
+/** Reusable Zod validation schema for category ID parameter. */
 export const categoryIdParamSchema = z.object({
   id: objectIdSchema,
+});
+
+/** Reusable Zod validation schema for querying categories list. */
+export const getCategoriesQuerySchema = z.object({
+  isActive: booleanQuerySchema,
 });
 
 /** Strongly typed interface inferred from `createCategorySchema`. */
@@ -58,3 +64,6 @@ export type UpdateCategoryInput = z.infer<typeof updateCategorySchema>;
 
 /** Strongly typed interface inferred from `categoryIdParamSchema`. */
 export type CategoryIdParamInput = z.infer<typeof categoryIdParamSchema>;
+
+/** Strongly typed interface inferred from `getCategoriesQuerySchema`. */
+export type GetCategoriesQueryInput = z.infer<typeof getCategoriesQuerySchema>;

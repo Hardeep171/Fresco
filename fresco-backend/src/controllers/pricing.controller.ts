@@ -6,6 +6,7 @@ import { ApiResponse } from "../utils/api-response.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import {
   createPricingSchema,
+  getPricingQuerySchema,
   pricingIdParamSchema,
   updatePricingSchema,
 } from "../validators/pricing.validator.js";
@@ -29,17 +30,7 @@ export const pricingController = {
 
   /** Retrieve pricing records, optionally filtering by garmentId, serviceId, and active status. */
   getPricing: asyncHandler(async (req: Request, res: Response) => {
-    const filters = {
-      ...(req.query.garmentId && {
-        garmentId: req.query.garmentId as string,
-      }),
-      ...(req.query.serviceId && {
-        serviceId: req.query.serviceId as string,
-      }),
-      ...(req.query.isActive !== undefined && {
-        isActive: req.query.isActive === "true",
-      }),
-    };
+    const filters = getPricingQuerySchema.parse(req.query);
 
     const pricing = await pricingService.getPricing(filters);
 

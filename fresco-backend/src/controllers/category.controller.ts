@@ -7,6 +7,7 @@ import { asyncHandler } from "../utils/async-handler.js";
 import {
   categoryIdParamSchema,
   createCategorySchema,
+  getCategoriesQuerySchema,
   updateCategorySchema,
 } from "../validators/category.validator.js";
 
@@ -29,11 +30,7 @@ export const categoryController = {
 
   /** Retrieve categories, optionally filtering by active status. */
   getCategories: asyncHandler(async (req: Request, res: Response) => {
-    const filters = {
-      ...(req.query.isActive !== undefined && {
-        isActive: req.query.isActive === "true",
-      }),
-    };
+    const filters = getCategoriesQuerySchema.parse(req.query);
 
     const categories = await categoryService.getCategories(filters);
 

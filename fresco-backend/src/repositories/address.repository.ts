@@ -44,7 +44,7 @@ export const addressRepository = {
    */
   async updateAddress(addressId: string, updateData: Partial<Address>) {
     return AddressModel.findByIdAndUpdate(addressId, updateData, {
-      new: true,
+      returnDocument: "after",
       runValidators: true,
     }).exec();
   },
@@ -79,7 +79,7 @@ export const addressRepository = {
     return AddressModel.findByIdAndUpdate(
       addressId,
       { isDefault: true },
-      { new: true, runValidators: true },
+      { returnDocument: "after", runValidators: true },
     ).exec();
   },
 

@@ -58,7 +58,7 @@ export const pricingRepository = {
    */
   async updatePricing(pricingId: string, data: Partial<Pricing>) {
     return PricingModel.findByIdAndUpdate(pricingId, data, {
-      new: true,
+      returnDocument: "after",
       runValidators: true,
     })
       .lean()
@@ -75,7 +75,7 @@ export const pricingRepository = {
     return PricingModel.findByIdAndUpdate(
       pricingId,
       { isActive: false },
-      { new: true, runValidators: true },
+      { returnDocument: "after", runValidators: true },
     )
       .lean()
       .exec();
@@ -91,7 +91,7 @@ export const pricingRepository = {
     return PricingModel.findByIdAndUpdate(
       pricingId,
       { isActive: true },
-      { new: true, runValidators: true },
+      { returnDocument: "after", runValidators: true },
     )
       .lean()
       .exec();

@@ -63,7 +63,7 @@ export const garmentRepository = {
    */
   async updateGarment(garmentId: string, data: Partial<Garment>) {
     return GarmentModel.findByIdAndUpdate(garmentId, data, {
-      new: true,
+      returnDocument: "after",
       runValidators: true,
     })
       .lean()
@@ -80,7 +80,7 @@ export const garmentRepository = {
     return GarmentModel.findByIdAndUpdate(
       garmentId,
       { isActive: false },
-      { new: true, runValidators: true },
+      { returnDocument: "after", runValidators: true },
     )
       .lean()
       .exec();
@@ -96,7 +96,7 @@ export const garmentRepository = {
     return GarmentModel.findByIdAndUpdate(
       garmentId,
       { isActive: true },
-      { new: true, runValidators: true },
+      { returnDocument: "after", runValidators: true },
     )
       .lean()
       .exec();

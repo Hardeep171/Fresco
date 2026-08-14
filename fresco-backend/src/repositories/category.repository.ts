@@ -59,7 +59,7 @@ export const categoryRepository = {
    */
   async updateCategory(categoryId: string, data: Partial<Category>) {
     return CategoryModel.findByIdAndUpdate(categoryId, data, {
-      new: true,
+      returnDocument: "after",
       runValidators: true,
     })
       .lean()
@@ -76,7 +76,7 @@ export const categoryRepository = {
     return CategoryModel.findByIdAndUpdate(
       categoryId,
       { isActive: false },
-      { new: true, runValidators: true },
+      { returnDocument: "after", runValidators: true },
     )
       .lean()
       .exec();
@@ -92,7 +92,7 @@ export const categoryRepository = {
     return CategoryModel.findByIdAndUpdate(
       categoryId,
       { isActive: true },
-      { new: true, runValidators: true },
+      { returnDocument: "after", runValidators: true },
     )
       .lean()
       .exec();

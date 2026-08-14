@@ -59,7 +59,7 @@ export const serviceRepository = {
    */
   async updateService(serviceId: string, data: Partial<Service>) {
     return ServiceModel.findByIdAndUpdate(serviceId, data, {
-      new: true,
+      returnDocument: "after",
       runValidators: true,
     })
       .lean()
@@ -76,7 +76,7 @@ export const serviceRepository = {
     return ServiceModel.findByIdAndUpdate(
       serviceId,
       { isActive: false },
-      { new: true, runValidators: true },
+      { returnDocument: "after", runValidators: true },
     )
       .lean()
       .exec();
@@ -92,7 +92,7 @@ export const serviceRepository = {
     return ServiceModel.findByIdAndUpdate(
       serviceId,
       { isActive: true },
-      { new: true, runValidators: true },
+      { returnDocument: "after", runValidators: true },
     )
       .lean()
       .exec();

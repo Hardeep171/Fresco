@@ -85,3 +85,13 @@ export const createNameSchema = (
  * Default reusable Zod validation schema for general name fields.
  */
 export const nameSchema = createNameSchema();
+
+/**
+ * Reusable Zod validation schema for boolean query parameters.
+ * Strictly converts "true" -> true and "false" -> false while rejecting all other invalid values.
+ */
+export const booleanQuerySchema = z.preprocess((val) => {
+  if (val === "true") return true;
+  if (val === "false") return false;
+  return val;
+}, z.boolean().optional());
