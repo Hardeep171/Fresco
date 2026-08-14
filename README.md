@@ -115,6 +115,6 @@ This project is licensed under the MIT License.
 
 ## 👨‍💻 Author
 
-**Hardeep Singh**
+**Hardeep Panghal**
 
 GitHub: https://github.com/hardeep171
