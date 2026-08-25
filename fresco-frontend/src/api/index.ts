@@ -10,7 +10,12 @@ export { serviceApi } from "./service.api";
 export { pricingApi } from "./pricing.api";
 export { cartApi } from "./cart.api";
 export { orderApi } from "./order.api";
+export { assignmentApi } from "./assignment.api";
+export { deliveryTaskApi } from "./delivery-task.api";
+export { inspectionApi } from "./inspection.api";
 export type {
+
+
   ApiResponse,
   ApiErrorResponse,
   ApiErrorDetail,

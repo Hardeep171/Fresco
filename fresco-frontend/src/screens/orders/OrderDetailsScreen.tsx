@@ -5,7 +5,9 @@ import {
   Alert,
   RefreshControl,
   ScrollView,
+  TouchableOpacity,
 } from "react-native";
+
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import { OrdersStackParamList } from "../../types/navigation.types";
@@ -176,8 +178,82 @@ export const OrderDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
             updatedAt={order.updatedAt}
           />
 
+          {/* GARMENT INSPECTION REPORT BANNER */}
+          <AppCard variant="outlined" padding="md" style={styles.sectionCard}>
+            <View style={styles.inspectionHeaderRow}>
+              <View style={styles.inspectionTitleBlock}>
+                <Ionicons
+                  name="shield-checkmark-outline"
+                  size={20}
+                  color={colors.primary}
+                />
+                <AppText
+                  variant="bodyBold"
+                  color="primary"
+                  style={styles.inspectionTitle}
+                >
+                  Garment Inspection
+                </AppText>
+              </View>
+              <AppBadge
+                label={
+                  order.status === "UNDER_INSPECTION"
+                    ? "Under Inspection"
+                    : order.status === "PLACED" ||
+                      order.status === "CONFIRMED" ||
+                      order.status === "PICKUP_ASSIGNED" ||
+                      order.status === "PICKED_UP"
+                    ? "Pending Inspection"
+                    : "Inspected"
+                }
+                variant={
+                  order.status === "UNDER_INSPECTION"
+                    ? "warning"
+                    : order.status === "PLACED" ||
+                      order.status === "CONFIRMED" ||
+                      order.status === "PICKUP_ASSIGNED" ||
+                      order.status === "PICKED_UP"
+                    ? "neutral"
+                    : "success"
+                }
+                size="sm"
+                showDot
+              />
+            </View>
+
+            <AppText
+              variant="caption"
+              color="secondary"
+              style={styles.inspectionDesc}
+            >
+              Garments are inspected in your presence before workshop processing to verify fabric condition and pre-existing stains.
+            </AppText>
+
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() =>
+                navigation.navigate("InspectionReviewScreen", {
+                  orderId: order._id,
+                })
+              }
+              style={styles.viewInspectionBtn}
+              accessibilityRole="button"
+              accessibilityLabel="View inspection details and findings"
+            >
+              <AppText variant="captionMedium" color="brand">
+                View Inspection Details & Findings
+              </AppText>
+              <Ionicons
+                name="chevron-forward"
+                size={16}
+                color={colors.primary}
+              />
+            </TouchableOpacity>
+          </AppCard>
+
           {/* ITEMIZED GARMENTS LIST */}
           <OrderItemList items={order.items} />
+
 
           {/* AUTHORITATIVE PRICING BREAKDOWN */}
           <OrderPricingCard
@@ -431,4 +507,31 @@ const styles = StyleSheet.create({
   infoText: {
     flex: 1,
   },
+  inspectionHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: spacing.xs,
+  },
+  inspectionTitleBlock: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  inspectionTitle: {
+    marginLeft: spacing.xs,
+  },
+  inspectionDesc: {
+    lineHeight: 18,
+    marginBottom: spacing.sm,
+  },
+  viewInspectionBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: colors.surfaceMuted,
+    borderRadius: radius.sm,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+  },
 });
+

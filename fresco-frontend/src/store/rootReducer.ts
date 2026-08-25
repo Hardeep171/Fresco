@@ -8,6 +8,9 @@ import serviceReducer from "./slices/serviceSlice";
 import pricingReducer from "./slices/pricingSlice";
 import cartReducer from "./slices/cartSlice";
 import orderReducer from "./slices/orderSlice";
+import partnerAssignmentReducer from "./slices/partnerAssignmentSlice";
+import deliveryTaskReducer from "./slices/deliveryTaskSlice";
+import inspectionReducer from "./slices/inspectionSlice";
 
 export const rootReducer = combineReducers({
   auth: authReducer,
@@ -19,6 +22,11 @@ export const rootReducer = combineReducers({
   pricing: pricingReducer,
   cart: cartReducer,
   order: orderReducer,
+  partnerAssignment: partnerAssignmentReducer,
+  deliveryTask: deliveryTaskReducer,
+  inspection: inspectionReducer,
 });
+
+
 
 export type RootState = ReturnType<typeof rootReducer>;

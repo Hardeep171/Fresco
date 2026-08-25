@@ -4,13 +4,15 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../types/navigation.types";
 import { AuthNavigator } from "./AuthNavigator";
 import { AppNavigator } from "./AppNavigator";
+import { PartnerNavigator } from "./PartnerNavigator";
 import { SplashScreen } from "../screens/auth/SplashScreen";
 import { useAuth } from "../hooks/useAuth";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export const RootNavigator: React.FC = () => {
-  const { isAuthenticated, isRestoringToken } = useAuth();
+  const { user, isAuthenticated, isRestoringToken } = useAuth();
+  const isDeliveryPartner = user?.role === "DELIVERY_PARTNER";
 
   return (
     <NavigationContainer>
@@ -19,6 +21,8 @@ export const RootNavigator: React.FC = () => {
           <Stack.Screen name="Splash" component={SplashScreen} />
         ) : !isAuthenticated ? (
           <Stack.Screen name="Auth" component={AuthNavigator} />
+        ) : isDeliveryPartner ? (
+          <Stack.Screen name="PartnerApp" component={PartnerNavigator} />
         ) : (
           <Stack.Screen name="App" component={AppNavigator} />
         )}
@@ -26,3 +30,4 @@ export const RootNavigator: React.FC = () => {
     </NavigationContainer>
   );
 };
+

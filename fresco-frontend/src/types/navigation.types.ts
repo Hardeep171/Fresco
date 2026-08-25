@@ -4,7 +4,8 @@ import { Order } from "./order.types";
 export type RootStackParamList = {
   Splash: undefined;
   Auth: NavigatorScreenParams<AuthStackParamList>;
-  App: NavigatorScreenParams<MainTabParamList> | NavigatorScreenParams<ProfileStackParamList> | undefined;
+  App: NavigatorScreenParams<MainTabParamList> | undefined;
+  PartnerApp: NavigatorScreenParams<PartnerTabParamList> | undefined;
 };
 
 export type AuthStackParamList = {
@@ -36,8 +37,9 @@ export type CartStackParamList = {
 export type OrdersStackParamList = {
   OrderHistoryScreen: undefined;
   OrderDetailsScreen: { orderId: string };
+  InspectionReviewScreen: { orderId: string; inspectionId?: string };
+  InspectionFormScreen: { orderId: string; inspectionId?: string };
 };
-
 
 export type ProfileStackParamList = {
   ProfileScreen: undefined;
@@ -57,3 +59,30 @@ export type MainTabParamList = {
   OrdersTab: NavigatorScreenParams<OrdersStackParamList>;
   ProfileTab: NavigatorScreenParams<ProfileStackParamList>;
 };
+
+// ==========================================
+// PHASE 8: DELIVERY PARTNER NAVIGATION TYPES
+// ==========================================
+
+export type PartnerStackParamList = {
+  PartnerDashboardScreen: undefined;
+  AssignmentListScreen: { initialFilter?: string } | undefined;
+  AssignmentDetailsScreen: { assignmentId: string };
+  DeliveryTaskListScreen: { initialFilter?: string } | undefined;
+  DeliveryTaskDetailsScreen: { taskId: string };
+  InspectionReviewScreen: { orderId: string; inspectionId?: string };
+  InspectionFormScreen: { orderId: string; inspectionId?: string };
+};
+
+
+export type PartnerProfileStackParamList = {
+  PartnerProfileScreen: undefined;
+};
+
+export type PartnerTabParamList = {
+  PartnerDashboardTab: NavigatorScreenParams<PartnerStackParamList>;
+  PartnerAssignmentsTab: NavigatorScreenParams<PartnerStackParamList>;
+  PartnerTasksTab: NavigatorScreenParams<PartnerStackParamList>;
+  PartnerProfileTab: NavigatorScreenParams<PartnerProfileStackParamList>;
+};
+
