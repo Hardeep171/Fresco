@@ -11,6 +11,7 @@ import orderReducer from "./slices/orderSlice";
 import partnerAssignmentReducer from "./slices/partnerAssignmentSlice";
 import deliveryTaskReducer from "./slices/deliveryTaskSlice";
 import inspectionReducer from "./slices/inspectionSlice";
+import paymentReducer from "./slices/paymentSlice";
 
 export const rootReducer = combineReducers({
   auth: authReducer,
@@ -25,6 +26,7 @@ export const rootReducer = combineReducers({
   partnerAssignment: partnerAssignmentReducer,
   deliveryTask: deliveryTaskReducer,
   inspection: inspectionReducer,
+  payment: paymentReducer,
 });
 
 

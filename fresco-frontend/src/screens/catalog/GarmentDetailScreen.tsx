@@ -30,7 +30,7 @@ import {
   ErrorState,
   ScreenContainer,
 } from "../../components/common";
-import { colors, spacing, radius, shadows } from "../../theme";
+import { useTheme, colors, spacing, radius, shadows } from "../../theme";
 import { formatCurrency } from "../../utils/formatters";
 
 type Props = NativeStackScreenProps<
@@ -42,6 +42,7 @@ export const GarmentDetailScreen: React.FC<Props> = ({
   route,
   navigation,
 }) => {
+  const { colors } = useTheme();
   const { garmentId, garmentName } = route.params;
 
   const {
@@ -321,7 +322,6 @@ export const GarmentDetailScreen: React.FC<Props> = ({
   return (
     <ScreenContainer
       scrollable
-      statusBarStyle="dark"
       refreshControl={
         <RefreshControl
           refreshing={refreshing}

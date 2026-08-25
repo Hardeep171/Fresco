@@ -9,7 +9,7 @@ import {
   AssignmentType,
 } from "../../constants/assignment.constants";
 import { AppText, AppCard, AppBadge, AppButton } from "../common";
-import { colors, spacing, radius } from "../../theme";
+import { useTheme, spacing, radius } from "../../theme";
 import { formatDateTime } from "../../utils/formatters";
 
 export interface AssignmentCardProps {
@@ -50,6 +50,7 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
   onComplete,
   isActionLoading = false,
 }) => {
+  const { colors } = useTheme();
   const formattedAssignmentId = `#ASG-${assignment._id.slice(-6).toUpperCase()}`;
   const orderIdStr =
     typeof assignment.orderId === "string"
@@ -94,7 +95,7 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
         </View>
 
         {/* DETAILS SECTION */}
-        <View style={styles.detailsContainer}>
+        <View style={[styles.detailsContainer, { borderColor: colors.border }]}>
           <View style={styles.idRow}>
             <View style={styles.idCol}>
               <AppText variant="caption" color="muted">
@@ -125,7 +126,7 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
 
           {/* NOTES IF PRESENT */}
           {assignment.notes ? (
-            <View style={styles.notesContainer}>
+            <View style={[styles.notesContainer, { backgroundColor: colors.surfaceMuted }]}>
               <AppText variant="caption" color="secondary" numberOfLines={2}>
                 Note: {assignment.notes}
               </AppText>
@@ -151,7 +152,6 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
               title={isPickup ? "Complete Pickup" : "Complete Delivery"}
               variant="primary"
               size="sm"
-
               loading={isActionLoading}
               disabled={isActionLoading}
               onPress={() => onComplete(assignment)}
@@ -196,7 +196,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: colors.border,
     marginVertical: spacing.xs,
   },
   idRow: {
@@ -217,7 +216,6 @@ const styles = StyleSheet.create({
   },
   notesContainer: {
     marginTop: spacing.xs,
-    backgroundColor: colors.surfaceMuted,
     padding: spacing.xs,
     borderRadius: radius.sm,
   },

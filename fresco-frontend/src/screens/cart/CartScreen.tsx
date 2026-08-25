@@ -22,12 +22,13 @@ import {
   ErrorState,
   ScreenContainer,
 } from "../../components/common";
-import { colors, spacing } from "../../theme";
+import { useTheme, spacing } from "../../theme";
 import { formatCurrency } from "../../utils/formatters";
 
 type Props = NativeStackScreenProps<CartStackParamList, "CartScreen">;
 
 export const CartScreen: React.FC<Props> = ({ navigation }) => {
+  const { colors } = useTheme();
   const {
     items,
     enrichedItems,
@@ -117,7 +118,6 @@ export const CartScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <ScreenContainer
       scrollable
-      statusBarStyle="dark"
       refreshControl={
         <RefreshControl
           refreshing={refreshing}

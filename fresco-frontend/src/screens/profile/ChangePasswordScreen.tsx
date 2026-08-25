@@ -13,7 +13,7 @@ import {
   AppHeader,
   ScreenContainer,
 } from "../../components/common";
-import { colors, spacing, radius } from "../../theme";
+import { useTheme, colors, spacing, radius } from "../../theme";
 
 type Props = NativeStackScreenProps<
   ProfileStackParamList,
@@ -21,6 +21,7 @@ type Props = NativeStackScreenProps<
 >;
 
 export const ChangePasswordScreen: React.FC<Props> = ({ navigation }) => {
+  const { colors } = useTheme();
   const { logout } = useAuth();
   const {
     changePassword,
@@ -111,7 +112,7 @@ export const ChangePasswordScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <ScreenContainer scrollable statusBarStyle="dark">
+    <ScreenContainer scrollable>
       <AppHeader
         title="Change Password"
         showBack
@@ -119,7 +120,7 @@ export const ChangePasswordScreen: React.FC<Props> = ({ navigation }) => {
       />
 
       {changePasswordError && !changePasswordError.fieldErrors && (
-        <View style={styles.errorBanner}>
+        <View style={[styles.errorBanner, { backgroundColor: colors.errorSurface }]}>
           <Ionicons
             name="alert-circle"
             size={20}

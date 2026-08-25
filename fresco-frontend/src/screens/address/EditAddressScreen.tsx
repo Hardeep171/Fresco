@@ -64,7 +64,7 @@ export const EditAddressScreen: React.FC<Props> = ({ route, navigation }) => {
   };
 
   return (
-    <ScreenContainer scrollable statusBarStyle="dark">
+    <ScreenContainer scrollable>
       <AppHeader
         title="Edit Address"
         showBack

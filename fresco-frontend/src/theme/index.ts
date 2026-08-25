@@ -1,25 +1,28 @@
-import { colors } from "./colors";
-import { typography } from "./typography";
-import { spacing } from "./spacing";
-import { radius } from "./radius";
-import { shadows } from "./shadows";
-
-/**
- * Unified Theme object for FRESCO mobile application.
- * All UI components should import and consume properties from this theme.
- */
-export const theme = {
-  colors,
-  typography,
-  spacing,
-  radius,
-  shadows,
-} as const;
-
-export type Theme = typeof theme;
-
 export { colors } from "./colors";
 export { typography } from "./typography";
 export { spacing } from "./spacing";
 export { radius } from "./radius";
 export { shadows } from "./shadows";
+
+export { lightColors, lightTheme } from "./lightTheme";
+export { darkColors, darkTheme, darkShadows } from "./darkTheme";
+export { ThemeProvider, ThemeContext } from "./ThemeProvider";
+export type { ThemeProviderProps } from "./ThemeProvider";
+export { useTheme } from "./useTheme";
+export { createNavigationTheme } from "./navigationTheme";
+export { themeStorage } from "./themeStorage";
+
+export type {
+  ThemeMode,
+  ThemeColors,
+  Theme,
+  ThemeContextValue,
+} from "./theme.types";
+export type { Typography } from "./typography";
+export type { Spacing } from "./spacing";
+export type { Radius } from "./radius";
+export type { Shadows } from "./shadows";
+export type { Colors } from "./colors";
+
+import { lightTheme } from "./lightTheme";
+export const theme = lightTheme;

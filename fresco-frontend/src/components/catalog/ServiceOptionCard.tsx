@@ -3,7 +3,7 @@ import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ServiceOptionWithPrice } from "../../types/catalog.types";
 import { AppText, AppCard, AppBadge } from "../common";
-import { colors, spacing, shadows } from "../../theme";
+import { useTheme, spacing } from "../../theme";
 import { formatCurrency } from "../../utils/formatters";
 
 export interface ServiceOptionCardProps {
@@ -17,6 +17,7 @@ export const ServiceOptionCard: React.FC<ServiceOptionCardProps> = ({
   isSelected,
   onSelect,
 }) => {
+  const { colors } = useTheme();
   const { service, pricing } = option;
   const formattedServiceName =
     service.name.charAt(0).toUpperCase() + service.name.slice(1);
@@ -34,7 +35,8 @@ export const ServiceOptionCard: React.FC<ServiceOptionCardProps> = ({
         padding="md"
         style={{
           ...styles.card,
-          ...(isSelected ? styles.selectedCard : {}),
+          borderColor: isSelected ? colors.primary : colors.border,
+          ...(isSelected ? { backgroundColor: colors.primarySurface } : {}),
         }}
       >
         <View style={styles.cardContent}>
@@ -89,12 +91,6 @@ const styles = StyleSheet.create({
   card: {
     marginBottom: spacing.sm,
     borderWidth: 1.5,
-    borderColor: colors.border,
-    ...shadows.card,
-  },
-  selectedCard: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primarySurface,
   },
   cardContent: {
     flexDirection: "row",

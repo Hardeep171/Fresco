@@ -5,12 +5,13 @@ import { CartScreen } from "../screens/cart/CartScreen";
 import { CheckoutScreen } from "../screens/checkout/CheckoutScreen";
 import { OrderReviewScreen } from "../screens/checkout/OrderReviewScreen";
 import { OrderSuccessScreen } from "../screens/checkout/OrderSuccessScreen";
+import { PaymentScreen } from "../screens/payment/PaymentScreen";
 
 const Stack = createNativeStackNavigator<CartStackParamList>();
 
 /**
- * Cart Stack Navigator for Phase 6.
- * Hosts Cart, Checkout, Order Review, and Order Success screens.
+ * Cart Stack Navigator for Phase 6 & Phase 10.
+ * Hosts Cart, Checkout, Order Review, Order Success, and Payment screens.
  */
 export const CartNavigator: React.FC = () => {
   return (
@@ -29,6 +30,7 @@ export const CartNavigator: React.FC = () => {
         component={OrderSuccessScreen}
         options={{ gestureEnabled: false }}
       />
+      <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
     </Stack.Navigator>
   );
 };

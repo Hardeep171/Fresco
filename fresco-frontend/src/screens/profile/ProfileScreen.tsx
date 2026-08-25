@@ -21,7 +21,7 @@ import {
   AppDivider,
   ScreenContainer,
 } from "../../components/common";
-import { colors, spacing, radius, shadows } from "../../theme";
+import { useTheme, spacing, radius } from "../../theme";
 import { formatDate } from "../../utils/formatters";
 
 type Props = NativeStackScreenProps<ProfileStackParamList, "ProfileScreen">;
@@ -30,6 +30,7 @@ export const ProfileScreen: React.FC<Props> = ({ navigation }) => {
   const { logout } = useAuth();
   const { profile, loadProfile } = useUser();
   const { addresses, loadAddresses } = useAddress();
+  const { colors, isDark, mode } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
@@ -64,10 +65,16 @@ export const ProfileScreen: React.FC<Props> = ({ navigation }) => {
     profile?.lastName?.charAt(0) || ""
   }`.toUpperCase() || "F";
 
+  const themeLabel =
+    mode === "system"
+      ? `System (${isDark ? "Dark" : "Light"})`
+      : mode === "dark"
+      ? "Dark"
+      : "Light";
+
   return (
     <ScreenContainer
       scrollable
-      statusBarStyle="dark"
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -92,7 +99,15 @@ export const ProfileScreen: React.FC<Props> = ({ navigation }) => {
       {/* User Header Profile Card */}
       <AppCard variant="elevated" padding="lg" style={styles.userHeaderCard}>
         <View style={styles.avatarSection}>
-          <View style={styles.avatarCircle}>
+          <View
+            style={[
+              styles.avatarCircle,
+              {
+                backgroundColor: colors.primarySurface,
+                borderColor: colors.primaryLight,
+              },
+            ]}
+          >
             <AppText variant="h1" color="brand" style={styles.avatarText}>
               {initials}
             </AppText>
@@ -170,6 +185,34 @@ export const ProfileScreen: React.FC<Props> = ({ navigation }) => {
             </AppText>
             <AppText variant="caption" color="secondary">
               Track status, receipts, and order history
+            </AppText>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+        </TouchableOpacity>
+
+        <AppDivider spacing="none" />
+
+        {/* Appearance / Theme Settings (PHASE 11) */}
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => navigation.navigate("ThemeSettingsScreen")}
+          style={styles.menuItem}
+          accessibilityRole="button"
+          accessibilityLabel="Appearance and Theme Settings"
+        >
+          <View style={[styles.menuIconCircle, { backgroundColor: colors.primarySurface }]}>
+            <Ionicons
+              name={isDark ? "moon-outline" : "sunny-outline"}
+              size={20}
+              color={colors.primary}
+            />
+          </View>
+          <View style={styles.menuTextContainer}>
+            <AppText variant="bodyMedium" color="primary">
+              Appearance & Theme
+            </AppText>
+            <AppText variant="caption" color="secondary">
+              Current: {themeLabel}
             </AppText>
           </View>
           <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
@@ -271,7 +314,6 @@ export const ProfileScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   userHeaderCard: {
     marginVertical: spacing.md,
-    ...shadows.card,
   },
   avatarSection: {
     flexDirection: "row",
@@ -281,9 +323,7 @@ const styles = StyleSheet.create({
     width: 68,
     height: 68,
     borderRadius: radius.round,
-    backgroundColor: colors.primarySurface,
     borderWidth: 2,
-    borderColor: colors.primaryLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: spacing.md,

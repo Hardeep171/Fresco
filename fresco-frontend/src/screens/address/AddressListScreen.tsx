@@ -24,7 +24,7 @@ import {
   ErrorState,
   ScreenContainer,
 } from "../../components/common";
-import { colors, spacing, shadows } from "../../theme";
+import { useTheme, colors, spacing, shadows } from "../../theme";
 
 type Props = NativeStackScreenProps<
   ProfileStackParamList,
@@ -32,6 +32,7 @@ type Props = NativeStackScreenProps<
 >;
 
 export const AddressListScreen: React.FC<Props> = ({ navigation }) => {
+  const { colors } = useTheme();
   const {
     addresses,
     isLoading,
@@ -229,7 +230,6 @@ export const AddressListScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <ScreenContainer
       scrollable
-      statusBarStyle="dark"
       refreshControl={
         <RefreshControl
           refreshing={refreshing}

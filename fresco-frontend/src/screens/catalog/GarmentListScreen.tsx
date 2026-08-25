@@ -23,7 +23,7 @@ import {
   ErrorState,
   ScreenContainer,
 } from "../../components/common";
-import { colors, spacing, radius } from "../../theme";
+import { useTheme, colors, spacing, radius } from "../../theme";
 
 type Props = NativeStackScreenProps<CatalogStackParamList, "GarmentListScreen">;
 
@@ -31,6 +31,7 @@ export const GarmentListScreen: React.FC<Props> = ({
   route,
   navigation,
 }) => {
+  const { colors } = useTheme();
   const { categoryId: initialCategoryId, categoryName: initialCategoryName } =
     route.params;
 
@@ -129,7 +130,6 @@ export const GarmentListScreen: React.FC<Props> = ({
   return (
     <ScreenContainer
       scrollable
-      statusBarStyle="dark"
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -166,7 +166,10 @@ export const GarmentListScreen: React.FC<Props> = ({
                   onPress={() => handleCategorySwitch(cat)}
                   style={[
                     styles.categoryPill,
-                    isSelected && styles.categoryPillSelected,
+                    {
+                      backgroundColor: isSelected ? colors.primary : colors.surface,
+                      borderColor: isSelected ? colors.primary : colors.border,
+                    },
                   ]}
                   accessibilityRole="tab"
                   accessibilityLabel={`Switch to ${pillName} category`}

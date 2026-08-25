@@ -1,7 +1,7 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import { AppText, AppCard, AppDivider } from "../common";
-import { spacing, shadows } from "../../theme";
+import { spacing } from "../../theme";
 import { formatCurrency } from "../../utils/formatters";
 
 export interface CartSummaryCardProps {
@@ -68,7 +68,6 @@ export const CartSummaryCard: React.FC<CartSummaryCardProps> = ({
 const styles = StyleSheet.create({
   card: {
     marginVertical: spacing.md,
-    ...shadows.card,
   },
   header: {
     letterSpacing: 0.8,

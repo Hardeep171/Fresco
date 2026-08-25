@@ -15,7 +15,7 @@ import {
   AppDivider,
   ScreenContainer,
 } from "../../components/common";
-import { colors, spacing, radius, shadows } from "../../theme";
+import { useTheme, colors, spacing, radius, shadows } from "../../theme";
 import { formatCurrency, formatDate } from "../../utils/formatters";
 
 type Props = NativeStackScreenProps<CartStackParamList, "OrderSuccessScreen">;
@@ -24,11 +24,19 @@ export const OrderSuccessScreen: React.FC<Props> = ({
   route,
   navigation,
 }) => {
+  const { colors } = useTheme();
   const { order } = route.params;
 
   const handleViewOrder = () => {
     (navigation.getParent() as any)?.navigate("OrdersTab", {
       screen: "OrderDetailsScreen",
+      params: { orderId: order._id },
+    });
+  };
+
+  const handlePayment = () => {
+    (navigation.getParent() as any)?.navigate("OrdersTab", {
+      screen: "PaymentScreen",
       params: { orderId: order._id },
     });
   };
@@ -41,10 +49,10 @@ export const OrderSuccessScreen: React.FC<Props> = ({
     ORDER_STATUS_LABELS[order.status] || order.status;
 
   return (
-    <ScreenContainer scrollable statusBarStyle="dark">
+    <ScreenContainer scrollable>
       <View style={styles.contentContainer}>
         {/* SUCCESS ICON HEADER */}
-        <View style={styles.iconCircle}>
+        <View style={[styles.iconCircle, { backgroundColor: colors.successSurface }]}>
           <Ionicons
             name="checkmark-circle"
             size={72}
@@ -61,7 +69,7 @@ export const OrderSuccessScreen: React.FC<Props> = ({
           align="center"
           style={styles.subtitle}
         >
-          Thank you for choosing FRESCO. Your laundry is now scheduled for pickup.
+          Thank you for choosing FRESCO. Your laundry is scheduled for doorstep pickup.
         </AppText>
 
         {/* ORDER DETAILS CARD */}
@@ -141,8 +149,16 @@ export const OrderSuccessScreen: React.FC<Props> = ({
           />
 
           <AppButton
-            title="Continue Shopping"
+            title="Record / Confirm Payment"
             variant="outline"
+            size="md"
+            onPress={handlePayment}
+            leftIcon={<Ionicons name="card-outline" size={20} color={colors.primary} />}
+          />
+
+          <AppButton
+            title="Continue Shopping"
+            variant="ghost"
             size="md"
             onPress={handleContinueShopping}
             leftIcon={<Ionicons name="shirt-outline" size={20} color={colors.primary} />}

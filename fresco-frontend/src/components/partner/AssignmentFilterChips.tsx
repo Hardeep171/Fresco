@@ -7,7 +7,7 @@ import {
   AssignmentStatus,
 } from "../../constants/assignment.constants";
 import { AppText } from "../common";
-import { colors, spacing, radius } from "../../theme";
+import { useTheme, spacing, radius } from "../../theme";
 
 export interface AssignmentFilterChipsProps {
   selectedTab: AssignmentFilterTab;
@@ -25,8 +25,10 @@ export const AssignmentFilterChips: React.FC<AssignmentFilterChipsProps> = ({
   onSelectTab,
   counts,
 }) => {
+  const { colors } = useTheme();
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -44,7 +46,10 @@ export const AssignmentFilterChips: React.FC<AssignmentFilterChipsProps> = ({
               onPress={() => onSelectTab(tab)}
               style={[
                 styles.chip,
-                isSelected ? styles.chipSelected : styles.chipUnselected,
+                {
+                  backgroundColor: isSelected ? colors.primary : colors.surface,
+                  borderColor: isSelected ? colors.primary : colors.border,
+                },
               ]}
               accessibilityRole="tab"
               accessibilityLabel={`Filter ${label}${count !== undefined ? `, ${count} tasks` : ""}`}
@@ -62,7 +67,9 @@ export const AssignmentFilterChips: React.FC<AssignmentFilterChipsProps> = ({
                 <View
                   style={[
                     styles.badge,
-                    isSelected ? styles.badgeSelected : styles.badgeUnselected,
+                    {
+                      backgroundColor: isSelected ? colors.surface : colors.surfaceMuted,
+                    },
                   ]}
                 >
                   <AppText
@@ -85,7 +92,6 @@ export const AssignmentFilterChips: React.FC<AssignmentFilterChipsProps> = ({
 const styles = StyleSheet.create({
   container: {
     paddingVertical: spacing.xs,
-    backgroundColor: colors.background,
   },
   scrollContent: {
     paddingHorizontal: spacing.screenPadding,
@@ -101,14 +107,6 @@ const styles = StyleSheet.create({
     borderRadius: radius.round,
     borderWidth: 1,
   },
-  chipSelected: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  chipUnselected: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-  },
   chipText: {
     lineHeight: 18,
   },
@@ -119,12 +117,6 @@ const styles = StyleSheet.create({
     borderRadius: radius.round,
     alignItems: "center",
     justifyContent: "center",
-  },
-  badgeSelected: {
-    backgroundColor: colors.surface,
-  },
-  badgeUnselected: {
-    backgroundColor: colors.surfaceMuted,
   },
   badgeText: {
     fontSize: 10,

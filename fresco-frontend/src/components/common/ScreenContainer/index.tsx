@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaView, Edge } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import { colors, spacing } from "../../../theme";
+import { useTheme, spacing } from "../../../theme";
 
 export interface ScreenContainerProps {
   children: React.ReactNode;
@@ -29,18 +29,23 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
   style,
   contentContainerStyle,
   edges = ["top", "bottom", "left", "right"],
-  backgroundColor = colors.background,
-  statusBarStyle = "dark",
+  backgroundColor,
+  statusBarStyle,
   refreshControl,
 }) => {
+  const { colors, isDark } = useTheme();
+  const effectiveBg = backgroundColor || colors.background;
+  const effectiveStatusBarStyle =
+    statusBarStyle || (isDark ? "light" : "dark");
+
   const containerStyle: ViewStyle = {
     flex: 1,
-    backgroundColor,
+    backgroundColor: effectiveBg,
   };
 
   return (
-    <SafeAreaView edges={edges} style={[styles.safeArea, { backgroundColor }]}>
-      <StatusBar style={statusBarStyle} backgroundColor={backgroundColor} />
+    <SafeAreaView edges={edges} style={[styles.safeArea, { backgroundColor: effectiveBg }]}>
+      <StatusBar style={effectiveStatusBarStyle} backgroundColor={effectiveBg} />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={styles.keyboardAvoid}

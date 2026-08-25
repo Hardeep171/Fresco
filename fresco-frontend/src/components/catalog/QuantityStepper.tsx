@@ -2,7 +2,7 @@ import React from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { AppText } from "../common";
-import { colors, spacing, radius } from "../../theme";
+import { useTheme, spacing, radius } from "../../theme";
 
 export interface QuantityStepperProps {
   quantity: number;
@@ -19,16 +19,21 @@ export const QuantityStepper: React.FC<QuantityStepperProps> = ({
   min = 1,
   max = 99,
 }) => {
+  const { colors } = useTheme();
   const isMin = quantity <= min;
   const isMax = quantity >= max;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.surfaceMuted }]}>
       <TouchableOpacity
         activeOpacity={0.7}
         onPress={onDecrement}
         disabled={isMin}
-        style={[styles.button, isMin && styles.buttonDisabled]}
+        style={[
+          styles.button,
+          { backgroundColor: isMin ? colors.surfaceDisabled : colors.surface },
+          isMin && styles.buttonDisabled,
+        ]}
         accessibilityRole="button"
         accessibilityLabel="Decrease quantity"
         accessibilityState={{ disabled: isMin }}
@@ -50,7 +55,11 @@ export const QuantityStepper: React.FC<QuantityStepperProps> = ({
         activeOpacity={0.7}
         onPress={onIncrement}
         disabled={isMax}
-        style={[styles.button, isMax && styles.buttonDisabled]}
+        style={[
+          styles.button,
+          { backgroundColor: isMax ? colors.surfaceDisabled : colors.surface },
+          isMax && styles.buttonDisabled,
+        ]}
         accessibilityRole="button"
         accessibilityLabel="Increase quantity"
         accessibilityState={{ disabled: isMax }}
@@ -69,7 +78,6 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.surfaceMuted,
     borderRadius: radius.md,
     padding: spacing.xxs,
     alignSelf: "flex-start",
@@ -78,12 +86,10 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: radius.sm,
-    backgroundColor: colors.surface,
     alignItems: "center",
     justifyContent: "center",
   },
   buttonDisabled: {
-    backgroundColor: colors.surfaceDisabled,
     opacity: 0.6,
   },
   valueContainer: {

@@ -20,11 +20,12 @@ import {
   ErrorState,
   ScreenContainer,
 } from "../../components/common";
-import { colors, spacing } from "../../theme";
+import { useTheme, spacing } from "../../theme";
 
 type Props = NativeStackScreenProps<CatalogStackParamList, "CatalogScreen">;
 
 export const CatalogScreen: React.FC<Props> = ({ navigation }) => {
+  const { colors } = useTheme();
   const { categories, isLoading: isCategoriesLoading, error, loadCategories } =
     useCategories();
   const { garments, loadGarments } = useGarments();
@@ -78,7 +79,6 @@ export const CatalogScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <ScreenContainer
       scrollable
-      statusBarStyle="dark"
       refreshControl={
         <RefreshControl
           refreshing={refreshing}

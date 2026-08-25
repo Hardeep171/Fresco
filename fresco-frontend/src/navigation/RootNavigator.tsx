@@ -7,15 +7,18 @@ import { AppNavigator } from "./AppNavigator";
 import { PartnerNavigator } from "./PartnerNavigator";
 import { SplashScreen } from "../screens/auth/SplashScreen";
 import { useAuth } from "../hooks/useAuth";
+import { useTheme, createNavigationTheme } from "../theme";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export const RootNavigator: React.FC = () => {
   const { user, isAuthenticated, isRestoringToken } = useAuth();
+  const { theme } = useTheme();
   const isDeliveryPartner = user?.role === "DELIVERY_PARTNER";
+  const navTheme = createNavigationTheme(theme);
 
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={navTheme}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {isRestoringToken ? (
           <Stack.Screen name="Splash" component={SplashScreen} />

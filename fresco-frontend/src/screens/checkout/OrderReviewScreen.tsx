@@ -20,12 +20,13 @@ import {
   AppDivider,
   ScreenContainer,
 } from "../../components/common";
-import { colors, spacing, shadows } from "../../theme";
+import { useTheme, colors, spacing, shadows } from "../../theme";
 import { formatDate, formatCurrency } from "../../utils/formatters";
 
 type Props = NativeStackScreenProps<CartStackParamList, "OrderReviewScreen">;
 
 export const OrderReviewScreen: React.FC<Props> = ({ navigation }) => {
+  const { colors } = useTheme();
   const {
     pickupAddress,
     deliveryAddress,
@@ -65,7 +66,7 @@ export const OrderReviewScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <ScreenContainer scrollable statusBarStyle="dark">
+    <ScreenContainer scrollable>
       <AppHeader
         title="Review & Confirm"
         subtitle="Verify order details before placing"

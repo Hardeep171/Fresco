@@ -8,7 +8,7 @@ import {
   ItemCondition,
 } from "../../constants/inspection.constants";
 import { AppText } from "../common";
-import { colors, spacing, radius } from "../../theme";
+import { useTheme, spacing, radius } from "../../theme";
 
 export interface InspectionConditionSelectorProps {
   selectedCondition: ItemCondition;
@@ -16,14 +16,15 @@ export interface InspectionConditionSelectorProps {
   disabled?: boolean;
 }
 
-const getConditionColor = (condition: ItemCondition): string => {
-  return colors.itemCondition[condition] || colors.textSecondary;
-};
-
-
 export const InspectionConditionSelector: React.FC<
   InspectionConditionSelectorProps
 > = ({ selectedCondition, onSelectCondition, disabled = false }) => {
+  const { colors } = useTheme();
+
+  const getConditionColor = (condition: ItemCondition): string => {
+    return colors.itemCondition[condition] || colors.textSecondary;
+  };
+
   return (
     <View style={styles.container}>
       {ITEM_CONDITIONS.map((condition) => {
@@ -40,8 +41,10 @@ export const InspectionConditionSelector: React.FC<
             onPress={() => onSelectCondition(condition)}
             style={[
               styles.optionCard,
-              isSelected ? styles.optionCardSelected : styles.optionCardUnselected,
-              isSelected && { borderColor: conditionColor },
+              {
+                backgroundColor: isSelected ? colors.surface : colors.surfaceMuted,
+                borderColor: isSelected ? conditionColor : colors.border,
+              },
             ]}
             accessibilityRole="radio"
             accessibilityLabel={`Condition: ${label}`}
@@ -64,7 +67,7 @@ export const InspectionConditionSelector: React.FC<
               </AppText>
             </View>
 
-            <View style={styles.radioOuter}>
+            <View style={[styles.radioOuter, { borderColor: colors.border }]}>
               {isSelected ? (
                 <View
                   style={[
@@ -94,13 +97,6 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     borderWidth: 1.5,
   },
-  optionCardSelected: {
-    backgroundColor: colors.surface,
-  },
-  optionCardUnselected: {
-    backgroundColor: colors.surfaceMuted,
-    borderColor: colors.border,
-  },
   iconContainer: {
     marginRight: spacing.sm,
     width: 24,
@@ -114,7 +110,6 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: radius.round,
     borderWidth: 2,
-    borderColor: colors.border,
     alignItems: "center",
     justifyContent: "center",
   },

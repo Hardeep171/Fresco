@@ -4,7 +4,7 @@ import {
   StyleSheet,
   ViewStyle,
 } from "react-native";
-import { colors, radius } from "../../../theme";
+import { useTheme, radius } from "../../../theme";
 
 export type IconButtonVariant = "default" | "filled" | "outlined";
 export type IconButtonSize = "sm" | "md" | "lg";
@@ -28,6 +28,24 @@ export const AppIconButton: React.FC<AppIconButtonProps> = ({
   accessibilityLabel,
   style,
 }) => {
+  const { colors } = useTheme();
+
+  const variantStyles: Record<IconButtonVariant, ViewStyle> = {
+    default: {
+      backgroundColor: "transparent",
+      borderWidth: 0,
+    },
+    filled: {
+      backgroundColor: colors.surfaceMuted,
+      borderWidth: 0,
+    },
+    outlined: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+  };
+
   const sizeConfig = sizeStyles[size];
   const variantConfig = variantStyles[variant];
 
@@ -67,22 +85,6 @@ const sizeStyles: Record<IconButtonSize, ViewStyle> = {
     width: 52,
     height: 52,
     borderRadius: radius.round,
-  },
-};
-
-const variantStyles: Record<IconButtonVariant, ViewStyle> = {
-  default: {
-    backgroundColor: "transparent",
-    borderWidth: 0,
-  },
-  filled: {
-    backgroundColor: colors.surfaceMuted,
-    borderWidth: 0,
-  },
-  outlined: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
   },
 };
 

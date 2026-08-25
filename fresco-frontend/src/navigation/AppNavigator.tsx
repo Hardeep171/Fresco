@@ -8,7 +8,7 @@ import { OrdersNavigator } from "./OrdersNavigator";
 import { CartNavigator } from "./CartNavigator";
 import { ProfileNavigator } from "./ProfileNavigator";
 import { useCart } from "../hooks/useCart";
-import { colors, typography, spacing } from "../theme";
+import { useTheme, colors, typography, spacing } from "../theme";
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -18,15 +18,22 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
  */
 export const AppNavigator: React.FC = () => {
   const { totalItemCount } = useCart();
+  const { colors } = useTheme();
 
   return (
     <Tab.Navigator
       initialRouteName="CatalogTab"
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textSecondary,
-        tabBarStyle: styles.tabBar,
+        tabBarActiveTintColor: colors.tabBarActive,
+        tabBarInactiveTintColor: colors.tabBarInactive,
+        tabBarStyle: [
+          styles.tabBar,
+          {
+            backgroundColor: colors.tabBarBackground,
+            borderTopColor: colors.tabBarBorder,
+          },
+        ],
         tabBarLabelStyle: styles.tabBarLabel,
         tabBarItemStyle: styles.tabBarItem,
       }}

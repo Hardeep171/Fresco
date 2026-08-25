@@ -27,11 +27,12 @@ import {
 } from "../../components/partner";
 import { Assignment } from "../../types/assignment.types";
 import { DeliveryTask } from "../../types/delivery-task.types";
-import { colors, spacing } from "../../theme";
+import { useTheme, spacing } from "../../theme";
 
 type Props = NativeStackScreenProps<PartnerStackParamList, "PartnerDashboardScreen">;
 
 export const PartnerDashboardScreen: React.FC<Props> = ({ navigation }) => {
+  const { colors } = useTheme();
   const { user } = useAuth();
   const {
     assignments,
@@ -133,7 +134,7 @@ export const PartnerDashboardScreen: React.FC<Props> = ({ navigation }) => {
     : "Delivery Partner";
 
   return (
-    <ScreenContainer scrollable={false} statusBarStyle="dark">
+    <ScreenContainer scrollable={false}>
       <AppHeader
         title="Partner Dashboard"
         showBack={false}

@@ -25,11 +25,12 @@ import {
   OrderCard,
   OrderFilterChips,
 } from "../../components/order";
-import { colors, spacing } from "../../theme";
+import { useTheme, spacing } from "../../theme";
 
 type Props = NativeStackScreenProps<OrdersStackParamList, "OrderHistoryScreen">;
 
 export const OrderHistoryScreen: React.FC<Props> = ({ navigation }) => {
+  const { colors } = useTheme();
   const {
     orders,
     isFetchingOrders,
@@ -121,7 +122,7 @@ export const OrderHistoryScreen: React.FC<Props> = ({ navigation }) => {
   }, [selectedStatusFilter, setStatusFilter, navigation]);
 
   return (
-    <ScreenContainer scrollable={false} statusBarStyle="dark">
+    <ScreenContainer scrollable={false}>
       <AppHeader
         title="My Orders"
         showBack={false}

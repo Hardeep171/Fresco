@@ -6,6 +6,8 @@ import { RootNavigator } from "./src/navigation/RootNavigator";
 import { setupInterceptors } from "./src/api";
 import { setTokens, logoutSuccess } from "./src/store/slices/authSlice";
 
+import { ThemeProvider } from "./src/theme";
+
 export default function App() {
   useEffect(() => {
     // Initialize networking interceptors with Redux session synchronization
@@ -26,7 +28,9 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <Provider store={store}>
-        <RootNavigator />
+        <ThemeProvider>
+          <RootNavigator />
+        </ThemeProvider>
       </Provider>
     </SafeAreaProvider>
   );

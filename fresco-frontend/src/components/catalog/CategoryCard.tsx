@@ -3,7 +3,7 @@ import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Category } from "../../types/catalog.types";
 import { AppText, AppCard } from "../common";
-import { colors, spacing, radius, shadows } from "../../theme";
+import { useTheme, spacing, radius } from "../../theme";
 
 export interface CategoryCardProps {
   category: Category;
@@ -35,6 +35,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
   onPress,
   garmentCount,
 }) => {
+  const { colors } = useTheme();
   const iconName = getCategoryIconName(category.name);
   const formattedName =
     category.name.charAt(0).toUpperCase() + category.name.slice(1);
@@ -48,7 +49,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
     >
       <AppCard variant="elevated" padding="md" style={styles.card}>
         <View style={styles.contentRow}>
-          <View style={styles.iconCircle}>
+          <View style={[styles.iconCircle, { backgroundColor: colors.primarySurface }]}>
             <Ionicons name={iconName} size={28} color={colors.primary} />
           </View>
 
@@ -89,7 +90,6 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
 const styles = StyleSheet.create({
   card: {
     marginBottom: spacing.md,
-    ...shadows.card,
   },
   contentRow: {
     flexDirection: "row",
@@ -99,7 +99,6 @@ const styles = StyleSheet.create({
     width: 54,
     height: 54,
     borderRadius: radius.lg,
-    backgroundColor: colors.primarySurface,
     alignItems: "center",
     justifyContent: "center",
     marginRight: spacing.md,

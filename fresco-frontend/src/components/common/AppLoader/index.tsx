@@ -6,7 +6,7 @@ import {
   ViewStyle,
   Modal,
 } from "react-native";
-import { colors, spacing, radius } from "../../../theme";
+import { useTheme, spacing, radius } from "../../../theme";
 import { AppText } from "../AppText";
 
 export type LoaderVariant = "spinner" | "fullscreen" | "skeleton";
@@ -25,19 +25,22 @@ export interface AppLoaderProps {
 export const AppLoader: React.FC<AppLoaderProps> = ({
   variant = "spinner",
   size = "large",
-  color = colors.primary,
+  color,
   message,
   skeletonWidth = "100%",
   skeletonHeight = 20,
   skeletonRadius = radius.sm,
   style,
 }) => {
+  const { colors } = useTheme();
+  const spinnerColor = color || colors.primary;
+
   if (variant === "fullscreen") {
     return (
       <Modal transparent animationType="fade" visible>
-        <View style={styles.fullscreenOverlay}>
-          <View style={styles.fullscreenCard}>
-            <ActivityIndicator size={size} color={color} />
+        <View style={[styles.fullscreenOverlay, { backgroundColor: colors.overlay }]}>
+          <View style={[styles.fullscreenCard, { backgroundColor: colors.surface }]}>
+            <ActivityIndicator size={size} color={spinnerColor} />
             {message && (
               <AppText variant="bodyMedium" color="primary" align="center" style={styles.message}>
                 {message}
@@ -58,6 +61,7 @@ export const AppLoader: React.FC<AppLoaderProps> = ({
             width: skeletonWidth,
             height: skeletonHeight,
             borderRadius: skeletonRadius,
+            backgroundColor: colors.surfaceDisabled,
           },
           style,
         ]}
@@ -67,7 +71,7 @@ export const AppLoader: React.FC<AppLoaderProps> = ({
 
   return (
     <View style={[styles.inlineContainer, style]}>
-      <ActivityIndicator size={size} color={color} />
+      <ActivityIndicator size={size} color={spinnerColor} />
       {message && (
         <AppText variant="captionMedium" color="secondary" style={styles.inlineMessage}>
           {message}
@@ -88,13 +92,11 @@ const styles = StyleSheet.create({
   },
   fullscreenOverlay: {
     flex: 1,
-    backgroundColor: "rgba(15, 23, 42, 0.45)",
     alignItems: "center",
     justifyContent: "center",
     padding: spacing.xl,
   },
   fullscreenCard: {
-    backgroundColor: colors.surface,
     borderRadius: radius.xl,
     padding: spacing.xl,
     alignItems: "center",
@@ -104,7 +106,5 @@ const styles = StyleSheet.create({
   message: {
     marginTop: spacing.md,
   },
-  skeleton: {
-    backgroundColor: colors.surfaceDisabled,
-  },
+  skeleton: {},
 });

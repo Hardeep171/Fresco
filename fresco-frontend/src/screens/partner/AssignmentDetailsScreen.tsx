@@ -26,7 +26,7 @@ import {
   ErrorState,
   ScreenContainer,
 } from "../../components/common";
-import { colors, spacing, radius, shadows } from "../../theme";
+import { useTheme, colors, spacing, radius, shadows } from "../../theme";
 import { formatDateTime, formatDate, formatPhone } from "../../utils/formatters";
 
 type Props = NativeStackScreenProps<PartnerStackParamList, "AssignmentDetailsScreen">;
@@ -52,6 +52,7 @@ export const AssignmentDetailsScreen: React.FC<Props> = ({
   route,
   navigation,
 }) => {
+  const { colors } = useTheme();
   const { assignmentId } = route.params;
 
   const {
@@ -177,7 +178,7 @@ export const AssignmentDetailsScreen: React.FC<Props> = ({
   const address = isPickup ? order?.pickupAddress : order?.deliveryAddress;
 
   return (
-    <ScreenContainer scrollable={false} statusBarStyle="dark">
+    <ScreenContainer scrollable={false}>
       <AppHeader
         title="Assignment Details"
         subtitle={formattedAssignmentId}
@@ -214,7 +215,7 @@ export const AssignmentDetailsScreen: React.FC<Props> = ({
         >
           {/* ERROR BANNERS */}
           {acceptError ? (
-            <View style={styles.errorBanner}>
+            <View style={[styles.errorBanner, { backgroundColor: colors.errorSurface }]}>
               <Ionicons name="alert-circle" size={18} color={colors.error} />
               <AppText variant="captionMedium" color="error" style={styles.errorText}>
                 {acceptError.message || "Failed to accept assignment."}
@@ -223,7 +224,7 @@ export const AssignmentDetailsScreen: React.FC<Props> = ({
           ) : null}
 
           {completeError ? (
-            <View style={styles.errorBanner}>
+            <View style={[styles.errorBanner, { backgroundColor: colors.errorSurface }]}>
               <Ionicons name="alert-circle" size={18} color={colors.error} />
               <AppText variant="captionMedium" color="error" style={styles.errorText}>
                 {completeError.message || "Failed to complete assignment."}

@@ -13,6 +13,7 @@ export { orderApi } from "./order.api";
 export { assignmentApi } from "./assignment.api";
 export { deliveryTaskApi } from "./delivery-task.api";
 export { inspectionApi } from "./inspection.api";
+export { paymentApi } from "./payment.api";
 export type {
 
 

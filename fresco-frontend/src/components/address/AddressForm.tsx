@@ -21,7 +21,7 @@ import {
   CreateAddressInput,
 } from "../../types/address.types";
 import { NormalizedApiError } from "../../types/api.types";
-import { colors, spacing, radius } from "../../theme";
+import { useTheme, spacing, radius } from "../../theme";
 
 export interface AddressFormProps {
   initialValues?: Partial<CreateAddressInput>;
@@ -40,6 +40,7 @@ export const AddressForm: React.FC<AddressFormProps> = ({
   serverError,
   onCancel,
 }) => {
+  const { colors } = useTheme();
   const [label, setLabel] = useState<AddressLabel>(
     initialValues?.label || "HOME"
   );
@@ -198,7 +199,7 @@ export const AddressForm: React.FC<AddressFormProps> = ({
   return (
     <View style={styles.container}>
       {serverError && !serverError.fieldErrors && (
-        <View style={styles.serverErrorBanner}>
+        <View style={[styles.serverErrorBanner, { backgroundColor: colors.errorSurface }]}>
           <Ionicons
             name="alert-circle"
             size={20}
@@ -233,7 +234,10 @@ export const AddressForm: React.FC<AddressFormProps> = ({
                 onPress={() => setLabel(item)}
                 style={[
                   styles.chip,
-                  isSelected ? styles.chipSelected : styles.chipUnselected,
+                  {
+                    backgroundColor: isSelected ? colors.primarySurface : colors.surface,
+                    borderColor: isSelected ? colors.primary : colors.border,
+                  },
                 ]}
                 accessibilityRole="button"
                 accessibilityLabel={`Select ${item} address type`}
@@ -454,7 +458,6 @@ const styles = StyleSheet.create({
   serverErrorBanner: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.errorSurface,
     borderRadius: radius.md,
     padding: spacing.md,
     marginBottom: spacing.md,
@@ -485,14 +488,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     borderRadius: radius.md,
     borderWidth: 1.5,
-  },
-  chipSelected: {
-    backgroundColor: colors.primarySurface,
-    borderColor: colors.primary,
-  },
-  chipUnselected: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
   },
   chipIcon: {
     marginRight: spacing.xs,

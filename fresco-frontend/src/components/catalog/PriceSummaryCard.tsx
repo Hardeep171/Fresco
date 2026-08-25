@@ -1,7 +1,7 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import { AppText, AppCard, AppDivider } from "../common";
-import { spacing, shadows } from "../../theme";
+import { spacing } from "../../theme";
 import { formatCurrency } from "../../utils/formatters";
 
 export interface PriceSummaryCardProps {
@@ -72,7 +72,6 @@ export const PriceSummaryCard: React.FC<PriceSummaryCardProps> = ({
 const styles = StyleSheet.create({
   card: {
     marginVertical: spacing.md,
-    ...shadows.card,
   },
   header: {
     letterSpacing: 0.8,

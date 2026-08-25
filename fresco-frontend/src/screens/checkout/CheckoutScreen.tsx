@@ -22,12 +22,13 @@ import {
   AppDivider,
   ScreenContainer,
 } from "../../components/common";
-import { colors, spacing, radius, shadows } from "../../theme";
+import { useTheme, colors, spacing, radius, shadows } from "../../theme";
 import { formatDate } from "../../utils/formatters";
 
 type Props = NativeStackScreenProps<CartStackParamList, "CheckoutScreen">;
 
 export const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
+  const { colors } = useTheme();
   const {
     addresses,
     pickupAddress,
@@ -174,7 +175,7 @@ export const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <ScreenContainer scrollable statusBarStyle="dark">
+    <ScreenContainer scrollable>
       <AppHeader
         title="Checkout"
         subtitle="Address & Schedule Selection"
@@ -233,7 +234,13 @@ export const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
                   key={idx}
                   activeOpacity={0.8}
                   onPress={() => setPickupDate(iso)}
-                  style={[styles.datePill, isSelected && styles.datePillSelected]}
+                  style={[
+                    styles.datePill,
+                    {
+                      backgroundColor: isSelected ? colors.primary : colors.surfaceMuted,
+                      borderColor: isSelected ? colors.primary : colors.border,
+                    },
+                  ]}
                 >
                   <AppText
                     variant="captionMedium"
@@ -276,7 +283,13 @@ export const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
                   key={idx}
                   activeOpacity={0.8}
                   onPress={() => setDeliveryDate(iso)}
-                  style={[styles.datePill, isSelected && styles.datePillSelected]}
+                  style={[
+                    styles.datePill,
+                    {
+                      backgroundColor: isSelected ? colors.primary : colors.surfaceMuted,
+                      borderColor: isSelected ? colors.primary : colors.border,
+                    },
+                  ]}
                 >
                   <AppText
                     variant="captionMedium"

@@ -8,7 +8,7 @@ import {
   PaymentStatus,
 } from "../../constants/order.constants";
 import { AppText, AppCard, AppBadge } from "../common";
-import { colors, spacing, radius, shadows } from "../../theme";
+import { useTheme, spacing, radius } from "../../theme";
 import { formatCurrency, formatDateTime } from "../../utils/formatters";
 
 export interface OrderCardProps {
@@ -64,6 +64,7 @@ const getPaymentBadgeVariant = (
 };
 
 export const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
+  const { colors } = useTheme();
   const formattedOrderId = `#FRC-${order._id.slice(-8).toUpperCase()}`;
   const totalGarments = order.items.reduce(
     (sum, item) => sum + item.quantity,
@@ -112,7 +113,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
         </View>
 
         {/* ITEMS PREVIEW */}
-        <View style={styles.itemsSection}>
+        <View style={[styles.itemsSection, { backgroundColor: colors.surfaceMuted }]}>
           <View style={styles.itemIconRow}>
             <Ionicons
               name="shirt-outline"
@@ -155,7 +156,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
         </View>
 
         {/* FOOTER: Total Amount & Payment Status & Action CTA */}
-        <View style={styles.footerRow}>
+        <View style={[styles.footerRow, { borderTopColor: colors.borderLight }]}>
           <View style={styles.priceContainer}>
             <AppText variant="caption" color="muted">
               Total Amount
@@ -191,7 +192,6 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
 const styles = StyleSheet.create({
   card: {
     marginBottom: spacing.md,
-    ...shadows.card,
   },
   headerRow: {
     flexDirection: "row",
@@ -207,7 +207,6 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
   },
   itemsSection: {
-    backgroundColor: colors.surfaceMuted,
     borderRadius: radius.sm,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
@@ -242,7 +241,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingTop: spacing.xs,
     borderTopWidth: 1,
-    borderTopColor: colors.borderLight,
   },
   priceContainer: {
     justifyContent: "center",

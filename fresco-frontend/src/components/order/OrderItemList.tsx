@@ -3,7 +3,7 @@ import { View, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { OrderItem } from "../../types/order.types";
 import { AppText, AppCard, AppDivider } from "../common";
-import { colors, spacing, radius } from "../../theme";
+import { useTheme, spacing, radius } from "../../theme";
 import { formatCurrency } from "../../utils/formatters";
 
 export interface OrderItemListProps {
@@ -11,6 +11,7 @@ export interface OrderItemListProps {
 }
 
 export const OrderItemList: React.FC<OrderItemListProps> = ({ items }) => {
+  const { colors } = useTheme();
   const totalGarments = items.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
@@ -35,7 +36,7 @@ export const OrderItemList: React.FC<OrderItemListProps> = ({ items }) => {
           <View key={`${item.garmentId}-${item.serviceId}-${index}`}>
             <View style={styles.itemRow}>
               {/* Garment Icon */}
-              <View style={styles.iconCircle}>
+              <View style={[styles.iconCircle, { backgroundColor: colors.primarySurface }]}>
                 <Ionicons
                   name="shirt-outline"
                   size={20}
@@ -108,7 +109,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: radius.md,
-    backgroundColor: colors.primarySurface,
     alignItems: "center",
     justifyContent: "center",
     marginRight: spacing.sm,

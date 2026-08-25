@@ -7,7 +7,7 @@ import {
   TextStyle,
   View,
 } from "react-native";
-import { colors, spacing, radius } from "../../../theme";
+import { useTheme, spacing, radius } from "../../../theme";
 import { AppText } from "../AppText";
 
 export type ButtonVariant = "primary" | "secondary" | "outline" | "danger" | "ghost";
@@ -42,7 +42,71 @@ export const AppButton: React.FC<AppButtonProps> = ({
   style,
   textStyle,
 }) => {
+  const { colors } = useTheme();
   const isInteractive = !disabled && !loading;
+
+  const variantStyles: Record<
+    ButtonVariant,
+    {
+      container: ViewStyle;
+      textColor: "inverse" | "brand" | "primary" | "error";
+    }
+  > = {
+    primary: {
+      container: {
+        backgroundColor: colors.primary,
+        borderWidth: 0,
+      },
+      textColor: "inverse",
+    },
+    secondary: {
+      container: {
+        backgroundColor: colors.primarySurface,
+        borderWidth: 0,
+      },
+      textColor: "brand",
+    },
+    outline: {
+      container: {
+        backgroundColor: "transparent",
+        borderWidth: 1.5,
+        borderColor: colors.primary,
+      },
+      textColor: "brand",
+    },
+    danger: {
+      container: {
+        backgroundColor: colors.error,
+        borderWidth: 0,
+      },
+      textColor: "inverse",
+    },
+    ghost: {
+      container: {
+        backgroundColor: "transparent",
+        borderWidth: 0,
+      },
+      textColor: "brand",
+    },
+  };
+
+  const disabledStyles: Partial<
+    Record<ButtonVariant, { container: ViewStyle }>
+  > = {
+    outline: {
+      container: {
+        backgroundColor: "transparent",
+        borderWidth: 1,
+        borderColor: colors.border,
+      },
+    },
+    ghost: {
+      container: {
+        backgroundColor: "transparent",
+        borderWidth: 0,
+      },
+    },
+  };
 
   // Determine container styling based on variant and state
   const getContainerStyle = (): ViewStyle => {
@@ -138,69 +202,6 @@ const sizeStyles = {
       borderRadius: radius.lg,
     },
     textVariant: "bodyLarge" as const,
-  },
-};
-
-const variantStyles: Record<
-  ButtonVariant,
-  {
-    container: ViewStyle;
-    textColor: "inverse" | "brand" | "primary" | "error";
-  }
-> = {
-  primary: {
-    container: {
-      backgroundColor: colors.primary,
-      borderWidth: 0,
-    },
-    textColor: "inverse",
-  },
-  secondary: {
-    container: {
-      backgroundColor: colors.primarySurface,
-      borderWidth: 0,
-    },
-    textColor: "brand",
-  },
-  outline: {
-    container: {
-      backgroundColor: colors.surface,
-      borderWidth: 1.5,
-      borderColor: colors.primary,
-    },
-    textColor: "brand",
-  },
-  danger: {
-    container: {
-      backgroundColor: colors.error,
-      borderWidth: 0,
-    },
-    textColor: "inverse",
-  },
-  ghost: {
-    container: {
-      backgroundColor: "transparent",
-      borderWidth: 0,
-    },
-    textColor: "brand",
-  },
-};
-
-const disabledStyles: Partial<
-  Record<ButtonVariant, { container: ViewStyle }>
-> = {
-  outline: {
-    container: {
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-    },
-  },
-  ghost: {
-    container: {
-      backgroundColor: "transparent",
-      borderWidth: 0,
-    },
   },
 };
 

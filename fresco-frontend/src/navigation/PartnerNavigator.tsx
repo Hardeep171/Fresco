@@ -20,7 +20,8 @@ import {
   InspectionReviewScreen,
   InspectionFormScreen,
 } from "../screens/inspection";
-import { colors, typography, spacing } from "../theme";
+import { ThemeSettingsScreen } from "../screens/profile/ThemeSettingsScreen";
+import { useTheme, colors, typography, spacing } from "../theme";
 
 const Tab = createBottomTabNavigator<PartnerTabParamList>();
 const Stack = createNativeStackNavigator<PartnerStackParamList>();
@@ -54,11 +55,11 @@ const DashboardStackNavigator: React.FC = () => {
       />
       <Stack.Screen
         name="InspectionReviewScreen"
-        component={InspectionReviewScreen as any}
+        component={InspectionReviewScreen}
       />
       <Stack.Screen
         name="InspectionFormScreen"
-        component={InspectionFormScreen as any}
+        component={InspectionFormScreen}
       />
     </Stack.Navigator>
   );
@@ -111,6 +112,10 @@ const PartnerProfileStackNavigator: React.FC = () => {
         name="PartnerProfileScreen"
         component={PartnerProfileScreen}
       />
+      <ProfileStack.Screen
+        name="ThemeSettingsScreen"
+        component={ThemeSettingsScreen}
+      />
     </ProfileStack.Navigator>
   );
 };
@@ -120,14 +125,22 @@ const PartnerProfileStackNavigator: React.FC = () => {
  * Strictly isolated from Customer App flows.
  */
 export const PartnerNavigator: React.FC = () => {
+  const { colors } = useTheme();
+
   return (
     <Tab.Navigator
       initialRouteName="PartnerDashboardTab"
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textSecondary,
-        tabBarStyle: styles.tabBar,
+        tabBarActiveTintColor: colors.tabBarActive,
+        tabBarInactiveTintColor: colors.tabBarInactive,
+        tabBarStyle: [
+          styles.tabBar,
+          {
+            backgroundColor: colors.tabBarBackground,
+            borderTopColor: colors.tabBarBorder,
+          },
+        ],
         tabBarLabelStyle: styles.tabBarLabel,
         tabBarItemStyle: styles.tabBarItem,
       }}

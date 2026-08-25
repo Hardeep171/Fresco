@@ -20,7 +20,7 @@ import {
   DeliveryTaskCard,
   DeliveryTaskFilterChips,
 } from "../../components/partner";
-import { colors, spacing } from "../../theme";
+import { useTheme, spacing } from "../../theme";
 
 type Props = NativeStackScreenProps<PartnerStackParamList, "DeliveryTaskListScreen">;
 
@@ -28,6 +28,7 @@ export const DeliveryTaskListScreen: React.FC<Props> = ({
   route,
   navigation,
 }) => {
+  const { colors } = useTheme();
   const initialFilter = route.params?.initialFilter as TaskFilterTab | undefined;
 
   const {
@@ -114,7 +115,7 @@ export const DeliveryTaskListScreen: React.FC<Props> = ({
   }, [selectedStatusFilter, setStatusFilter, loadTasks]);
 
   return (
-    <ScreenContainer scrollable={false} statusBarStyle="dark">
+    <ScreenContainer scrollable={false}>
       <AppHeader
         title="Delivery Tasks"
         showBack={false}

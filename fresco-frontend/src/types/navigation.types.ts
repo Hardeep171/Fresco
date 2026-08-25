@@ -27,16 +27,20 @@ export type CatalogStackParamList = {
   GarmentDetailScreen: { garmentId: string; garmentName: string };
 };
 
+import { PaymentMethod } from "../constants/payment.constants";
+
 export type CartStackParamList = {
   CartScreen: undefined;
   CheckoutScreen: undefined;
   OrderReviewScreen: undefined;
   OrderSuccessScreen: { order: Order };
+  PaymentScreen: { orderId: string; initialPaymentMethod?: PaymentMethod };
 };
 
 export type OrdersStackParamList = {
   OrderHistoryScreen: undefined;
   OrderDetailsScreen: { orderId: string };
+  PaymentScreen: { orderId: string; initialPaymentMethod?: PaymentMethod };
   InspectionReviewScreen: { orderId: string; inspectionId?: string };
   InspectionFormScreen: { orderId: string; inspectionId?: string };
 };
@@ -50,6 +54,7 @@ export type ProfileStackParamList = {
   AddEditAddressScreen?: { addressId?: string };
   ChangePasswordScreen: undefined;
   PaymentHistoryScreen?: undefined;
+  ThemeSettingsScreen: undefined;
 };
 
 export type MainTabParamList = {
@@ -77,6 +82,7 @@ export type PartnerStackParamList = {
 
 export type PartnerProfileStackParamList = {
   PartnerProfileScreen: undefined;
+  ThemeSettingsScreen?: undefined;
 };
 
 export type PartnerTabParamList = {

@@ -3,7 +3,7 @@ import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Garment } from "../../types/catalog.types";
 import { AppText, AppCard, AppBadge } from "../common";
-import { colors, spacing, radius, shadows } from "../../theme";
+import { useTheme, spacing, radius } from "../../theme";
 import { formatCurrency } from "../../utils/formatters";
 
 export interface GarmentCardProps {
@@ -19,6 +19,7 @@ export const GarmentCard: React.FC<GarmentCardProps> = ({
   minPrice,
   serviceCount,
 }) => {
+  const { colors } = useTheme();
   const formattedName =
     garment.name.charAt(0).toUpperCase() + garment.name.slice(1);
 
@@ -31,7 +32,7 @@ export const GarmentCard: React.FC<GarmentCardProps> = ({
     >
       <AppCard variant="elevated" padding="md" style={styles.card}>
         <View style={styles.contentRow}>
-          <View style={styles.iconCircle}>
+          <View style={[styles.iconCircle, { backgroundColor: colors.primarySurface }]}>
             <Ionicons name="shirt-outline" size={24} color={colors.primary} />
           </View>
 
@@ -89,7 +90,6 @@ export const GarmentCard: React.FC<GarmentCardProps> = ({
 const styles = StyleSheet.create({
   card: {
     marginBottom: spacing.md,
-    ...shadows.card,
   },
   contentRow: {
     flexDirection: "row",
@@ -99,7 +99,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: radius.md,
-    backgroundColor: colors.primarySurface,
     alignItems: "center",
     justifyContent: "center",
     marginRight: spacing.md,

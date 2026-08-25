@@ -14,9 +14,10 @@ import {
   ErrorState,
   ScreenContainer,
 } from "../../components/common";
-import { colors, spacing } from "../../theme";
+import { useTheme, colors, spacing } from "../../theme";
 
 export const DesignSystemDemoScreen: React.FC = () => {
+  const { colors } = useTheme();
   const [inputText, setInputText] = useState("");
   const [passwordText, setPasswordText] = useState("");
   const [buttonLoading, setButtonLoading] = useState(false);
@@ -29,7 +30,7 @@ export const DesignSystemDemoScreen: React.FC = () => {
   };
 
   return (
-    <ScreenContainer scrollable={false} statusBarStyle="dark">
+    <ScreenContainer scrollable={false}>
       <AppHeader
         title="FRESCO Design System"
         subtitle="Phase 2A Reusable UI Foundation"

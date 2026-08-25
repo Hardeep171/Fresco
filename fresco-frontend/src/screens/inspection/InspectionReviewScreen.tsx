@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
-import { OrdersStackParamList } from "../../types/navigation.types";
+import { OrdersStackParamList, PartnerStackParamList } from "../../types/navigation.types";
 import { useAuth } from "../../hooks/useAuth";
 import { useInspection } from "../../hooks/useInspection";
 import { useOrders } from "../../hooks/useOrders";
@@ -27,15 +27,19 @@ import {
   InspectionPricingSummaryCard,
   InspectionStatusBadge,
 } from "../../components/inspection";
-import { colors, spacing, radius } from "../../theme";
+import { useTheme, colors, spacing, radius } from "../../theme";
 import { formatDateTime, formatCurrency } from "../../utils/formatters";
 
-type Props = NativeStackScreenProps<OrdersStackParamList, "InspectionReviewScreen">;
+type Props = NativeStackScreenProps<
+  OrdersStackParamList | PartnerStackParamList,
+  "InspectionReviewScreen"
+>;
 
 export const InspectionReviewScreen: React.FC<Props> = ({
   route,
   navigation,
 }) => {
+  const { colors } = useTheme();
   const { orderId, inspectionId } = route.params;
   const { user } = useAuth();
   const {
@@ -113,12 +117,16 @@ export const InspectionReviewScreen: React.FC<Props> = ({
   ]);
 
   const inspection = currentInspection;
-  const formattedOrderId = orderId ? `#FRC-${orderId.slice(-8).toUpperCase()}` : "N/A";
   const isDraft = inspection?.status === "DRAFT";
   const isSubmitted = inspection?.status === "SUBMITTED" || inspection?.status === "APPROVED";
+  const formattedOrderId = orderId
+    ? `#FRC-${orderId.slice(-8).toUpperCase()}`
+    : inspection?._id
+    ? `#INSP-${inspection._id.slice(-8).toUpperCase()}`
+    : "N/A";
 
   return (
-    <ScreenContainer scrollable={false} statusBarStyle="dark">
+    <ScreenContainer scrollable={false}>
       <AppHeader
         title="Inspection Report"
         subtitle={formattedOrderId}
@@ -155,7 +163,7 @@ export const InspectionReviewScreen: React.FC<Props> = ({
         >
           {/* SUBMIT ERROR BANNER */}
           {submitError ? (
-            <View style={styles.errorBanner}>
+            <View style={[styles.errorBanner, { backgroundColor: colors.errorSurface }]}>
               <Ionicons name="alert-circle" size={18} color={colors.error} />
               <AppText variant="captionMedium" color="error" style={styles.errorText}>
                 {submitError.message || "Failed to submit inspection."}

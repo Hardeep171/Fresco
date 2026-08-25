@@ -1,6 +1,8 @@
 import React, { useCallback } from "react";
-import { View, StyleSheet, ScrollView, Alert } from "react-native";
+import { View, StyleSheet, ScrollView, Alert, TouchableOpacity } from "react-native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
+import { PartnerProfileStackParamList } from "../../types/navigation.types";
 import { useAuth } from "../../hooks/useAuth";
 import {
   AppText,
@@ -11,11 +13,14 @@ import {
   AppDivider,
   ScreenContainer,
 } from "../../components/common";
-import { colors, spacing, radius, shadows } from "../../theme";
+import { useTheme, spacing, radius } from "../../theme";
 import { formatPhone } from "../../utils/formatters";
 
-export const PartnerProfileScreen: React.FC = () => {
+type Props = NativeStackScreenProps<PartnerProfileStackParamList, "PartnerProfileScreen">;
+
+export const PartnerProfileScreen: React.FC<Props> = ({ navigation }) => {
   const { user, logout, isLoading } = useAuth();
+  const { colors, isDark, mode } = useTheme();
 
   const handleLogout = useCallback(() => {
     Alert.alert(
@@ -38,8 +43,15 @@ export const PartnerProfileScreen: React.FC = () => {
     ? `${user.firstName} ${user.lastName}`.trim()
     : "Delivery Partner";
 
+  const themeLabel =
+    mode === "system"
+      ? `System (${isDark ? "Dark" : "Light"})`
+      : mode === "dark"
+      ? "Dark"
+      : "Light";
+
   return (
-    <ScreenContainer scrollable={false} statusBarStyle="dark">
+    <ScreenContainer scrollable={false}>
       <AppHeader
         title="Partner Profile"
         showBack={false}
@@ -52,7 +64,7 @@ export const PartnerProfileScreen: React.FC = () => {
         {/* PROFILE SUMMARY CARD */}
         <AppCard variant="elevated" padding="lg" style={styles.summaryCard}>
           <View style={styles.avatarRow}>
-            <View style={styles.avatarCircle}>
+            <View style={[styles.avatarCircle, { backgroundColor: colors.primarySurface }]}>
               <Ionicons name="person" size={36} color={colors.primary} />
             </View>
 
@@ -108,6 +120,38 @@ export const PartnerProfileScreen: React.FC = () => {
           </View>
         </AppCard>
 
+        {/* PREFERENCES / THEME */}
+        <AppCard variant="outlined" padding="none" style={styles.sectionCard}>
+          <AppText variant="label" color="secondary" style={[styles.sectionTitle, styles.prefPadding]}>
+            PREFERENCES
+          </AppText>
+
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate("ThemeSettingsScreen")}
+            style={styles.prefRow}
+            accessibilityRole="button"
+            accessibilityLabel="Appearance and Theme Settings"
+          >
+            <View style={[styles.prefIconCircle, { backgroundColor: colors.primarySurface }]}>
+              <Ionicons
+                name={isDark ? "moon-outline" : "sunny-outline"}
+                size={20}
+                color={colors.primary}
+              />
+            </View>
+            <View style={styles.prefTextContainer}>
+              <AppText variant="bodyMedium" color="primary">
+                Appearance & Theme
+              </AppText>
+              <AppText variant="caption" color="secondary">
+                Current: {themeLabel}
+              </AppText>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+          </TouchableOpacity>
+        </AppCard>
+
         {/* PARTNER DISPATCH GUIDELINES */}
         <AppCard variant="outlined" padding="md" style={styles.sectionCard}>
           <AppText variant="label" color="secondary" style={styles.sectionTitle}>
@@ -161,7 +205,6 @@ const styles = StyleSheet.create({
   },
   summaryCard: {
     marginBottom: spacing.md,
-    ...shadows.card,
   },
   avatarRow: {
     flexDirection: "row",
@@ -171,7 +214,6 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: radius.round,
-    backgroundColor: colors.primarySurface,
     alignItems: "center",
     justifyContent: "center",
     marginRight: spacing.md,
@@ -194,6 +236,27 @@ const styles = StyleSheet.create({
   sectionTitle: {
     letterSpacing: 0.8,
     marginBottom: spacing.sm,
+  },
+  prefPadding: {
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
+  },
+  prefRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+  },
+  prefIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.md,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: spacing.md,
+  },
+  prefTextContainer: {
+    flex: 1,
   },
   infoRow: {
     flexDirection: "row",

@@ -8,7 +8,7 @@ import {
   OrderStatus,
 } from "../../constants/order.constants";
 import { AppText, AppCard, AppBadge } from "../common";
-import { colors, spacing, radius } from "../../theme";
+import { useTheme, spacing, radius } from "../../theme";
 import { formatDateTime } from "../../utils/formatters";
 
 export interface OrderStatusTimelineProps {
@@ -22,6 +22,7 @@ export const OrderStatusTimeline: React.FC<OrderStatusTimelineProps> = ({
   createdAt,
   updatedAt,
 }) => {
+  const { colors } = useTheme();
   const isCancelled = currentStatus === "CANCELLED";
 
   // If order is cancelled, render a specialized cancellation alert card + history
@@ -32,7 +33,7 @@ export const OrderStatusTimeline: React.FC<OrderStatusTimelineProps> = ({
           ORDER STATUS & PROGRESS
         </AppText>
 
-        <View style={styles.cancelledBanner}>
+        <View style={[styles.cancelledBanner, { backgroundColor: colors.errorSurface }]}>
           <View style={styles.cancelledIconCircle}>
             <Ionicons name="close-circle" size={28} color={colors.error} />
           </View>
@@ -92,7 +93,6 @@ export const OrderStatusTimeline: React.FC<OrderStatusTimelineProps> = ({
             nodeBgColor = colors.primarySurface;
           }
 
-
           // Line color
           const lineColor = isCompleted ? colors.primary : colors.border;
 
@@ -133,7 +133,7 @@ export const OrderStatusTimeline: React.FC<OrderStatusTimelineProps> = ({
               <View
                 style={[
                   styles.contentColumn,
-                  isCurrent && styles.activeContentColumn,
+                  isCurrent && [styles.activeContentColumn, { backgroundColor: colors.primarySurface }],
                   !isLast && styles.contentColumnSpacing,
                 ]}
               >
@@ -233,7 +233,6 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.md,
   },
   activeContentColumn: {
-    backgroundColor: colors.primarySurface,
     borderRadius: radius.md,
     padding: spacing.sm,
     marginLeft: spacing.xs,
@@ -258,7 +257,6 @@ const styles = StyleSheet.create({
   cancelledBanner: {
     flexDirection: "row",
     alignItems: "flex-start",
-    backgroundColor: colors.errorSurface,
     borderRadius: radius.md,
     padding: spacing.md,
   },

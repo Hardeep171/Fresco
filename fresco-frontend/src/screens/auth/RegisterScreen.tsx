@@ -12,12 +12,13 @@ import {
   AppHeader,
   ScreenContainer,
 } from "../../components/common";
-import { colors, spacing, radius } from "../../theme";
+import { useTheme, colors, spacing, radius } from "../../theme";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "Register">;
 
 export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   const { register, isLoading, error, clearError } = useAuth();
+  const { colors } = useTheme();
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -76,7 +77,7 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <ScreenContainer scrollable statusBarStyle="dark">
+    <ScreenContainer scrollable>
       <AppHeader
         title="Create Account"
         onBackPress={() => navigation.goBack()}
@@ -88,12 +89,12 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
           Join FRESCO
         </AppText>
         <AppText variant="body" color="secondary">
-          Experience premium on-demand fabric care
+          Experience premium fabric care & convenient door-to-door delivery
         </AppText>
       </View>
 
       {error && (
-        <View style={styles.errorBanner}>
+        <View style={[styles.errorBanner, { backgroundColor: colors.errorSurface }]}>
           <Ionicons name="alert-circle" size={20} color={colors.error} style={styles.errorIcon} />
           <AppText variant="captionMedium" color="error" style={styles.errorMessage}>
             {error.message}

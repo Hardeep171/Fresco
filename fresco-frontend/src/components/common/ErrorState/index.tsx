@@ -1,7 +1,7 @@
 import React from "react";
 import { View, StyleSheet, ViewStyle } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors, spacing } from "../../../theme";
+import { useTheme, spacing } from "../../../theme";
 import { AppText } from "../AppText";
 import { AppButton } from "../AppButton";
 
@@ -22,9 +22,11 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
   icon,
   style,
 }) => {
+  const { colors } = useTheme();
+
   return (
     <View style={[styles.container, style]}>
-      <View style={styles.iconCircle}>
+      <View style={[styles.iconCircle, { backgroundColor: colors.errorSurface }]}>
         {icon || (
           <Ionicons
             name="alert-circle-outline"
@@ -69,7 +71,6 @@ const styles = StyleSheet.create({
     width: 96,
     height: 96,
     borderRadius: 48,
-    backgroundColor: colors.errorSurface,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: spacing.lg,

@@ -2,7 +2,7 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { AppText, AppCard, AppBadge } from "../common";
-import { colors, spacing, radius } from "../../theme";
+import { useTheme, spacing, radius } from "../../theme";
 
 export interface PartnerStatsHeaderProps {
   partnerName: string;
@@ -17,6 +17,8 @@ export const PartnerStatsHeader: React.FC<PartnerStatsHeaderProps> = ({
   activeDeliveriesCount,
   totalAssignmentsCount,
 }) => {
+  const { colors } = useTheme();
+
   return (
     <AppCard variant="elevated" padding="md" style={styles.container}>
       {/* GREETING & STATUS ROW */}
@@ -39,7 +41,7 @@ export const PartnerStatsHeader: React.FC<PartnerStatsHeaderProps> = ({
       </View>
 
       {/* STATS METRIC GRID */}
-      <View style={styles.statsGrid}>
+      <View style={[styles.statsGrid, { backgroundColor: colors.surfaceMuted }]}>
         <View style={styles.statBox}>
           <View style={styles.statIconCircle}>
             <Ionicons name="arrow-up-circle" size={20} color={colors.primary} />
@@ -52,7 +54,7 @@ export const PartnerStatsHeader: React.FC<PartnerStatsHeaderProps> = ({
           </AppText>
         </View>
 
-        <View style={styles.dividerVertical} />
+        <View style={[styles.dividerVertical, { backgroundColor: colors.border }]} />
 
         <View style={styles.statBox}>
           <View style={styles.statIconCircle}>
@@ -66,7 +68,7 @@ export const PartnerStatsHeader: React.FC<PartnerStatsHeaderProps> = ({
           </AppText>
         </View>
 
-        <View style={styles.dividerVertical} />
+        <View style={[styles.dividerVertical, { backgroundColor: colors.border }]} />
 
         <View style={styles.statBox}>
           <View style={styles.statIconCircle}>
@@ -102,7 +104,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: colors.surfaceMuted,
     borderRadius: radius.md,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.xs,
@@ -118,6 +119,5 @@ const styles = StyleSheet.create({
   dividerVertical: {
     width: 1,
     height: 36,
-    backgroundColor: colors.border,
   },
 });

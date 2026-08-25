@@ -14,11 +14,12 @@ import {
   AppHeader,
   ScreenContainer,
 } from "../../components/common";
-import { colors, spacing, radius } from "../../theme";
+import { useTheme, colors, spacing, radius } from "../../theme";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "ResetPassword">;
 
 export const ResetPasswordScreen: React.FC<Props> = ({ route, navigation }) => {
+  const { colors } = useTheme();
   const initialToken = route.params?.token || "";
 
   const [token, setToken] = useState(initialToken);
@@ -84,7 +85,7 @@ export const ResetPasswordScreen: React.FC<Props> = ({ route, navigation }) => {
   };
 
   return (
-    <ScreenContainer scrollable statusBarStyle="dark">
+    <ScreenContainer scrollable>
       <AppHeader
         title="Create New Password"
         onBackPress={() => navigation.goBack()}
@@ -92,7 +93,7 @@ export const ResetPasswordScreen: React.FC<Props> = ({ route, navigation }) => {
       />
 
       <View style={styles.headerContainer}>
-        <View style={styles.iconCircle}>
+        <View style={[styles.iconCircle, { backgroundColor: colors.primarySurface }]}>
           <Ionicons name="lock-open-outline" size={32} color={colors.primary} />
         </View>
         <AppText variant="h1" color="primary" style={styles.title}>

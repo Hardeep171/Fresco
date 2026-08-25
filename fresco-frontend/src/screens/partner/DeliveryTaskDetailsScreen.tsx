@@ -20,10 +20,8 @@ import {
   ScreenContainer,
 } from "../../components/common";
 
-import { colors, spacing, shadows } from "../../theme";
+import { useTheme, spacing, shadows } from "../../theme";
 import { formatDateTime, formatDate, formatPhone } from "../../utils/formatters";
-
-
 
 type Props = NativeStackScreenProps<PartnerStackParamList, "DeliveryTaskDetailsScreen">;
 
@@ -49,6 +47,7 @@ export const DeliveryTaskDetailsScreen: React.FC<Props> = ({
   route,
   navigation,
 }) => {
+  const { colors } = useTheme();
   const { taskId } = route.params;
 
   const { tasks, isFetchingTasks, loadTasks } = useDeliveryTasks();
@@ -99,7 +98,7 @@ export const DeliveryTaskDetailsScreen: React.FC<Props> = ({
   const address = isPickup ? order?.pickupAddress : order?.deliveryAddress;
 
   return (
-    <ScreenContainer scrollable={false} statusBarStyle="dark">
+    <ScreenContainer scrollable={false}>
       <AppHeader
         title="Delivery Task Details"
         subtitle={formattedTaskId}

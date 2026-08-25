@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet, ViewStyle, TextStyle } from "react-native";
-import { colors, spacing, radius } from "../../../theme";
+import { useTheme, spacing, radius } from "../../../theme";
 import { AppText } from "../AppText";
 
 export type BadgeVariant =
@@ -33,6 +33,53 @@ export const AppBadge: React.FC<AppBadgeProps> = ({
   style,
   textStyle,
 }) => {
+  const { colors } = useTheme();
+
+  const variantStyles: Record<
+    BadgeVariant,
+    {
+      backgroundColor: string;
+      dotColor: string;
+      textColor: Parameters<typeof AppText>[0]["color"];
+    }
+  > = {
+    primary: {
+      backgroundColor: colors.primarySurface,
+      dotColor: colors.primary,
+      textColor: "brand",
+    },
+    secondary: {
+      backgroundColor: colors.surfaceMuted,
+      dotColor: colors.textSecondary,
+      textColor: "secondary",
+    },
+    success: {
+      backgroundColor: colors.successSurface,
+      dotColor: colors.success,
+      textColor: "success",
+    },
+    warning: {
+      backgroundColor: colors.warningSurface,
+      dotColor: colors.warning,
+      textColor: "warning",
+    },
+    error: {
+      backgroundColor: colors.errorSurface,
+      dotColor: colors.error,
+      textColor: "error",
+    },
+    info: {
+      backgroundColor: colors.infoSurface,
+      dotColor: colors.info,
+      textColor: "info",
+    },
+    neutral: {
+      backgroundColor: colors.surfaceMuted,
+      dotColor: colors.textMuted,
+      textColor: "secondary",
+    },
+  };
+
   const variantConfig = variantStyles[variant];
   const sizeConfig = sizeStyles[size];
 
@@ -95,51 +142,6 @@ const sizeStyles = {
       marginRight: spacing.xs,
     },
     textVariant: "captionMedium" as const,
-  },
-};
-
-const variantStyles: Record<
-  BadgeVariant,
-  {
-    backgroundColor: string;
-    dotColor: string;
-    textColor: Parameters<typeof AppText>[0]["color"];
-  }
-> = {
-  primary: {
-    backgroundColor: colors.primarySurface,
-    dotColor: colors.primary,
-    textColor: "brand",
-  },
-  secondary: {
-    backgroundColor: colors.surfaceMuted,
-    dotColor: colors.textSecondary,
-    textColor: "secondary",
-  },
-  success: {
-    backgroundColor: colors.successSurface,
-    dotColor: colors.success,
-    textColor: "success",
-  },
-  warning: {
-    backgroundColor: colors.warningSurface,
-    dotColor: colors.warning,
-    textColor: "warning",
-  },
-  error: {
-    backgroundColor: colors.errorSurface,
-    dotColor: colors.error,
-    textColor: "error",
-  },
-  info: {
-    backgroundColor: colors.infoSurface,
-    dotColor: colors.info,
-    textColor: "info",
-  },
-  neutral: {
-    backgroundColor: colors.surfaceMuted,
-    dotColor: colors.textMuted,
-    textColor: "secondary",
   },
 };
 

@@ -1,7 +1,7 @@
 import React from "react";
 import { View, StyleSheet, ViewStyle } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors, spacing } from "../../../theme";
+import { useTheme, spacing } from "../../../theme";
 import { AppText } from "../AppText";
 import { AppIconButton } from "../AppIconButton";
 
@@ -21,11 +21,23 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   showBack = true,
   onBackPress,
   rightAction,
-  backgroundColor = colors.background,
+  backgroundColor,
   style,
 }) => {
+  const { colors } = useTheme();
+  const effectiveBg = backgroundColor || colors.background;
+
   return (
-    <View style={[styles.container, { backgroundColor }, style]}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: effectiveBg,
+          borderBottomColor: colors.borderLight,
+        },
+        style,
+      ]}
+    >
       <View style={styles.leftContainer}>
         {showBack && onBackPress && (
           <AppIconButton
@@ -64,7 +76,6 @@ const styles = StyleSheet.create({
     minHeight: 56,
     paddingHorizontal: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors.borderLight,
   },
   leftContainer: {
     width: 44,

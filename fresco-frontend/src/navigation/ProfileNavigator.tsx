@@ -7,6 +7,7 @@ import { ChangePasswordScreen } from "../screens/profile/ChangePasswordScreen";
 import { AddressListScreen } from "../screens/address/AddressListScreen";
 import { AddAddressScreen } from "../screens/address/AddAddressScreen";
 import { EditAddressScreen } from "../screens/address/EditAddressScreen";
+import { ThemeSettingsScreen } from "../screens/profile/ThemeSettingsScreen";
 
 const Stack = createNativeStackNavigator<ProfileStackParamList>();
 
@@ -31,6 +32,10 @@ export const ProfileNavigator: React.FC = () => {
       <Stack.Screen name="AddressListScreen" component={AddressListScreen} />
       <Stack.Screen name="AddAddressScreen" component={AddAddressScreen} />
       <Stack.Screen name="EditAddressScreen" component={EditAddressScreen} />
+      <Stack.Screen
+        name="ThemeSettingsScreen"
+        component={ThemeSettingsScreen}
+      />
     </Stack.Navigator>
   );
 };

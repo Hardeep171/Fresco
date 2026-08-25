@@ -14,11 +14,12 @@ import {
   AppHeader,
   ScreenContainer,
 } from "../../components/common";
-import { colors, spacing, radius } from "../../theme";
+import { useTheme, colors, spacing, radius } from "../../theme";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "ForgotPassword">;
 
 export const ForgotPasswordScreen: React.FC<Props> = ({ navigation }) => {
+  const { colors } = useTheme();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<NormalizedApiError | null>(null);
@@ -51,7 +52,7 @@ export const ForgotPasswordScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <ScreenContainer scrollable statusBarStyle="dark">
+    <ScreenContainer scrollable>
       <AppHeader
         title="Reset Password"
         onBackPress={() => navigation.goBack()}
@@ -59,7 +60,7 @@ export const ForgotPasswordScreen: React.FC<Props> = ({ navigation }) => {
       />
 
       <View style={styles.headerContainer}>
-        <View style={styles.iconCircle}>
+        <View style={[styles.iconCircle, { backgroundColor: colors.primarySurface }]}>
           <Ionicons name="key-outline" size={32} color={colors.primary} />
         </View>
         <AppText variant="h1" color="primary" style={styles.title}>
@@ -71,7 +72,7 @@ export const ForgotPasswordScreen: React.FC<Props> = ({ navigation }) => {
       </View>
 
       {error && (
-        <View style={styles.errorBanner}>
+        <View style={[styles.errorBanner, { backgroundColor: colors.errorSurface }]}>
           <Ionicons name="alert-circle" size={20} color={colors.error} style={styles.errorIcon} />
           <AppText variant="captionMedium" color="error" style={styles.errorMessage}>
             {error.message}
@@ -81,7 +82,7 @@ export const ForgotPasswordScreen: React.FC<Props> = ({ navigation }) => {
 
       {successMessage ? (
         <AppCard variant="outlined" padding="lg" style={styles.successCard}>
-          <View style={styles.successIconCircle}>
+          <View style={[styles.successIconCircle, { backgroundColor: colors.successSurface }]}>
             <Ionicons name="mail-unread-outline" size={36} color={colors.success} />
           </View>
           <AppText variant="h3" color="success" align="center" style={styles.successTitle}>

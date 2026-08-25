@@ -1,6 +1,6 @@
 import React from "react";
 import { Text as RNText, TextProps as RNTextProps, TextStyle } from "react-native";
-import { colors, typography } from "../../../theme";
+import { useTheme, typography } from "../../../theme";
 
 export type TextVariant =
   | "display"
@@ -34,19 +34,6 @@ export interface AppTextProps extends RNTextProps {
   children: React.ReactNode;
 }
 
-const colorMap: Record<TextColor, string> = {
-  primary: colors.textPrimary,
-  secondary: colors.textSecondary,
-  muted: colors.textMuted,
-  disabled: colors.textDisabled,
-  inverse: colors.textInverse,
-  brand: colors.primary,
-  success: colors.success,
-  warning: colors.warning,
-  error: colors.error,
-  info: colors.info,
-};
-
 export const AppText: React.FC<AppTextProps> = ({
   variant = "body",
   color = "primary",
@@ -55,8 +42,23 @@ export const AppText: React.FC<AppTextProps> = ({
   children,
   ...rest
 }) => {
+  const { colors } = useTheme();
+
+  const colorMap: Record<TextColor, string> = {
+    primary: colors.textPrimary,
+    secondary: colors.textSecondary,
+    muted: colors.textMuted,
+    disabled: colors.textDisabled,
+    inverse: colors.textInverse,
+    brand: colors.primary,
+    success: colors.success,
+    warning: colors.warning,
+    error: colors.error,
+    info: colors.info,
+  };
+
   const presetStyle = typography.presets[variant];
-  const textColor = colorMap[color];
+  const textColor = colorMap[color] || colors.textPrimary;
 
   return (
     <RNText

@@ -45,7 +45,7 @@ export const AddAddressScreen: React.FC<Props> = ({ navigation }) => {
     : "";
 
   return (
-    <ScreenContainer scrollable statusBarStyle="dark">
+    <ScreenContainer scrollable>
       <AppHeader
         title="Add New Address"
         showBack

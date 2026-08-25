@@ -1,15 +1,11 @@
-import { TextStyle, Platform } from "react-native";
+import type { TextStyle } from "react-native";
 
 /**
  * Centralized typography design tokens for FRESCO mobile application.
  * Provides consistent font sizes, weights, and line heights.
  */
 
-const fontFamily = Platform.select({
-  ios: "System",
-  android: "Roboto",
-  default: "System",
-});
+const fontFamily = "System";
 
 export const typography = {
   fontFamily: {

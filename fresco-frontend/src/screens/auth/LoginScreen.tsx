@@ -11,12 +11,13 @@ import {
   AppCard,
   ScreenContainer,
 } from "../../components/common";
-import { colors, spacing, radius } from "../../theme";
+import { useTheme, colors, spacing, radius } from "../../theme";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "Login">;
 
 export const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const { login, isLoading, error, clearError } = useAuth();
+  const { colors } = useTheme();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -51,9 +52,9 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <ScreenContainer scrollable statusBarStyle="dark">
+    <ScreenContainer scrollable>
       <View style={styles.headerContainer}>
-        <View style={styles.logoBadge}>
+        <View style={[styles.logoBadge, { backgroundColor: colors.primarySurface }]}>
           <Ionicons name="shirt" size={28} color={colors.primary} />
         </View>
         <AppText variant="h1" color="primary" style={styles.title}>
@@ -65,7 +66,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
       </View>
 
       {error && (
-        <View style={styles.errorBanner}>
+        <View style={[styles.errorBanner, { backgroundColor: colors.errorSurface }]}>
           <Ionicons name="alert-circle" size={20} color={colors.error} style={styles.errorIcon} />
           <AppText variant="captionMedium" color="error" style={styles.errorMessage}>
             {error.message}

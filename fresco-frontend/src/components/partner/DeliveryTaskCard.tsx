@@ -8,7 +8,7 @@ import {
   TaskType,
 } from "../../constants/delivery-task.constants";
 import { AppText, AppCard, AppBadge } from "../common";
-import { colors, spacing, radius } from "../../theme";
+import { useTheme, spacing, radius } from "../../theme";
 import { formatDateTime } from "../../utils/formatters";
 
 export interface DeliveryTaskCardProps {
@@ -44,6 +44,7 @@ export const DeliveryTaskCard: React.FC<DeliveryTaskCardProps> = ({
   task,
   onPress,
 }) => {
+  const { colors } = useTheme();
   const formattedTaskId = `#TSK-${task._id.slice(-6).toUpperCase()}`;
   const orderIdStr =
     typeof task.orderId === "string" ? task.orderId : task.orderId?._id || "";
@@ -84,7 +85,7 @@ export const DeliveryTaskCard: React.FC<DeliveryTaskCardProps> = ({
           />
         </View>
 
-        <View style={styles.detailsContainer}>
+        <View style={[styles.detailsContainer, { borderColor: colors.border }]}>
           <View style={styles.idRow}>
             <View style={styles.idCol}>
               <AppText variant="caption" color="muted">
@@ -122,7 +123,7 @@ export const DeliveryTaskCard: React.FC<DeliveryTaskCardProps> = ({
           ) : null}
 
           {task.notes ? (
-            <View style={styles.notesContainer}>
+            <View style={[styles.notesContainer, { backgroundColor: colors.surfaceMuted }]}>
               <AppText variant="caption" color="secondary" numberOfLines={2}>
                 Note: {task.notes}
               </AppText>
@@ -165,7 +166,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: colors.border,
     marginVertical: spacing.xs,
   },
   idRow: {
@@ -186,7 +186,6 @@ const styles = StyleSheet.create({
   },
   notesContainer: {
     marginTop: spacing.xs,
-    backgroundColor: colors.surfaceMuted,
     padding: spacing.xs,
     borderRadius: radius.sm,
   },

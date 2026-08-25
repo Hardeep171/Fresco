@@ -3,7 +3,7 @@ import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-nat
 import { Ionicons } from "@expo/vector-icons";
 import { EnrichedCartItem } from "../../types/cart.types";
 import { AppText, AppCard } from "../common";
-import { colors, spacing, radius, shadows } from "../../theme";
+import { useTheme, spacing, radius } from "../../theme";
 import { formatCurrency } from "../../utils/formatters";
 
 export interface CartItemCardProps {
@@ -21,13 +21,14 @@ export const CartItemCard: React.FC<CartItemCardProps> = ({
   onDecrement,
   onRemove,
 }) => {
+  const { colors } = useTheme();
   const isMin = item.quantity <= 1;
 
   return (
     <AppCard variant="elevated" padding="md" style={styles.card}>
       <View style={styles.contentRow}>
         {/* Garment Icon */}
-        <View style={styles.iconCircle}>
+        <View style={[styles.iconCircle, { backgroundColor: colors.primarySurface }]}>
           <Ionicons name="shirt-outline" size={24} color={colors.primary} />
         </View>
 
@@ -62,13 +63,14 @@ export const CartItemCard: React.FC<CartItemCardProps> = ({
           {/* Controls Row: Quantity & Subtotal */}
           <View style={styles.controlsRow}>
             {/* Quantity Stepper (touch targets 44x44) */}
-            <View style={styles.stepperContainer}>
+            <View style={[styles.stepperContainer, { backgroundColor: colors.surfaceMuted }]}>
               <TouchableOpacity
                 activeOpacity={0.7}
                 onPress={() => onDecrement(item)}
                 disabled={isMutating || isMin}
                 style={[
                   styles.stepperButton,
+                  { backgroundColor: isMutating || isMin ? colors.surfaceDisabled : colors.surface },
                   (isMutating || isMin) && styles.stepperButtonDisabled,
                 ]}
                 accessibilityRole="button"
@@ -95,7 +97,11 @@ export const CartItemCard: React.FC<CartItemCardProps> = ({
                 activeOpacity={0.7}
                 onPress={() => onIncrement(item)}
                 disabled={isMutating}
-                style={[styles.stepperButton, isMutating && styles.stepperButtonDisabled]}
+                style={[
+                  styles.stepperButton,
+                  { backgroundColor: isMutating ? colors.surfaceDisabled : colors.surface },
+                  isMutating && styles.stepperButtonDisabled,
+                ]}
                 accessibilityRole="button"
                 accessibilityLabel="Increase item quantity"
               >
@@ -126,7 +132,6 @@ export const CartItemCard: React.FC<CartItemCardProps> = ({
 const styles = StyleSheet.create({
   card: {
     marginBottom: spacing.md,
-    ...shadows.card,
   },
   contentRow: {
     flexDirection: "row",
@@ -136,7 +141,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: radius.md,
-    backgroundColor: colors.primarySurface,
     alignItems: "center",
     justifyContent: "center",
     marginRight: spacing.md,
@@ -177,7 +181,6 @@ const styles = StyleSheet.create({
   stepperContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.surfaceMuted,
     borderRadius: radius.md,
     padding: spacing.xxs,
   },
@@ -185,12 +188,10 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: radius.sm,
-    backgroundColor: colors.surface,
     alignItems: "center",
     justifyContent: "center",
   },
   stepperButtonDisabled: {
-    backgroundColor: colors.surfaceDisabled,
     opacity: 0.6,
   },
   stepperValue: {

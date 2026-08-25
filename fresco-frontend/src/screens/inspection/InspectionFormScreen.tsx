@@ -8,7 +8,6 @@ import {
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
-import { OrdersStackParamList } from "../../types/navigation.types";
 import { useInspection } from "../../hooks/useInspection";
 import { useOrders } from "../../hooks/useOrders";
 import {
@@ -35,10 +34,14 @@ import {
   INSPECTION_DAMAGE_NOTES_MAX_LENGTH,
   INSPECTION_ADJUSTMENT_REASON_MAX_LENGTH,
 } from "../../constants/inspection.constants";
-import { colors, spacing, radius } from "../../theme";
+import { OrdersStackParamList, PartnerStackParamList } from "../../types/navigation.types";
+import { useTheme, colors, spacing, radius } from "../../theme";
 import { formatCurrency } from "../../utils/formatters";
 
-type Props = NativeStackScreenProps<OrdersStackParamList, "InspectionFormScreen">;
+type Props = NativeStackScreenProps<
+  OrdersStackParamList | PartnerStackParamList,
+  "InspectionFormScreen"
+>;
 
 interface FormItemState {
   garmentId: string;
@@ -56,6 +59,7 @@ export const InspectionFormScreen: React.FC<Props> = ({
   route,
   navigation,
 }) => {
+  const { colors } = useTheme();
   const { orderId } = route.params;
 
   const {
@@ -248,7 +252,7 @@ export const InspectionFormScreen: React.FC<Props> = ({
   const formattedOrderId = `#FRC-${orderId.slice(-8).toUpperCase()}`;
 
   return (
-    <ScreenContainer scrollable={false} statusBarStyle="dark">
+    <ScreenContainer scrollable={false}>
       <AppHeader
         title="Record Inspection"
         subtitle={formattedOrderId}
@@ -271,7 +275,7 @@ export const InspectionFormScreen: React.FC<Props> = ({
         >
           {/* ERROR BANNER */}
           {currentError ? (
-            <View style={styles.errorBanner}>
+            <View style={[styles.errorBanner, { backgroundColor: colors.errorSurface }]}>
               <Ionicons name="alert-circle" size={18} color={colors.error} />
               <AppText variant="captionMedium" color="error" style={styles.errorText}>
                 {currentError.message || "An error occurred while saving inspection."}

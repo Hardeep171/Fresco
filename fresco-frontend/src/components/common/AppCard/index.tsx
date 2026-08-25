@@ -5,7 +5,7 @@ import {
   StyleSheet,
   ViewStyle,
 } from "react-native";
-import { colors, spacing, radius, shadows } from "../../../theme";
+import { useTheme, spacing, radius } from "../../../theme";
 
 export type CardVariant = "elevated" | "outlined" | "flat";
 export type CardPadding = "none" | "sm" | "md" | "lg";
@@ -29,6 +29,26 @@ export const AppCard: React.FC<AppCardProps> = ({
   style,
   accessibilityLabel,
 }) => {
+  const { colors, theme } = useTheme();
+
+  const variantStyles: Record<CardVariant, ViewStyle> = {
+    elevated: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      ...theme.shadows.card,
+    },
+    outlined: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    flat: {
+      backgroundColor: colors.surfaceMuted,
+      borderWidth: 0,
+    },
+  };
+
   const getContainerStyle = (): ViewStyle => {
     return {
       ...styles.baseCard,
@@ -72,24 +92,6 @@ const paddingStyles: Record<CardPadding, ViewStyle> = {
   },
   lg: {
     padding: spacing.lg,
-  },
-};
-
-const variantStyles: Record<CardVariant, ViewStyle> = {
-  elevated: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    ...shadows.card,
-  },
-  outlined: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  flat: {
-    backgroundColor: colors.surfaceMuted,
-    borderWidth: 0,
   },
 };
 

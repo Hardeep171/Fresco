@@ -8,9 +8,10 @@ import {
   TextStyle,
   KeyboardTypeOptions,
   ReturnKeyTypeOptions,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors, typography, spacing, radius } from "../../../theme";
+import { useTheme, typography, spacing, radius } from "../../../theme";
 import { AppText } from "../AppText";
 
 export interface AppInputProps {
@@ -64,6 +65,7 @@ export const AppInput: React.FC<AppInputProps> = ({
   style,
   inputStyle,
 }) => {
+  const { colors } = useTheme();
   const [isFocused, setIsFocused] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
@@ -113,7 +115,7 @@ export const AppInput: React.FC<AppInputProps> = ({
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor={colors.textMuted}
+          placeholderTextColor={colors.placeholder}
           secureTextEntry={secureTextEntry && !isPasswordVisible}
           keyboardType={keyboardType}
           returnKeyType={returnKeyType}
@@ -210,6 +212,13 @@ const styles = StyleSheet.create({
     flex: 1,
     ...typography.presets.body,
     paddingVertical: spacing.sm,
+    ...Platform.select({
+      web: {
+        outlineStyle: "none",
+        outlineWidth: 0,
+      } as TextStyle,
+      default: {},
+    }),
   },
   multilineInput: {
     textAlignVertical: "top",

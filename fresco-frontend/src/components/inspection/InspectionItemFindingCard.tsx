@@ -8,7 +8,7 @@ import {
   ItemCondition,
 } from "../../constants/inspection.constants";
 import { AppText, AppCard, AppBadge } from "../common";
-import { colors, spacing, radius } from "../../theme";
+import { useTheme, spacing, radius } from "../../theme";
 import { formatCurrency } from "../../utils/formatters";
 
 export interface InspectionItemFindingCardProps {
@@ -38,6 +38,7 @@ export const InspectionItemFindingCard: React.FC<InspectionItemFindingCardProps>
   item,
   index,
 }) => {
+  const { colors } = useTheme();
   const conditionLabel = ITEM_CONDITION_LABELS[item.condition] || item.condition;
   const conditionVariant = getConditionVariant(item.condition);
   const conditionIcon = ITEM_CONDITION_ICONS[item.condition];
@@ -68,7 +69,7 @@ export const InspectionItemFindingCard: React.FC<InspectionItemFindingCardProps>
       </View>
 
       {/* QUANTITIES AND PRICE */}
-      <View style={styles.metricsRow}>
+      <View style={[styles.metricsRow, { backgroundColor: colors.surfaceMuted }]}>
         <View style={styles.metricCol}>
           <AppText variant="caption" color="muted">
             INITIAL QTY
@@ -111,7 +112,15 @@ export const InspectionItemFindingCard: React.FC<InspectionItemFindingCardProps>
 
       {/* DAMAGE / STAIN NOTES */}
       {item.damageNotes ? (
-        <View style={styles.notesContainer}>
+        <View
+          style={[
+            styles.notesContainer,
+            {
+              backgroundColor: colors.surfaceMuted,
+              borderLeftColor: colors.warning,
+            },
+          ]}
+        >
           <View style={styles.notesHeader}>
             <Ionicons name={conditionIcon} size={14} color={colors.warning} />
             <AppText variant="captionMedium" color="warning" style={styles.notesTitle}>
@@ -135,7 +144,7 @@ export const InspectionItemFindingCard: React.FC<InspectionItemFindingCardProps>
               <Image
                 key={`${url}-${imgIdx}`}
                 source={{ uri: url }}
-                style={styles.thumbnail}
+                style={[styles.thumbnail, { backgroundColor: colors.surfaceMuted }]}
                 resizeMode="cover"
               />
             ))}
@@ -163,7 +172,6 @@ const styles = StyleSheet.create({
   metricsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    backgroundColor: colors.surfaceMuted,
     borderRadius: radius.sm,
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.sm,
@@ -174,11 +182,9 @@ const styles = StyleSheet.create({
   },
   notesContainer: {
     marginTop: spacing.xs,
-    backgroundColor: colors.surfaceMuted,
     borderRadius: radius.sm,
     padding: spacing.xs,
     borderLeftWidth: 3,
-    borderLeftColor: colors.warning,
   },
   notesHeader: {
     flexDirection: "row",
@@ -202,6 +208,5 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: radius.sm,
     marginRight: spacing.xs,
-    backgroundColor: colors.surfaceMuted,
   },
 });

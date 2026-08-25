@@ -14,11 +14,12 @@ import {
   AppHeader,
   ScreenContainer,
 } from "../../components/common";
-import { colors, spacing, radius } from "../../theme";
+import { useTheme, colors, spacing, radius } from "../../theme";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "VerifyEmail">;
 
 export const VerifyEmailScreen: React.FC<Props> = ({ route, navigation }) => {
+  const { colors } = useTheme();
   const initialToken = route.params?.token || "";
 
   const [token, setToken] = useState(initialToken);
@@ -53,7 +54,7 @@ export const VerifyEmailScreen: React.FC<Props> = ({ route, navigation }) => {
   };
 
   return (
-    <ScreenContainer scrollable statusBarStyle="dark">
+    <ScreenContainer scrollable>
       <AppHeader
         title="Email Verification"
         onBackPress={() => navigation.goBack()}
@@ -61,7 +62,7 @@ export const VerifyEmailScreen: React.FC<Props> = ({ route, navigation }) => {
       />
 
       <View style={styles.headerContainer}>
-        <View style={styles.iconCircle}>
+        <View style={[styles.iconCircle, { backgroundColor: colors.primarySurface }]}>
           <Ionicons name="mail-open-outline" size={32} color={colors.primary} />
         </View>
         <AppText variant="h1" color="primary" style={styles.title}>
@@ -73,7 +74,7 @@ export const VerifyEmailScreen: React.FC<Props> = ({ route, navigation }) => {
       </View>
 
       {error && (
-        <View style={styles.errorBanner}>
+        <View style={[styles.errorBanner, { backgroundColor: colors.errorSurface }]}>
           <Ionicons name="alert-circle" size={20} color={colors.error} style={styles.errorIcon} />
           <AppText variant="captionMedium" color="error" style={styles.errorMessage}>
             {error.message}
@@ -83,7 +84,7 @@ export const VerifyEmailScreen: React.FC<Props> = ({ route, navigation }) => {
 
       {success ? (
         <AppCard variant="outlined" padding="lg" style={styles.successCard}>
-          <View style={styles.successIconCircle}>
+          <View style={[styles.successIconCircle, { backgroundColor: colors.successSurface }]}>
             <Ionicons name="checkmark-done-circle-outline" size={40} color={colors.success} />
           </View>
           <AppText variant="h3" color="success" align="center" style={styles.successTitle}>

@@ -16,6 +16,7 @@ import {
   isOrderCancellable,
 } from "../../constants/order.constants";
 import { useOrders } from "../../hooks/useOrders";
+import { usePayment } from "../../hooks/usePayment";
 import {
   AppText,
   AppButton,
@@ -32,12 +33,17 @@ import {
   OrderItemList,
   OrderPricingCard,
 } from "../../components/order";
-import { colors, spacing, radius, shadows } from "../../theme";
+import {
+  PaymentStatusCard,
+  RefundHistoryCard,
+} from "../../components/payment";
+import { useTheme, colors, spacing, radius, shadows } from "../../theme";
 import { formatDate, formatDateTime, formatPhone } from "../../utils/formatters";
 
 type Props = NativeStackScreenProps<OrdersStackParamList, "OrderDetailsScreen">;
 
 export const OrderDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
+  const { colors } = useTheme();
   const { orderId } = route.params;
   const {
     currentOrder,
@@ -50,20 +56,31 @@ export const OrderDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
     clearCancel,
   } = useOrders();
 
+  const {
+    currentPayment,
+    isRetryingPayment,
+    loadPaymentByOrderId,
+    retryPayment,
+  } = usePayment();
+
   const [refreshing, setRefreshing] = useState(false);
   const isCancellingRef = useRef(false);
 
-  // Fetch order details on mount
+  // Fetch order details & payment on mount
   useEffect(() => {
     loadOrderById(orderId);
-  }, [orderId, loadOrderById]);
+    loadPaymentByOrderId(orderId);
+  }, [orderId, loadOrderById, loadPaymentByOrderId]);
 
   // Pull-to-refresh
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    await loadOrderById(orderId);
+    await Promise.all([
+      loadOrderById(orderId),
+      loadPaymentByOrderId(orderId),
+    ]);
     setRefreshing(false);
-  }, [orderId, loadOrderById]);
+  }, [orderId, loadOrderById, loadPaymentByOrderId]);
 
   // Cancel order with confirmation modal
   const handleCancelOrder = useCallback(() => {
@@ -73,14 +90,16 @@ export const OrderDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
       "Cancel Order",
       "Are you sure you want to cancel this order? This action cannot be undone.",
       [
-        { text: "No, Keep Order", style: "cancel" },
+        {
+          text: "Keep Order",
+          style: "cancel",
+          onPress: () => clearCancel(),
+        },
         {
           text: "Yes, Cancel Order",
           style: "destructive",
           onPress: async () => {
-            if (isCancellingRef.current) return;
             isCancellingRef.current = true;
-            clearCancel();
             await cancelOrder(orderId);
             isCancellingRef.current = false;
           },
@@ -94,7 +113,7 @@ export const OrderDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
   const canCancel = order ? isOrderCancellable(order.status) : false;
 
   return (
-    <ScreenContainer scrollable={false} statusBarStyle="dark">
+    <ScreenContainer scrollable={false}>
       <AppHeader
         title="Order Details"
         subtitle={formattedOrderId}
@@ -134,7 +153,7 @@ export const OrderDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
         >
           {/* CANCELLATION ERROR BANNER */}
           {cancelError && (
-            <View style={styles.errorBanner}>
+            <View style={[styles.errorBanner, { backgroundColor: colors.errorSurface }]}>
               <Ionicons
                 name="alert-circle"
                 size={20}
@@ -260,6 +279,42 @@ export const OrderDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
             pricing={order.pricing}
             paymentStatus={order.paymentStatus}
           />
+
+          {/* PAYMENT DETAILS & RECORDING FLOW */}
+          <PaymentStatusCard
+            payment={
+              currentPayment && currentPayment.orderId === order._id
+                ? currentPayment
+                : null
+            }
+            orderPaymentStatus={order.paymentStatus}
+            orderTotalAmount={order.pricing.totalAmount}
+            onRecordOrChangePayment={() =>
+              navigation.navigate("PaymentScreen", {
+                orderId: order._id,
+                initialPaymentMethod:
+                  currentPayment?.paymentMethod || "CASH",
+              })
+            }
+            onRetryPayment={async () => {
+              if (currentPayment) {
+                await retryPayment(currentPayment._id, {
+                  paymentMethod: currentPayment.paymentMethod,
+                });
+                await loadOrderById(orderId);
+              } else {
+                navigation.navigate("PaymentScreen", {
+                  orderId: order._id,
+                });
+              }
+            }}
+            isRetrying={isRetryingPayment}
+          />
+
+          {/* REFUND HISTORY (IF ANY PROCESSED REFUNDS EXIST) */}
+          {currentPayment?.refunds && currentPayment.refunds.length > 0 && (
+            <RefundHistoryCard refunds={currentPayment.refunds} />
+          )}
 
           {/* PICKUP & DELIVERY ADDRESSES */}
           <AppCard variant="outlined" padding="md" style={styles.sectionCard}>

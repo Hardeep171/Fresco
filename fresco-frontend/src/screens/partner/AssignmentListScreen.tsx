@@ -20,11 +20,12 @@ import {
   AssignmentCard,
   AssignmentFilterChips,
 } from "../../components/partner";
-import { colors, spacing } from "../../theme";
+import { useTheme, spacing } from "../../theme";
 
 type Props = NativeStackScreenProps<PartnerStackParamList, "AssignmentListScreen">;
 
 export const AssignmentListScreen: React.FC<Props> = ({ route, navigation }) => {
+  const { colors } = useTheme();
   const initialFilter = route.params?.initialFilter as AssignmentFilterTab | undefined;
 
   const {
@@ -147,7 +148,7 @@ export const AssignmentListScreen: React.FC<Props> = ({ route, navigation }) => 
   }, [selectedStatusFilter, setStatusFilter, loadAssignments]);
 
   return (
-    <ScreenContainer scrollable={false} statusBarStyle="dark">
+    <ScreenContainer scrollable={false}>
       <AppHeader
         title="Assignments"
         showBack={false}
