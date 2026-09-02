@@ -1,0 +1,16 @@
+{
+  "name": "fresco-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FRESCO Laundry & Garment Care Platform — Monorepo Root",
+  "scripts": {
+    "dev:backend": "cd fresco-backend && npm run dev",
+    "dev:frontend": "cd fresco-frontend && npm run web",
+    "dev:mobile": "cd fresco-frontend && npm run start",
+    "seed": "cd fresco-backend && npm run seed",
+    "build": "cd fresco-backend && npm run build",
+    "test:backend": "cd fresco-backend && npm run test",
+    "test:frontend": "cd fresco-frontend && npm run test",
+    "typecheck": "cd fresco-frontend && npm run typecheck"
+  }
+}

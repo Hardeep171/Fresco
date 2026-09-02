@@ -1,1 +1,3 @@
-export { AddressForm, AddressFormProps } from "./AddressForm";
+export { AddressForm } from "./AddressForm";
+export type { AddressFormProps } from "./AddressForm";
+

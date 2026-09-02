@@ -230,7 +230,7 @@ All environment variables are validated at server startup using strict **Zod** s
 | `PORT` | No | `5000` | Integer (`1` – `65535`) | HTTP port for incoming connections |
 | `MONGO_URI` | **Yes** | — | Valid MongoDB URI | Connection string for MongoDB instance |
 | `LOG_LEVEL` | No | `info` | `error` \| `warn` \| `info` \| `http` \| `debug` | Winston logging threshold |
-| `CORS_ORIGIN` | No | `*` | Comma-separated URLs or `*` | Allowed client origins for CORS policy |
+| `CORS_ORIGIN` | No | `http://localhost:3000,http://localhost:19006,http://localhost:8081` | Comma-separated URLs (wildcard `*` disallowed in production) | Allowed client origins for CORS policy |
 | `JWT_ACCESS_SECRET` | **Yes** | — | String (Minimum 32 characters) | Secret key for signing JWT access tokens |
 | `JWT_ACCESS_EXPIRES_IN` | **Yes** | `15m` | Regex `/^[1-9]\d*[mhd]$/` | Access token lifespan (e.g., `15m`, `1h`) |
 | `JWT_REFRESH_SECRET` | **Yes** | — | String (Minimum 32 characters) | Secret key for signing JWT refresh tokens |

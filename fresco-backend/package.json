@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "seed": "tsx src/scripts/seed.ts",
+    "test": "tsx src/tests/duplicate-prevention.e2e.ts && tsx src/tests/security.e2e.ts && tsx src/tests/inspection.e2e.ts && tsx src/tests/payment.e2e.ts"
   },
   "keywords": [],
   "author": "",

@@ -7,11 +7,33 @@ import {
 } from "../types/api.types";
 
 /**
+ * Type guard to check if an object is already a NormalizedApiError.
+ */
+export function isNormalizedApiError(error: unknown): error is NormalizedApiError {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "kind" in error &&
+    "statusCode" in error &&
+    "message" in error &&
+    "rawErrors" in error &&
+    "isNetworkError" in error &&
+    "isTimeout" in error &&
+    "isAuthError" in error
+  );
+}
+
+/**
  * Transforms any unknown caught error (Axios errors, network errors, timeouts, or exceptions)
  * into a predictable, strongly typed NormalizedApiError structure.
  */
 export function normalizeApiError(error: unknown): NormalizedApiError {
-  if (axios.isAxiosError(error)) {
+  // If error is already normalized, return as-is
+  if (isNormalizedApiError(error)) {
+    return error;
+  }
+
+  if (axios.isAxiosError(error) || (typeof error === "object" && error !== null && (error as any).isAxiosError)) {
     const axiosError = error as AxiosError<ApiErrorResponse>;
 
     // 1. Timeout Error
@@ -44,17 +66,25 @@ export function normalizeApiError(error: unknown): NormalizedApiError {
     const statusCode = axiosError.response.status;
     const responseData = axiosError.response.data;
 
-    const rawErrors: ApiErrorDetail[] = Array.isArray(responseData?.errors)
-      ? responseData.errors
-      : [];
-
-    // Map field errors from backend Zod validation output
+    let rawErrors: ApiErrorDetail[] = [];
     const fieldErrors: Record<string, string> = {};
-    rawErrors.forEach((err) => {
-      if (err.field && err.message) {
-        fieldErrors[err.field] = err.message;
-      }
-    });
+
+    if (Array.isArray(responseData?.errors)) {
+      rawErrors = responseData.errors;
+      rawErrors.forEach((err) => {
+        const fieldName = err.field || (Array.isArray((err as any).path) ? (err as any).path.join(".") : (err as any).path) || (err as any).param;
+        if (fieldName && err.message) {
+          fieldErrors[fieldName] = err.message;
+        }
+      });
+    } else if (responseData?.errors && typeof responseData.errors === "object") {
+      Object.entries(responseData.errors).forEach(([field, msg]) => {
+        if (typeof msg === "string") {
+          fieldErrors[field] = msg;
+          rawErrors.push({ field, message: msg });
+        }
+      });
+    }
 
     // Semantic error classification
     let kind: ErrorKind = "UNKNOWN";

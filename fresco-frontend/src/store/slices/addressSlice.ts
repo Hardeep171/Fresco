@@ -7,6 +7,7 @@ import {
 import { addressApi } from "../../api/address.api";
 import { normalizeApiError } from "../../api/error";
 import { NormalizedApiError } from "../../types/api.types";
+import { logoutUser, logoutSuccess } from "./authSlice";
 
 export interface AddressState {
   addresses: Address[];
@@ -312,6 +313,10 @@ export const addressSlice = createSlice({
       state.settingDefaultAddressId = null;
       state.actionError = action.payload || null;
     });
+
+    // LOGOUT RESET
+    builder.addCase(logoutUser.fulfilled, () => initialState);
+    builder.addCase(logoutSuccess, () => initialState);
   },
 });
 

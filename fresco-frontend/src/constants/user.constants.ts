@@ -11,6 +11,13 @@ export const USER_ROLES = [
   "CUSTOMER",
 ] as const;
 
+export const ADMIN_ROLES = [
+  "SUPER_ADMIN",
+  "ADMIN",
+  "CITY_MANAGER",
+  "BRANCH_MANAGER",
+] as const;
+
 export type UserRole = (typeof USER_ROLES)[number];
 
 export const USER_STATUSES = ["ACTIVE", "INACTIVE", "BLOCKED"] as const;

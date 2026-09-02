@@ -4,7 +4,7 @@ import { normalizeApiError } from "../../api/error";
 import { NormalizedApiError } from "../../types/api.types";
 import { DeliveryTask } from "../../types/delivery-task.types";
 import { TaskFilterTab } from "../../constants/delivery-task.constants";
-import { logoutUser } from "./authSlice";
+import { logoutUser, logoutSuccess } from "./authSlice";
 
 
 export interface DeliveryTaskState {
@@ -86,6 +86,7 @@ export const deliveryTaskSlice = createSlice({
 
     // LOGOUT RESET
     builder.addCase(logoutUser.fulfilled, () => initialState);
+    builder.addCase(logoutSuccess, () => initialState);
   },
 });
 

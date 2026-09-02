@@ -1,2 +1,5 @@
-export { CartItemCard, CartItemCardProps } from "./CartItemCard";
-export { CartSummaryCard, CartSummaryCardProps } from "./CartSummaryCard";
+export { CartItemCard } from "./CartItemCard";
+export type { CartItemCardProps } from "./CartItemCard";
+export { CartSummaryCard } from "./CartSummaryCard";
+export type { CartSummaryCardProps } from "./CartSummaryCard";
+

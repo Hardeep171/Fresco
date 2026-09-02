@@ -16,7 +16,7 @@ import { useTheme, colors, spacing, radius } from "../../theme";
 type Props = NativeStackScreenProps<AuthStackParamList, "Login">;
 
 export const LoginScreen: React.FC<Props> = ({ navigation }) => {
-  const { login, isLoading, error, clearError } = useAuth();
+  const { login, isLoading, error, clearError, clearFieldError } = useAuth();
   const { colors } = useTheme();
 
   const [email, setEmail] = useState("");
@@ -51,6 +51,11 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
     });
   };
 
+  const hasFieldErrors = Boolean(
+    error?.fieldErrors && Object.keys(error.fieldErrors).length > 0
+  );
+  const shouldShowBanner = Boolean(error && !hasFieldErrors);
+
   return (
     <ScreenContainer scrollable>
       <View style={styles.headerContainer}>
@@ -65,7 +70,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
         </AppText>
       </View>
 
-      {error && (
+      {shouldShowBanner && error && (
         <View style={[styles.errorBanner, { backgroundColor: colors.errorSurface }]}>
           <Ionicons name="alert-circle" size={20} color={colors.error} style={styles.errorIcon} />
           <AppText variant="captionMedium" color="error" style={styles.errorMessage}>
@@ -82,6 +87,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
           onChangeText={(text) => {
             setEmail(text);
             if (localErrors.email) setLocalErrors((prev) => ({ ...prev, email: undefined }));
+            if (error?.fieldErrors?.["email"]) clearFieldError("email");
           }}
           keyboardType="email-address"
           autoCapitalize="none"
@@ -98,6 +104,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
           onChangeText={(text) => {
             setPassword(text);
             if (localErrors.password) setLocalErrors((prev) => ({ ...prev, password: undefined }));
+            if (error?.fieldErrors?.["password"]) clearFieldError("password");
           }}
           secureTextEntry
           error={localErrors.password || error?.fieldErrors?.["password"]}

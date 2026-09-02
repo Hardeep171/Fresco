@@ -6,6 +6,7 @@ export type RootStackParamList = {
   Auth: NavigatorScreenParams<AuthStackParamList>;
   App: NavigatorScreenParams<MainTabParamList> | undefined;
   PartnerApp: NavigatorScreenParams<PartnerTabParamList> | undefined;
+  AdminApp: NavigatorScreenParams<AdminTabParamList> | undefined;
 };
 
 export type AuthStackParamList = {
@@ -91,4 +92,43 @@ export type PartnerTabParamList = {
   PartnerTasksTab: NavigatorScreenParams<PartnerStackParamList>;
   PartnerProfileTab: NavigatorScreenParams<PartnerProfileStackParamList>;
 };
+
+// ==========================================
+// ADMIN NAVIGATION TYPES
+// ==========================================
+
+export type AdminStackParamList = {
+  AdminDashboardScreen: undefined;
+  OrderDetailsScreen: { orderId: string };
+  AssignmentDetailsScreen: { assignmentId: string };
+  DeliveryTaskDetailsScreen: { taskId: string };
+  InspectionReviewScreen: { orderId: string; inspectionId?: string };
+  InspectionFormScreen: { orderId: string; inspectionId?: string };
+};
+
+export type AdminOrdersStackParamList = {
+  OrderHistoryScreen: undefined;
+  OrderDetailsScreen: { orderId: string };
+  InspectionReviewScreen: { orderId: string; inspectionId?: string };
+  InspectionFormScreen: { orderId: string; inspectionId?: string };
+};
+
+export type AdminAssignmentsStackParamList = {
+  AssignmentListScreen: { initialFilter?: string } | undefined;
+  AssignmentDetailsScreen: { assignmentId: string };
+  DeliveryTaskDetailsScreen: { taskId: string };
+};
+
+export type AdminProfileStackParamList = {
+  AdminProfileScreen: undefined;
+  ThemeSettingsScreen?: undefined;
+};
+
+export type AdminTabParamList = {
+  AdminDashboardTab: NavigatorScreenParams<AdminStackParamList>;
+  AdminOrdersTab: NavigatorScreenParams<AdminOrdersStackParamList>;
+  AdminAssignmentsTab: NavigatorScreenParams<AdminAssignmentsStackParamList>;
+  AdminProfileTab: NavigatorScreenParams<AdminProfileStackParamList>;
+};
+
 

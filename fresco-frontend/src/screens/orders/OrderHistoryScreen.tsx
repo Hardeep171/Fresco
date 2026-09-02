@@ -14,6 +14,8 @@ import {
   OrderStatus,
 } from "../../constants/order.constants";
 import { useOrders } from "../../hooks/useOrders";
+import { useAuth } from "../../hooks/useAuth";
+import { ADMIN_ROLES } from "../../constants/user.constants";
 import {
   AppHeader,
   AppLoader,
@@ -31,28 +33,42 @@ type Props = NativeStackScreenProps<OrdersStackParamList, "OrderHistoryScreen">;
 
 export const OrderHistoryScreen: React.FC<Props> = ({ navigation }) => {
   const { colors } = useTheme();
+  const { user } = useAuth();
   const {
     orders,
     isFetchingOrders,
     ordersError,
     selectedStatusFilter,
     loadUserOrders,
+    loadAllOrders,
     setStatusFilter,
   } = useOrders();
+
+  const isAdmin = Boolean(
+    user?.role && (ADMIN_ROLES as readonly string[]).includes(user.role)
+  );
+
+  const fetchOrders = useCallback(async () => {
+    if (isAdmin) {
+      await loadAllOrders();
+    } else {
+      await loadUserOrders();
+    }
+  }, [isAdmin, loadAllOrders, loadUserOrders]);
 
   const [refreshing, setRefreshing] = useState(false);
 
   // Load orders on initial mount
   useEffect(() => {
-    loadUserOrders();
-  }, [loadUserOrders]);
+    fetchOrders();
+  }, [fetchOrders]);
 
   // Pull-to-refresh handler
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    await loadUserOrders();
+    await fetchOrders();
     setRefreshing(false);
-  }, [loadUserOrders]);
+  }, [fetchOrders]);
 
   // Navigate to order details
   const handleOrderPress = useCallback(

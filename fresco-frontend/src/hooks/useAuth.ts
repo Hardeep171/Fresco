@@ -7,6 +7,7 @@ import {
   restoreUserSession,
   logoutUser,
   clearAuthError,
+  clearAuthFieldError,
 } from "../store/slices/authSlice";
 import { LoginInput, RegisterInput } from "../types/auth.types";
 
@@ -43,6 +44,13 @@ export function useAuth() {
     dispatch(clearAuthError());
   }, [dispatch]);
 
+  const clearFieldError = useCallback(
+    (field: string) => {
+      dispatch(clearAuthFieldError(field));
+    },
+    [dispatch]
+  );
+
   return {
     user,
     isAuthenticated,
@@ -54,5 +62,6 @@ export function useAuth() {
     logout,
     restoreSession,
     clearError,
+    clearFieldError,
   };
 }

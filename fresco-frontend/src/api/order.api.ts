@@ -35,6 +35,18 @@ export const orderApi = {
   },
 
   /**
+   * Retrieve all orders across the entire system (admin use).
+   * Backend endpoint: GET /api/v1/orders/all
+   */
+  async getAllOrders(filters?: OrderFilters): Promise<Order[]> {
+    const response = await apiClient.get<ApiResponse<{ orders: Order[] }>>(
+      "/orders/all",
+      { params: filters }
+    );
+    return response.data.data.orders;
+  },
+
+  /**
    * Retrieve a single order by ID.
    * Backend endpoint: GET /api/v1/orders/:id
    */

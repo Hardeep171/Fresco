@@ -1,5 +1,11 @@
-export { CategoryCard, CategoryCardProps } from "./CategoryCard";
-export { GarmentCard, GarmentCardProps } from "./GarmentCard";
-export { ServiceOptionCard, ServiceOptionCardProps } from "./ServiceOptionCard";
-export { QuantityStepper, QuantityStepperProps } from "./QuantityStepper";
-export { PriceSummaryCard, PriceSummaryCardProps } from "./PriceSummaryCard";
+export { CategoryCard } from "./CategoryCard";
+export type { CategoryCardProps } from "./CategoryCard";
+export { GarmentCard } from "./GarmentCard";
+export type { GarmentCardProps } from "./GarmentCard";
+export { ServiceOptionCard } from "./ServiceOptionCard";
+export type { ServiceOptionCardProps } from "./ServiceOptionCard";
+export { QuantityStepper } from "./QuantityStepper";
+export type { QuantityStepperProps } from "./QuantityStepper";
+export { PriceSummaryCard } from "./PriceSummaryCard";
+export type { PriceSummaryCardProps } from "./PriceSummaryCard";
+

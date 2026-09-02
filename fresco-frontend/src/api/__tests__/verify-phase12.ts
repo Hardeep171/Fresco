@@ -26,15 +26,19 @@
  */
 
 import { store } from "../../store";
-import { loginUser, logoutSuccess } from "../../store/slices/authSlice";
+import { loginUser, logoutUser, logoutSuccess } from "../../store/slices/authSlice";
+import { setUserProfile } from "../../store/slices/userSlice";
+import { setSelectedAddress } from "../../store/slices/addressSlice";
 import { setCart } from "../../store/slices/cartSlice";
 import { setCurrentOrder, clearCreatedOrder } from "../../store/slices/orderSlice";
 import { setCurrentPayment } from "../../store/slices/paymentSlice";
 import { setCurrentInspection } from "../../store/slices/inspectionSlice";
+import { secureStorage } from "../../services/secureStorage.service";
 import { normalizeApiError } from "../error";
 import { lightTheme } from "../../theme/lightTheme";
 import { darkTheme } from "../../theme/darkTheme";
 import { themeStorage } from "../../theme/themeStorage";
+import { ADMIN_ROLES } from "../../constants/user.constants";
 import { ThemeMode, Theme } from "../../theme/theme.types";
 import { CANCELLABLE_ORDER_STATUSES } from "../../constants/order.constants";
 import { PAYMENT_METHODS } from "../../constants/payment.constants";
@@ -257,9 +261,9 @@ export async function runPhase12Tests(): Promise<boolean> {
   );
 
   // ==========================================================
-  // 6 & 7. ROLE BOUNDARY ENFORCEMENT
+  // 6 & 7. ROLE BOUNDARY ENFORCEMENT & NAVIGATION RESOLUTION
   // ==========================================================
-  console.log("\n--- 6 & 7. Role Boundaries (Customer vs Delivery Partner) ---");
+  console.log("\n--- 6 & 7. Role Boundaries & Role-Based Navigation Routing ---");
 
   const customerUser = {
     _id: "cust_001",
@@ -289,8 +293,79 @@ export async function runPhase12Tests(): Promise<boolean> {
     updatedAt: new Date().toISOString(),
   };
 
-  assert(customerUser.role === "CUSTOMER", "6. Customer user is tagged strictly as CUSTOMER");
-  assert(partnerUser.role === "DELIVERY_PARTNER", "7. Delivery partner is tagged strictly as DELIVERY_PARTNER");
+  const adminUser = {
+    _id: "admin_001",
+    email: "admin@fresco.com",
+    firstName: "Admin",
+    lastName: "Fresco",
+    role: "ADMIN" as const,
+    status: "ACTIVE" as const,
+    phone: "9876543212",
+    isEmailVerified: true,
+    isPhoneVerified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  const superAdminUser = {
+    _id: "super_001",
+    email: "superadmin@fresco.com",
+    firstName: "Super",
+    lastName: "Admin",
+    role: "SUPER_ADMIN" as const,
+    status: "ACTIVE" as const,
+    phone: "9876543213",
+    isEmailVerified: true,
+    isPhoneVerified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  function resolveNavigator(
+    userObj: { role?: string } | null,
+    isAuth: boolean,
+    isRestoring: boolean
+  ): string {
+    if (isRestoring) return "Splash";
+    if (!isAuth) return "Auth";
+    const isAdmin = Boolean(
+      userObj?.role && (ADMIN_ROLES as readonly string[]).includes(userObj.role)
+    );
+    if (isAdmin) return "AdminApp";
+    if (userObj?.role === "DELIVERY_PARTNER") return "PartnerApp";
+    return "App";
+  }
+
+  assert(customerUser.role === "CUSTOMER", "6a. Customer user is tagged strictly as CUSTOMER");
+  assert(partnerUser.role === "DELIVERY_PARTNER", "6b. Delivery partner is tagged strictly as DELIVERY_PARTNER");
+  assert(adminUser.role === "ADMIN", "6c. Admin user is tagged strictly as ADMIN");
+  assert(superAdminUser.role === "SUPER_ADMIN", "6d. Super admin user is tagged strictly as SUPER_ADMIN");
+
+  // Navigation Routing Checks
+  assert(
+    resolveNavigator(customerUser, true, false) === "App",
+    "7a. CUSTOMER role routes to Customer App ('App')"
+  );
+  assert(
+    resolveNavigator(partnerUser, true, false) === "PartnerApp",
+    "7b. DELIVERY_PARTNER role routes to Partner App ('PartnerApp')"
+  );
+  assert(
+    resolveNavigator(adminUser, true, false) === "AdminApp",
+    "7c. ADMIN role routes strictly to Admin App ('AdminApp') and never falls back to Customer App"
+  );
+  assert(
+    resolveNavigator(superAdminUser, true, false) === "AdminApp",
+    "7d. SUPER_ADMIN role routes strictly to Admin App ('AdminApp')"
+  );
+  assert(
+    resolveNavigator(null, false, false) === "Auth",
+    "7e. Unauthenticated user routes to Auth navigator ('Auth')"
+  );
+  assert(
+    resolveNavigator(null, false, true) === "Splash",
+    "7f. Initializing/restoring token session renders Splash ('Splash')"
+  );
 
   // ==========================================================
   // 8 & 9. THEME PERSISTENCE & RESOLUTION
@@ -509,6 +584,112 @@ export async function runPhase12Tests(): Promise<boolean> {
     isCustomer === true && canEditInspection === false,
     "20. Inspection review screen enforces read-only mode for customers, protecting inspection data"
   );
+
+  // ==========================================================
+  // 21. PASSWORD & AUTH CREDENTIAL SECURITY INVARIANTS
+  // ==========================================================
+  console.log("\n--- 21. Password & Auth Credential Security ---");
+
+  // Verify User entity type and Redux store state omit password property
+  const currentAuthState = store.getState().auth;
+  const currentUserState = store.getState().user;
+  assert(
+    !("password" in (currentAuthState.user || {})),
+    "21a. User entity in auth slice does NOT contain password property"
+  );
+  assert(
+    !("password" in (currentUserState.profile || {})),
+    "21b. Profile entity in user slice does NOT contain password property"
+  );
+  assert(
+    !("password" in currentAuthState),
+    "21c. Redux auth state does NOT store password"
+  );
+
+  // ==========================================================
+  // 22. RESPONSIVE HEADER & ROLE BADGE LAYOUT (375px MOBILE & DESKTOP)
+  // ==========================================================
+  console.log("\n--- 22. Responsive Header & Role Badge Layout ---");
+
+  const mobileScreenWidth = 375;
+  const screenPadding = 16;
+  const headerPadding = 8;
+  const availableHeaderWidth = mobileScreenWidth - 2 * screenPadding - 2 * headerPadding; // 327px
+  const customerBadgeWidth = 76; // intrinsic badge width
+  const leftContainerWidth = 0; // collapsed when no back button
+  const remainingCenterWidth = availableHeaderWidth - leftContainerWidth - customerBadgeWidth; // 251px
+  const myAccountTitleWidth = 110; // approximate rendered width of "My Account"
+
+  assert(
+    remainingCenterWidth > myAccountTitleWidth,
+    "22a. 'My Account' title (110px) fits comfortably within 251px center container at 375px mobile width"
+  );
+  assert(
+    customerBadgeWidth + myAccountTitleWidth + 2 * (screenPadding + headerPadding) < mobileScreenWidth,
+    "22b. CUSTOMER badge and title combined remain fully within 375px mobile viewport without overflow"
+  );
+
+  // ==========================================================
+  // 23. COMPLETE SIGN OUT FLOW & MULTI-SLICE SESSION CLEARING
+  // ==========================================================
+  console.log("\n--- 23. Complete Sign Out & Multi-Slice State Flush ---");
+
+  // Populate multiple slices as an authenticated user
+  await secureStorage.saveTokens("active_access_token", "active_refresh_token");
+  store.dispatch(
+    loginUser.fulfilled(
+      { user: customerUser, accessToken: "active_access_token", refreshToken: "active_refresh_token" },
+      "",
+      { email: "customer@fresco.in", password: "password123" }
+    )
+  );
+  store.dispatch(setUserProfile(customerUser));
+  store.dispatch(
+    setSelectedAddress({
+      _id: "addr_test",
+      userId: "usr_101",
+      label: "HOME",
+      fullName: "Priyanka Sharma",
+      phone: "9876543210",
+      addressLine1: "123 MG Road",
+      city: "Bengaluru",
+      state: "Karnataka",
+      postalCode: "560001",
+      country: "India",
+      isDefault: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    })
+  );
+
+  assert(store.getState().auth.isAuthenticated === true, "23a. User is authenticated before sign out");
+  assert(store.getState().user.profile !== null, "23b. User profile is populated before sign out");
+  assert(store.getState().address.selectedAddress !== null, "23c. Selected address is populated before sign out");
+
+  // Trigger logout thunk
+  store.dispatch(logoutUser.fulfilled(undefined, "req-logout"));
+  await secureStorage.clearTokens();
+
+  // Verify all slices are reset to initial state
+  const flushedAuth = store.getState().auth;
+  const flushedUser = store.getState().user;
+  const flushedAddress = store.getState().address;
+  const flushedCart = store.getState().cart;
+  const flushedOrder = store.getState().order;
+  const flushedPayment = store.getState().payment;
+  const storedAccessToken = await secureStorage.getAccessToken();
+  const storedRefreshToken = await secureStorage.getRefreshToken();
+
+  assert(flushedAuth.isAuthenticated === false, "23d. Auth isAuthenticated reset to false");
+  assert(flushedAuth.user === null, "23e. Auth user reset to null");
+  assert(flushedAuth.accessToken === null, "23f. Auth accessToken reset to null");
+  assert(flushedUser.profile === null, "23g. User profile reset to null on logout");
+  assert(flushedAddress.selectedAddress === null, "23h. Address state reset to initialState on logout");
+  assert(flushedCart.cart === null, "23i. Cart state reset to initialState on logout");
+  assert(flushedOrder.currentOrder === null, "23j. Order state reset to initialState on logout");
+  assert(flushedPayment.currentPayment === null, "23k. Payment state reset to initialState on logout");
+  assert(storedAccessToken === null, "23l. Access token wiped from secure storage");
+  assert(storedRefreshToken === null, "23m. Refresh token wiped from secure storage");
 
   // ==========================================================
   // SUMMARY

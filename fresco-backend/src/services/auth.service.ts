@@ -1,5 +1,9 @@
 import { StatusCodes } from "http-status-codes";
 
+import {
+  extractDuplicateField,
+  isMongoDuplicateKeyError,
+} from "../middlewares/error.middleware.js";
 import { authRepository } from "../repositories/auth.repository.js";
 import { ApiError } from "../utils/api-error.js";
 import {
@@ -21,22 +25,88 @@ async function generateTokens(userId: string, role: string) {
 
 /** Authentication service handling user registration, login, token refresh, and logout. */
 export const authService = {
-  /** Register a new user. */
+  /** Register a new user with duplicate email and phone prevention. */
   async register(registerData: RegisterInput) {
-    // Check if user exists
-    const existingUser = await authRepository.findUserByEmail(registerData.email);
-    if (existingUser) {
-      throw new ApiError(StatusCodes.CONFLICT, "User already exists");
+    const normalizedEmail = registerData.email.trim().toLowerCase();
+    const normalizedPhone = registerData.phone.trim();
+
+    // Friendly pre-check for duplicate email / phone
+    const existingUsers = await authRepository.findExistingUsersByEmailOrPhone(
+      normalizedEmail,
+      normalizedPhone,
+    );
+
+    const emailExists = existingUsers.some(
+      (u) => String(u.email).toLowerCase() === normalizedEmail,
+    );
+    const phoneExists = existingUsers.some(
+      (u) => String(u.phone) === normalizedPhone,
+    );
+
+    if (emailExists && phoneExists) {
+      throw new ApiError(
+        StatusCodes.CONFLICT,
+        "An account with this email or phone number already exists.",
+        [
+          { field: "email", message: "An account with this email already exists." },
+          { field: "phone", message: "An account with this phone number already exists." },
+        ],
+      );
+    } else if (emailExists) {
+      throw new ApiError(
+        StatusCodes.CONFLICT,
+        "An account with this email already exists.",
+        [
+          { field: "email", message: "An account with this email already exists." },
+        ],
+      );
+    } else if (phoneExists) {
+      throw new ApiError(
+        StatusCodes.CONFLICT,
+        "An account with this phone number already exists.",
+        [
+          { field: "phone", message: "An account with this phone number already exists." },
+        ],
+      );
     }
 
     // Hash password
     const hashedPassword = await hashPassword(registerData.password);
 
-    // Create user
-    const user = await authRepository.createUser({
-      ...registerData,
-      password: hashedPassword,
-    });
+    // Create user with race condition error handling on unique constraints
+    let user;
+    try {
+      user = await authRepository.createUser({
+        ...registerData,
+        email: normalizedEmail,
+        phone: normalizedPhone,
+        password: hashedPassword,
+      });
+    } catch (error: unknown) {
+      if (isMongoDuplicateKeyError(error)) {
+        const field = extractDuplicateField(error);
+        if (field === "email") {
+          throw new ApiError(
+            StatusCodes.CONFLICT,
+            "An account with this email already exists.",
+            [{ field: "email", message: "An account with this email already exists." }],
+          );
+        }
+        if (field === "phone") {
+          throw new ApiError(
+            StatusCodes.CONFLICT,
+            "An account with this phone number already exists.",
+            [{ field: "phone", message: "An account with this phone number already exists." }],
+          );
+        }
+        throw new ApiError(
+          StatusCodes.CONFLICT,
+          "An account with this value already exists.",
+          field ? [{ field, message: `${field} already exists.` }] : [],
+        );
+      }
+      throw error;
+    }
 
     // Generate tokens
     const userId = user._id.toString();
@@ -54,8 +124,10 @@ export const authService = {
 
   /** Authenticate user with credentials. */
   async login(email: string, password: string) {
+    const normalizedEmail = email.trim().toLowerCase();
+
     // Find user
-    const user = await authRepository.findUserByEmail(email);
+    const user = await authRepository.findUserByEmail(normalizedEmail);
     if (!user) {
       throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid credentials");
     }

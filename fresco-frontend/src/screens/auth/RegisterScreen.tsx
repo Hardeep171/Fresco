@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { AuthStackParamList } from "../../types/navigation.types";
 import { useAuth } from "../../hooks/useAuth";
@@ -17,7 +18,7 @@ import { useTheme, colors, spacing, radius } from "../../theme";
 type Props = NativeStackScreenProps<AuthStackParamList, "Register">;
 
 export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
-  const { register, isLoading, error, clearError } = useAuth();
+  const { register, isLoading, error, clearError, clearFieldError } = useAuth();
   const { colors } = useTheme();
 
   const [firstName, setFirstName] = useState("");
@@ -28,6 +29,16 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [localErrors, setLocalErrors] = useState<Record<string, string>>({});
+
+  // Clear stale registration errors when entering/focusing and leaving/unmounting
+  useFocusEffect(
+    useCallback(() => {
+      clearError();
+      return () => {
+        clearError();
+      };
+    }, [clearError])
+  );
 
   const validate = (): boolean => {
     const errors: Record<string, string> = {};
@@ -40,15 +51,18 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
       errors.lastName = "Last name must be at least 2 characters.";
     }
 
-    if (!email.trim()) {
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
       errors.email = "Email address is required.";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
       errors.email = "Please enter a valid email address.";
     }
 
-    const cleanPhone = phone.replace(/\D/g, "");
-    if (!cleanPhone || cleanPhone.length < 10) {
-      errors.phone = "Phone number must be at least 10 digits.";
+    const trimmedPhone = phone.trim();
+    if (!trimmedPhone) {
+      errors.phone = "Phone number is required.";
+    } else if (!/^\+?[1-9]\d{7,14}$|^\d{10,15}$/.test(trimmedPhone)) {
+      errors.phone = "Please enter a valid phone number (10-15 digits).";
     }
 
     if (!password || password.length < 8) {
@@ -64,6 +78,7 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleRegister = async () => {
+    if (isLoading) return;
     clearError();
     if (!validate()) return;
 
@@ -71,10 +86,16 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       email: email.trim().toLowerCase(),
-      phone: phone.replace(/\D/g, ""),
+      phone: phone.trim(),
       password,
     });
   };
+
+  // Only show top error banner for non-field errors (network error, server unavailable, general error)
+  const hasFieldErrors = Boolean(
+    error?.fieldErrors && Object.keys(error.fieldErrors).length > 0
+  );
+  const shouldShowBanner = Boolean(error && !hasFieldErrors);
 
   return (
     <ScreenContainer scrollable>
@@ -93,7 +114,7 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
         </AppText>
       </View>
 
-      {error && (
+      {shouldShowBanner && error && (
         <View style={[styles.errorBanner, { backgroundColor: colors.errorSurface }]}>
           <Ionicons name="alert-circle" size={20} color={colors.error} style={styles.errorIcon} />
           <AppText variant="captionMedium" color="error" style={styles.errorMessage}>
@@ -112,6 +133,7 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
               onChangeText={(text) => {
                 setFirstName(text);
                 if (localErrors.firstName) setLocalErrors((prev) => ({ ...prev, firstName: "" }));
+                if (error?.fieldErrors?.["firstName"]) clearFieldError("firstName");
               }}
               error={localErrors.firstName || error?.fieldErrors?.["firstName"]}
               required
@@ -126,6 +148,7 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
               onChangeText={(text) => {
                 setLastName(text);
                 if (localErrors.lastName) setLocalErrors((prev) => ({ ...prev, lastName: "" }));
+                if (error?.fieldErrors?.["lastName"]) clearFieldError("lastName");
               }}
               error={localErrors.lastName || error?.fieldErrors?.["lastName"]}
               required
@@ -140,6 +163,7 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
           onChangeText={(text) => {
             setEmail(text);
             if (localErrors.email) setLocalErrors((prev) => ({ ...prev, email: "" }));
+            if (error?.fieldErrors?.["email"]) clearFieldError("email");
           }}
           keyboardType="email-address"
           autoCapitalize="none"
@@ -156,11 +180,12 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
           onChangeText={(text) => {
             setPhone(text);
             if (localErrors.phone) setLocalErrors((prev) => ({ ...prev, phone: "" }));
+            if (error?.fieldErrors?.["phone"]) clearFieldError("phone");
           }}
           keyboardType="phone-pad"
           error={localErrors.phone || error?.fieldErrors?.["phone"]}
           leftIcon={<Ionicons name="call-outline" size={20} color={colors.textSecondary} />}
-          helperText="10-digit mobile number for delivery coordination."
+          helperText="10-15 digit mobile number for delivery coordination."
           required
         />
 
@@ -171,6 +196,7 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
           onChangeText={(text) => {
             setPassword(text);
             if (localErrors.password) setLocalErrors((prev) => ({ ...prev, password: "" }));
+            if (error?.fieldErrors?.["password"]) clearFieldError("password");
           }}
           secureTextEntry
           error={localErrors.password || error?.fieldErrors?.["password"]}

@@ -4,6 +4,7 @@ import { orderApi } from "../../api/order.api";
 import { normalizeApiError } from "../../api/error";
 import { NormalizedApiError } from "../../types/api.types";
 import { setCart } from "./cartSlice";
+import { logoutUser, logoutSuccess } from "./authSlice";
 
 import { OrderFilterTab } from "../../constants/order.constants";
 
@@ -86,6 +87,22 @@ export const fetchUserOrders = createAsyncThunk<
 >("order/fetchUserOrders", async (filters, { rejectWithValue }) => {
   try {
     const orders = await orderApi.getUserOrders(filters);
+    return orders;
+  } catch (error: unknown) {
+    return rejectWithValue(normalizeApiError(error));
+  }
+});
+
+/**
+ * Async thunk to fetch all orders across the entire system (admin operations).
+ */
+export const fetchAllOrders = createAsyncThunk<
+  Order[],
+  OrderFilters | undefined,
+  { rejectValue: NormalizedApiError }
+>("order/fetchAllOrders", async (filters, { rejectWithValue }) => {
+  try {
+    const orders = await orderApi.getAllOrders(filters);
     return orders;
   } catch (error: unknown) {
     return rejectWithValue(normalizeApiError(error));
@@ -196,6 +213,24 @@ export const orderSlice = createSlice({
       state.error = action.payload || null;
     });
 
+    // FETCH ALL ORDERS (ADMIN)
+    builder.addCase(fetchAllOrders.pending, (state) => {
+      state.isFetchingOrders = true;
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(fetchAllOrders.fulfilled, (state, action) => {
+      state.orders = action.payload;
+      state.isFetchingOrders = false;
+      state.isLoading = false;
+      state.error = null;
+    });
+    builder.addCase(fetchAllOrders.rejected, (state, action) => {
+      state.isFetchingOrders = false;
+      state.isLoading = false;
+      state.error = action.payload || null;
+    });
+
     // FETCH ORDER BY ID
     builder.addCase(fetchOrderById.pending, (state) => {
       state.isFetchingDetails = true;
@@ -248,6 +283,10 @@ export const orderSlice = createSlice({
       state.cancelError = action.payload || null;
       state.error = action.payload || null;
     });
+
+    // LOGOUT RESET
+    builder.addCase(logoutUser.fulfilled, () => initialState);
+    builder.addCase(logoutSuccess, () => initialState);
   },
 });
 

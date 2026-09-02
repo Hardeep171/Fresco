@@ -4,6 +4,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
+  Platform,
   RefreshControl,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -27,7 +28,7 @@ import { formatDate } from "../../utils/formatters";
 type Props = NativeStackScreenProps<ProfileStackParamList, "ProfileScreen">;
 
 export const ProfileScreen: React.FC<Props> = ({ navigation }) => {
-  const { logout } = useAuth();
+  const { logout, isLoading } = useAuth();
   const { profile, loadProfile } = useUser();
   const { addresses, loadAddresses } = useAddress();
   const { colors, isDark, mode } = useTheme();
@@ -44,7 +45,20 @@ export const ProfileScreen: React.FC<Props> = ({ navigation }) => {
     setRefreshing(false);
   }, [loadProfile, loadAddresses]);
 
-  const handleSignOut = () => {
+  const handleSignOut = useCallback(() => {
+    if (isLoading) return;
+
+    if (Platform.OS === "web") {
+      if (typeof window !== "undefined" && window.confirm) {
+        if (window.confirm("Are you sure you want to sign out of your FRESCO account?")) {
+          logout();
+        }
+      } else {
+        logout();
+      }
+      return;
+    }
+
     Alert.alert(
       "Sign Out",
       "Are you sure you want to sign out of your FRESCO account?",
@@ -59,7 +73,7 @@ export const ProfileScreen: React.FC<Props> = ({ navigation }) => {
         },
       ]
     );
-  };
+  }, [logout, isLoading]);
 
   const initials = `${profile?.firstName?.charAt(0) || ""}${
     profile?.lastName?.charAt(0) || ""
@@ -300,6 +314,8 @@ export const ProfileScreen: React.FC<Props> = ({ navigation }) => {
           title="Sign Out"
           variant="outline"
           size="md"
+          loading={isLoading}
+          disabled={isLoading}
           onPress={handleSignOut}
           leftIcon={<Ionicons name="log-out-outline" size={20} color={colors.primary} />}
         />

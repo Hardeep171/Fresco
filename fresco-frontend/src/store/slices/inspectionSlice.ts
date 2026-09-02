@@ -8,7 +8,7 @@ import {
   UpdateInspectionInput,
   InspectionFilters,
 } from "../../types/inspection.types";
-import { logoutUser } from "./authSlice";
+import { logoutUser, logoutSuccess } from "./authSlice";
 
 export interface InspectionState {
   inspections: Inspection[];
@@ -268,6 +268,7 @@ export const inspectionSlice = createSlice({
 
     // LOGOUT RESET
     builder.addCase(logoutUser.fulfilled, () => initialState);
+    builder.addCase(logoutSuccess, () => initialState);
   },
 });
 

@@ -16,6 +16,29 @@ export const authRepository = {
   },
 
   /**
+   * Finds a user document by phone number.
+   *
+   * @param phone - The user's phone number.
+   * @returns Promise resolving to the user document if found, or null.
+   */
+  async findUserByPhone(phone: string) {
+    return UserModel.findOne({ phone }).exec();
+  },
+
+  /**
+   * Finds existing user documents matching either email or phone number.
+   *
+   * @param email - The normalized email to search.
+   * @param phone - The normalized phone to search.
+   * @returns Promise resolving to an array of matching user documents.
+   */
+  async findExistingUsersByEmailOrPhone(email: string, phone: string) {
+    return UserModel.find({
+      $or: [{ email }, { phone }],
+    }).exec();
+  },
+
+  /**
    * Finds a user document by ID following least privilege (no sensitive tokens/passwords selected).
    *
    * @param userId - The user's unique identifier.

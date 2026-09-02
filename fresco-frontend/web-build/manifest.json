@@ -1,0 +1,21 @@
+{
+  "background_color": "#1E3A8A",
+  "display": "standalone",
+  "lang": "en",
+  "name": "FRESCO",
+  "short_name": "FRESCO",
+  "start_url": "/?utm_source=web_app_manifest",
+  "orientation": "portrait",
+  "related_applications": [
+    {
+      "platform": "itunes",
+      "id": "com.fresco.mobile"
+    },
+    {
+      "platform": "play",
+      "url": "http://play.google.com/store/apps/details?id=com.fresco.mobile",
+      "id": "com.fresco.mobile"
+    }
+  ],
+  "prefer_related_applications": true
+}

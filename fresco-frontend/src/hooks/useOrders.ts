@@ -4,6 +4,7 @@ import { useAppSelector } from "./useAppSelector";
 import {
   createOrder,
   fetchUserOrders,
+  fetchAllOrders,
   fetchOrderById,
   cancelUserOrder,
   clearOrderErrors,
@@ -56,6 +57,14 @@ export function useOrders() {
     async (filters?: OrderFilters) => {
       const result = await dispatch(fetchUserOrders(filters));
       return fetchUserOrders.fulfilled.match(result);
+    },
+    [dispatch]
+  );
+
+  const loadAllOrders = useCallback(
+    async (filters?: OrderFilters) => {
+      const result = await dispatch(fetchAllOrders(filters));
+      return fetchAllOrders.fulfilled.match(result);
     },
     [dispatch]
   );
@@ -126,6 +135,7 @@ export function useOrders() {
 
     placeOrder,
     loadUserOrders,
+    loadAllOrders,
     loadOrderById,
     cancelOrder,
     selectOrder,

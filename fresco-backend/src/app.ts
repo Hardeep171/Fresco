@@ -1,6 +1,6 @@
 import compression from "compression";
 import cookieParser from "cookie-parser";
-import cors from "cors";
+import cors, { type CorsOptions } from "cors";
 import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
@@ -13,9 +13,20 @@ import { apiRouter } from "./routes/index.js";
 
 const app = express();
 
+const corsOptions: CorsOptions = {
+  origin: (origin, callback) => {
+    // Allow non-browser requests or requests with no Origin header (e.g. mobile apps, curl, server-to-server)
+    if (!origin || env.corsOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(null, false);
+  },
+  credentials: true,
+};
+
 app.disable("x-powered-by");
 app.use(helmet());
-app.use(cors({ origin: env.corsOrigin }));
+app.use(cors(corsOptions));
 app.use(compression());
 app.use(cookieParser());
 app.use(express.json({ limit: "1mb" }));

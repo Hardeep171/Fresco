@@ -26,6 +26,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 }) => {
   const { colors } = useTheme();
   const effectiveBg = backgroundColor || colors.background;
+  const hasBack = Boolean(showBack && onBackPress);
 
   return (
     <View
@@ -38,7 +39,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         style,
       ]}
     >
-      <View style={styles.leftContainer}>
+      <View style={[styles.leftContainer, !hasBack && styles.emptySideContainer]}>
         {showBack && onBackPress && (
           <AppIconButton
             icon={<Ionicons name="arrow-back" size={24} color={colors.textPrimary} />}
@@ -61,7 +62,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         )}
       </View>
 
-      <View style={styles.rightContainer}>
+      <View style={[styles.rightContainer, !rightAction && styles.emptySideContainer]}>
         {rightAction}
       </View>
     </View>
@@ -74,26 +75,32 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     minHeight: 56,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.sm,
     borderBottomWidth: 1,
   },
   leftContainer: {
-    width: 44,
+    minWidth: 40,
     alignItems: "flex-start",
     justifyContent: "center",
+    flexShrink: 0,
+  },
+  emptySideContainer: {
+    minWidth: 0,
   },
   backButton: {
     marginLeft: -spacing.xs,
   },
   centerContainer: {
     flex: 1,
+    flexShrink: 1,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: spacing.xs,
   },
   rightContainer: {
-    width: 44,
+    minWidth: 40,
     alignItems: "flex-end",
     justifyContent: "center",
+    flexShrink: 0,
   },
 });

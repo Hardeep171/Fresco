@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Alert } from "react-native";
+import { View, StyleSheet, Alert, Platform } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import { ProfileStackParamList } from "../../types/navigation.types";
@@ -96,6 +96,16 @@ export const ChangePasswordScreen: React.FC<Props> = ({ navigation }) => {
     });
 
     if (success) {
+      if (Platform.OS === "web") {
+        if (typeof window !== "undefined" && window.alert) {
+          window.alert(
+            "Your password has been changed successfully. For your security, please sign in again with your new password."
+          );
+        }
+        await logout();
+        return;
+      }
+
       Alert.alert(
         "Password Changed",
         "Your password has been changed successfully. For your security, please sign in again with your new password.",

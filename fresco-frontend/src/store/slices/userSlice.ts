@@ -4,7 +4,7 @@ import { UpdateProfileInput, ChangePasswordInput } from "../../types/user.types"
 import { userApi } from "../../api/user.api";
 import { normalizeApiError } from "../../api/error";
 import { NormalizedApiError } from "../../types/api.types";
-import { setUser } from "./authSlice";
+import { setUser, logoutUser, logoutSuccess } from "./authSlice";
 
 export interface UserState {
   profile: User | null;
@@ -151,6 +151,10 @@ export const userSlice = createSlice({
       state.changePasswordError = action.payload || null;
       state.changePasswordSuccess = false;
     });
+
+    // LOGOUT RESET
+    builder.addCase(logoutUser.fulfilled, () => initialState);
+    builder.addCase(logoutSuccess, () => initialState);
   },
 });
 

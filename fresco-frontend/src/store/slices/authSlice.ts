@@ -111,6 +111,14 @@ export const authSlice = createSlice({
     clearAuthError: (state) => {
       state.error = null;
     },
+    clearAuthFieldError: (state, action: PayloadAction<string>) => {
+      if (state.error?.fieldErrors) {
+        delete state.error.fieldErrors[action.payload];
+        if (Object.keys(state.error.fieldErrors).length === 0) {
+          state.error = null;
+        }
+      }
+    },
     setTokens: (state, action: PayloadAction<AuthTokens>) => {
       state.accessToken = action.payload.accessToken;
       state.refreshToken = action.payload.refreshToken;
@@ -191,7 +199,19 @@ export const authSlice = createSlice({
     });
 
     // LOGOUT
+    builder.addCase(logoutUser.pending, (state) => {
+      state.isLoading = true;
+    });
     builder.addCase(logoutUser.fulfilled, (state) => {
+      state.user = null;
+      state.accessToken = null;
+      state.refreshToken = null;
+      state.isAuthenticated = false;
+      state.isRestoringToken = false;
+      state.isLoading = false;
+      state.error = null;
+    });
+    builder.addCase(logoutUser.rejected, (state) => {
       state.user = null;
       state.accessToken = null;
       state.refreshToken = null;
@@ -203,7 +223,7 @@ export const authSlice = createSlice({
   },
 });
 
-export const { clearAuthError, setTokens, setUser, logoutSuccess } =
+export const { clearAuthError, clearAuthFieldError, setTokens, setUser, logoutSuccess } =
   authSlice.actions;
 
 export default authSlice.reducer;

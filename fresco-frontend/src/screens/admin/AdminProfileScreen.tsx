@@ -2,7 +2,7 @@ import React, { useCallback } from "react";
 import { View, StyleSheet, ScrollView, Alert, Platform, TouchableOpacity } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
-import { PartnerProfileStackParamList } from "../../types/navigation.types";
+import { AdminProfileStackParamList } from "../../types/navigation.types";
 import { useAuth } from "../../hooks/useAuth";
 import {
   AppText,
@@ -16,9 +16,9 @@ import {
 import { useTheme, spacing, radius } from "../../theme";
 import { formatPhone } from "../../utils/formatters";
 
-type Props = NativeStackScreenProps<PartnerProfileStackParamList, "PartnerProfileScreen">;
+type Props = NativeStackScreenProps<AdminProfileStackParamList, "AdminProfileScreen">;
 
-export const PartnerProfileScreen: React.FC<Props> = ({ navigation }) => {
+export const AdminProfileScreen: React.FC<Props> = ({ navigation }) => {
   const { user, logout, isLoading } = useAuth();
   const { colors, isDark, mode } = useTheme();
 
@@ -27,7 +27,7 @@ export const PartnerProfileScreen: React.FC<Props> = ({ navigation }) => {
 
     if (Platform.OS === "web") {
       if (typeof window !== "undefined" && window.confirm) {
-        if (window.confirm("Are you sure you want to sign out from your partner account?")) {
+        if (window.confirm("Are you sure you want to sign out from the administrative session?")) {
           logout();
         }
       } else {
@@ -38,7 +38,7 @@ export const PartnerProfileScreen: React.FC<Props> = ({ navigation }) => {
 
     Alert.alert(
       "Sign Out",
-      "Are you sure you want to sign out from your partner account?",
+      "Are you sure you want to sign out from the administrative session?",
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -54,7 +54,7 @@ export const PartnerProfileScreen: React.FC<Props> = ({ navigation }) => {
 
   const fullName = user
     ? `${user.firstName} ${user.lastName}`.trim()
-    : "Delivery Partner";
+    : "Administrator";
 
   const themeLabel =
     mode === "system"
@@ -66,7 +66,7 @@ export const PartnerProfileScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <ScreenContainer scrollable={false}>
       <AppHeader
-        title="Partner Profile"
+        title="Admin Profile"
         showBack={false}
       />
 
@@ -78,7 +78,7 @@ export const PartnerProfileScreen: React.FC<Props> = ({ navigation }) => {
         <AppCard variant="elevated" padding="lg" style={styles.summaryCard}>
           <View style={styles.avatarRow}>
             <View style={[styles.avatarCircle, { backgroundColor: colors.primarySurface }]}>
-              <Ionicons name="person" size={36} color={colors.primary} />
+              <Ionicons name="shield-checkmark" size={36} color={colors.primary} />
             </View>
 
             <View style={styles.nameContainer}>
@@ -86,10 +86,10 @@ export const PartnerProfileScreen: React.FC<Props> = ({ navigation }) => {
                 {fullName}
               </AppText>
               <AppText variant="caption" color="secondary" style={styles.emailText}>
-                {user?.email || "partner@fresco.com"}
+                {user?.email || "admin@fresco.com"}
               </AppText>
               <View style={styles.badgeRow}>
-                <AppBadge label="DELIVERY PARTNER" variant="primary" size="sm" />
+                <AppBadge label={user?.role || "ADMIN"} variant="primary" size="sm" />
                 <AppBadge label="ACTIVE" variant="success" size="sm" showDot />
               </View>
             </View>
@@ -99,8 +99,24 @@ export const PartnerProfileScreen: React.FC<Props> = ({ navigation }) => {
         {/* ACCOUNT INFORMATION */}
         <AppCard variant="outlined" padding="md" style={styles.sectionCard}>
           <AppText variant="label" color="secondary" style={styles.sectionTitle}>
-            ACCOUNT DETAILS
+            ADMINISTRATOR DETAILS
           </AppText>
+
+          <View style={styles.infoRow}>
+            <View style={styles.infoIconCol}>
+              <Ionicons name="mail-outline" size={18} color={colors.primary} />
+            </View>
+            <View style={styles.infoTextCol}>
+              <AppText variant="caption" color="muted">
+                Admin Email
+              </AppText>
+              <AppText variant="bodyMedium" color="primary">
+                {user?.email || "admin@fresco.com"}
+              </AppText>
+            </View>
+          </View>
+
+          <AppDivider spacing="sm" />
 
           <View style={styles.infoRow}>
             <View style={styles.infoIconCol}>
@@ -120,14 +136,14 @@ export const PartnerProfileScreen: React.FC<Props> = ({ navigation }) => {
 
           <View style={styles.infoRow}>
             <View style={styles.infoIconCol}>
-              <Ionicons name="mail-outline" size={18} color={colors.primary} />
+              <Ionicons name="key-outline" size={18} color={colors.primary} />
             </View>
             <View style={styles.infoTextCol}>
               <AppText variant="caption" color="muted">
-                Registered Email
+                Authorization Scope
               </AppText>
               <AppText variant="bodyMedium" color="primary">
-                {user?.email || "N/A"}
+                System Administration & Operations Control
               </AppText>
             </View>
           </View>
@@ -163,34 +179,6 @@ export const PartnerProfileScreen: React.FC<Props> = ({ navigation }) => {
             </View>
             <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
           </TouchableOpacity>
-        </AppCard>
-
-        {/* PARTNER DISPATCH GUIDELINES */}
-        <AppCard variant="outlined" padding="md" style={styles.sectionCard}>
-          <AppText variant="label" color="secondary" style={styles.sectionTitle}>
-            DISPATCH GUIDELINES & PROTOCOL
-          </AppText>
-
-          <View style={styles.protocolRow}>
-            <Ionicons name="checkmark-circle-outline" size={18} color={colors.success} style={styles.protocolIcon} />
-            <AppText variant="caption" color="secondary" style={styles.protocolText}>
-              Always verify garment count at customer doorstep during pickup.
-            </AppText>
-          </View>
-
-          <View style={styles.protocolRow}>
-            <Ionicons name="checkmark-circle-outline" size={18} color={colors.success} style={styles.protocolIcon} />
-            <AppText variant="caption" color="secondary" style={styles.protocolText}>
-              Check fabric care notes from the customer prior to collection.
-            </AppText>
-          </View>
-
-          <View style={styles.protocolRow}>
-            <Ionicons name="checkmark-circle-outline" size={18} color={colors.success} style={styles.protocolIcon} />
-            <AppText variant="caption" color="secondary" style={styles.protocolText}>
-              Mark tasks completed in the app promptly upon delivery.
-            </AppText>
-          </View>
         </AppCard>
 
         {/* LOGOUT BUTTON */}
@@ -283,19 +271,6 @@ const styles = StyleSheet.create({
   infoTextCol: {
     flex: 1,
     marginLeft: spacing.xs,
-  },
-  protocolRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    paddingVertical: spacing.xxs,
-  },
-  protocolIcon: {
-    marginRight: spacing.xs,
-    marginTop: 2,
-  },
-  protocolText: {
-    flex: 1,
-    lineHeight: 18,
   },
   logoutContainer: {
     marginTop: spacing.md,

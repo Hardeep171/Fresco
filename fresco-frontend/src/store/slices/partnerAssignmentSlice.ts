@@ -8,7 +8,7 @@ import { Order } from "../../types/order.types";
 import {
   AssignmentFilterTab,
 } from "../../constants/assignment.constants";
-import { logoutUser } from "./authSlice";
+import { logoutUser, logoutSuccess } from "./authSlice";
 
 
 export interface PartnerAssignmentState {
@@ -227,6 +227,7 @@ export const partnerAssignmentSlice = createSlice({
 
     // LOGOUT RESET
     builder.addCase(logoutUser.fulfilled, () => initialState);
+    builder.addCase(logoutSuccess, () => initialState);
   },
 });
 

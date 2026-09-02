@@ -12,7 +12,7 @@ import {
 import { paymentApi } from "../../api/payment.api";
 import { normalizeApiError } from "../../api/error";
 import { NormalizedApiError } from "../../types/api.types";
-import { logoutUser } from "./authSlice";
+import { logoutUser, logoutSuccess } from "./authSlice";
 
 export interface PaymentState {
   currentPayment: Payment | null;
@@ -312,6 +312,7 @@ export const paymentSlice = createSlice({
 
     // LOGOUT RESET
     builder.addCase(logoutUser.fulfilled, () => initialState);
+    builder.addCase(logoutSuccess, () => initialState);
   },
 });
 

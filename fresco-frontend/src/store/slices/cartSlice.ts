@@ -3,6 +3,7 @@ import { Cart, AddCartItemInput } from "../../types/cart.types";
 import { cartApi } from "../../api/cart.api";
 import { normalizeApiError } from "../../api/error";
 import { NormalizedApiError } from "../../types/api.types";
+import { logoutUser, logoutSuccess } from "./authSlice";
 
 export interface CartState {
   cart: Cart | null;
@@ -205,6 +206,10 @@ export const cartSlice = createSlice({
       state.isMutating = false;
       state.mutationError = action.payload || null;
     });
+
+    // LOGOUT RESET
+    builder.addCase(logoutUser.fulfilled, () => initialState);
+    builder.addCase(logoutSuccess, () => initialState);
   },
 });
 

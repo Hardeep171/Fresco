@@ -44,7 +44,9 @@ export const registerSchema = z.object({
     .trim()
     .min(10, { error: "Phone number must be at least 10 digits long." })
     .max(15, { error: "Phone number cannot exceed 15 digits." })
-    .regex(/^\d+$/, { error: "Phone number must contain only digits." }),
+    .regex(/^\+?[1-9]\d{7,14}$|^\d{10,15}$/, {
+      error: "Phone number must be a valid phone number.",
+    }),
 });
 
 /**
