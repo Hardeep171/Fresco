@@ -1,4 +1,10 @@
+import { webcrypto } from "node:crypto";
+if (typeof globalThis.crypto === "undefined" || !(globalThis as any).crypto?.getRandomValues) {
+  (globalThis as any).crypto = webcrypto;
+}
+
 import compression from "compression";
+
 import cookieParser from "cookie-parser";
 import cors, { type CorsOptions } from "cors";
 import express from "express";

@@ -141,6 +141,38 @@ export const cancelUserOrder = createAsyncThunk<
   }
 });
 
+/**
+ * Async thunk for Admin to update order lifecycle status.
+ */
+export const updateOrderStatusAction = createAsyncThunk<
+  Order,
+  { id: string; status: string },
+  { rejectValue: NormalizedApiError }
+>("order/updateOrderStatus", async ({ id, status }, { rejectWithValue }) => {
+  try {
+    const order = await orderApi.updateOrderStatus(id, status);
+    return order;
+  } catch (error: unknown) {
+    return rejectWithValue(normalizeApiError(error));
+  }
+});
+
+/**
+ * Async thunk for Admin to update order payment status.
+ */
+export const updatePaymentStatusAction = createAsyncThunk<
+  Order,
+  { id: string; paymentStatus: string },
+  { rejectValue: NormalizedApiError }
+>("order/updatePaymentStatus", async ({ id, paymentStatus }, { rejectWithValue }) => {
+  try {
+    const order = await orderApi.updatePaymentStatus(id, paymentStatus);
+    return order;
+  } catch (error: unknown) {
+    return rejectWithValue(normalizeApiError(error));
+  }
+});
+
 export const orderSlice = createSlice({
   name: "order",
   initialState,
@@ -282,6 +314,24 @@ export const orderSlice = createSlice({
       state.cancelSuccess = false;
       state.cancelError = action.payload || null;
       state.error = action.payload || null;
+    });
+
+    // ADMIN UPDATE ORDER STATUS
+    builder.addCase(updateOrderStatusAction.fulfilled, (state, action) => {
+      state.currentOrder = action.payload;
+      const index = state.orders.findIndex((o) => o._id === action.payload._id);
+      if (index !== -1) {
+        state.orders[index] = action.payload;
+      }
+    });
+
+    // ADMIN UPDATE PAYMENT STATUS
+    builder.addCase(updatePaymentStatusAction.fulfilled, (state, action) => {
+      state.currentOrder = action.payload;
+      const index = state.orders.findIndex((o) => o._id === action.payload._id);
+      if (index !== -1) {
+        state.orders[index] = action.payload;
+      }
     });
 
     // LOGOUT RESET

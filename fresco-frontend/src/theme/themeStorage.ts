@@ -31,7 +31,9 @@ export const themeStorage = {
   async saveThemeMode(mode: ThemeMode): Promise<void> {
     inMemoryThemeMode = mode;
     try {
-      if (platformOS !== "web" && platformOS !== "node" && secureStoreModule) {
+      if (typeof window !== "undefined" && window.localStorage) {
+        window.localStorage.setItem(THEME_MODE_STORAGE_KEY, mode);
+      } else if (platformOS !== "web" && platformOS !== "node" && secureStoreModule) {
         await secureStoreModule.setItemAsync(THEME_MODE_STORAGE_KEY, mode);
       }
     } catch (error) {
@@ -47,7 +49,13 @@ export const themeStorage = {
       return inMemoryThemeMode;
     }
     try {
-      if (platformOS !== "web" && platformOS !== "node" && secureStoreModule) {
+      if (typeof window !== "undefined" && window.localStorage) {
+        const stored = window.localStorage.getItem(THEME_MODE_STORAGE_KEY);
+        if (stored === "light" || stored === "dark" || stored === "system") {
+          inMemoryThemeMode = stored as ThemeMode;
+          return stored as ThemeMode;
+        }
+      } else if (platformOS !== "web" && platformOS !== "node" && secureStoreModule) {
         const stored = await secureStoreModule.getItemAsync(THEME_MODE_STORAGE_KEY);
         if (stored === "light" || stored === "dark" || stored === "system") {
           inMemoryThemeMode = stored as ThemeMode;

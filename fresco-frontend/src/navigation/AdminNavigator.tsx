@@ -7,12 +7,20 @@ import {
   AdminTabParamList,
   AdminStackParamList,
   AdminOrdersStackParamList,
+  AdminCatalogStackParamList,
   AdminAssignmentsStackParamList,
   AdminProfileStackParamList,
 } from "../types/navigation.types";
 import {
   AdminDashboardScreen,
   AdminProfileScreen,
+  AdminCatalogScreen,
+  AdminCategoriesScreen,
+  AdminGarmentsScreen,
+  AdminServicesScreen,
+  AdminPricingScreen,
+  AdminCustomersScreen,
+  AdminPartnersScreen,
 } from "../screens/admin";
 import { OrderHistoryScreen, OrderDetailsScreen } from "../screens/orders";
 import {
@@ -30,6 +38,7 @@ import { useTheme, colors, typography, spacing } from "../theme";
 const Tab = createBottomTabNavigator<AdminTabParamList>();
 const DashboardStack = createNativeStackNavigator<AdminStackParamList>();
 const OrdersStack = createNativeStackNavigator<AdminOrdersStackParamList>();
+const CatalogStack = createNativeStackNavigator<AdminCatalogStackParamList>();
 const AssignmentsStack = createNativeStackNavigator<AdminAssignmentsStackParamList>();
 const ProfileStack = createNativeStackNavigator<AdminProfileStackParamList>();
 
@@ -63,6 +72,34 @@ const DashboardStackNavigator: React.FC = () => {
         name="InspectionFormScreen"
         component={InspectionFormScreen}
       />
+      <DashboardStack.Screen
+        name="AdminCatalogScreen"
+        component={AdminCatalogScreen}
+      />
+      <DashboardStack.Screen
+        name="AdminCategoriesScreen"
+        component={AdminCategoriesScreen}
+      />
+      <DashboardStack.Screen
+        name="AdminGarmentsScreen"
+        component={AdminGarmentsScreen}
+      />
+      <DashboardStack.Screen
+        name="AdminServicesScreen"
+        component={AdminServicesScreen}
+      />
+      <DashboardStack.Screen
+        name="AdminPricingScreen"
+        component={AdminPricingScreen}
+      />
+      <DashboardStack.Screen
+        name="AdminCustomersScreen"
+        component={AdminCustomersScreen}
+      />
+      <DashboardStack.Screen
+        name="AdminPartnersScreen"
+        component={AdminPartnersScreen}
+      />
     </DashboardStack.Navigator>
   );
 };
@@ -90,6 +127,36 @@ const OrdersStackNavigator: React.FC = () => {
         component={InspectionFormScreen}
       />
     </OrdersStack.Navigator>
+  );
+};
+
+const CatalogStackNavigator: React.FC = () => {
+  return (
+    <CatalogStack.Navigator
+      initialRouteName="AdminCatalogScreen"
+      screenOptions={{ headerShown: false, animation: "slide_from_right" }}
+    >
+      <CatalogStack.Screen
+        name="AdminCatalogScreen"
+        component={AdminCatalogScreen}
+      />
+      <CatalogStack.Screen
+        name="AdminCategoriesScreen"
+        component={AdminCategoriesScreen}
+      />
+      <CatalogStack.Screen
+        name="AdminGarmentsScreen"
+        component={AdminGarmentsScreen}
+      />
+      <CatalogStack.Screen
+        name="AdminServicesScreen"
+        component={AdminServicesScreen}
+      />
+      <CatalogStack.Screen
+        name="AdminPricingScreen"
+        component={AdminPricingScreen}
+      />
+    </CatalogStack.Navigator>
   );
 };
 
@@ -187,6 +254,20 @@ export const AdminNavigator: React.FC = () => {
         }}
       />
       <Tab.Screen
+        name="AdminCatalogTab"
+        component={CatalogStackNavigator}
+        options={{
+          tabBarLabel: "Catalog",
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "shirt" : "shirt-outline"}
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
         name="AdminAssignmentsTab"
         component={AssignmentsStackNavigator}
         options={{
@@ -217,6 +298,7 @@ export const AdminNavigator: React.FC = () => {
     </Tab.Navigator>
   );
 };
+
 
 const styles = StyleSheet.create({
   tabBar: {

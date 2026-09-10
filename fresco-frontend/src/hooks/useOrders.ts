@@ -7,6 +7,8 @@ import {
   fetchAllOrders,
   fetchOrderById,
   cancelUserOrder,
+  updateOrderStatusAction,
+  updatePaymentStatusAction,
   clearOrderErrors,
   clearCreatedOrder,
   setCurrentOrder,
@@ -85,6 +87,24 @@ export function useOrders() {
     [dispatch]
   );
 
+  const updateOrderStatus = useCallback(
+    async (id: string, status: string) => {
+      const result = await dispatch(updateOrderStatusAction({ id, status }));
+      return updateOrderStatusAction.fulfilled.match(result);
+    },
+    [dispatch]
+  );
+
+  const updatePaymentStatus = useCallback(
+    async (id: string, paymentStatus: string) => {
+      const result = await dispatch(
+        updatePaymentStatusAction({ id, paymentStatus })
+      );
+      return updatePaymentStatusAction.fulfilled.match(result);
+    },
+    [dispatch]
+  );
+
   const selectOrder = useCallback(
     (order: Order | null) => {
       dispatch(setCurrentOrder(order));
@@ -138,6 +158,8 @@ export function useOrders() {
     loadAllOrders,
     loadOrderById,
     cancelOrder,
+    updateOrderStatus,
+    updatePaymentStatus,
     selectOrder,
     setStatusFilter,
     clearCancel,

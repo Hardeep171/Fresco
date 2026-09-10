@@ -187,5 +187,35 @@ export const userService = {
 
     // TODO: EmailService will send confirmation/welcome email upon successful email verification
   },
+
+  /**
+   * Admin: Retrieves users matching optional query filters.
+   */
+  async getUsers(filters: { role?: string; status?: string; search?: string }) {
+    return userRepository.findUsers(filters);
+  },
+
+  /**
+   * Admin: Updates account status for a specific user.
+   */
+  async updateUserStatus(userId: string, status: string) {
+    const user = await userRepository.findUserById(userId);
+    if (!user) {
+      throw new ApiError(StatusCodes.NOT_FOUND, "User not found");
+    }
+    const updatedUser = await userRepository.updateUserStatus(userId, status);
+    if (!updatedUser) {
+      throw new ApiError(StatusCodes.NOT_FOUND, "User not found");
+    }
+    return updatedUser;
+  },
+
+  /**
+   * Admin: Retrieves platform operational statistics.
+   */
+  async getAdminStats() {
+    return userRepository.getAdminStats();
+  },
 };
+
 

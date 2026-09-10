@@ -13,6 +13,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useOrders } from "../../hooks/useOrders";
 import { usePartnerAssignments } from "../../hooks/usePartnerAssignments";
 import { useDeliveryTasks } from "../../hooks/useDeliveryTasks";
+import { useAdminUsers } from "../../hooks/useAdminUsers";
 import {
   AppText,
   AppHeader,
@@ -32,6 +33,7 @@ export const AdminDashboardScreen: React.FC<Props> = ({ navigation }) => {
   const { orders, loadAllOrders, isLoading: isOrdersLoading } = useOrders();
   const { assignments, loadAssignments, isFetchingAssignments } = usePartnerAssignments();
   const { tasks, loadTasks, isFetchingTasks } = useDeliveryTasks();
+  const { stats, loadStats } = useAdminUsers();
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -39,13 +41,14 @@ export const AdminDashboardScreen: React.FC<Props> = ({ navigation }) => {
     loadAllOrders();
     loadAssignments();
     loadTasks();
-  }, [loadAllOrders, loadAssignments, loadTasks]);
+    loadStats();
+  }, [loadAllOrders, loadAssignments, loadTasks, loadStats]);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([loadAllOrders(), loadAssignments(), loadTasks()]);
+    await Promise.all([loadAllOrders(), loadAssignments(), loadTasks(), loadStats()]);
     setRefreshing(false);
-  }, [loadAllOrders, loadAssignments, loadTasks]);
+  }, [loadAllOrders, loadAssignments, loadTasks, loadStats]);
 
   // Operational metrics
   const activeOrders = useMemo(
@@ -128,6 +131,51 @@ export const AdminDashboardScreen: React.FC<Props> = ({ navigation }) => {
             OPERATIONAL METRICS
           </AppText>
 
+          {/* USER & PARTNER METRICS */}
+          <View style={styles.metricGrid}>
+            <TouchableOpacity
+              style={styles.metricCardTouchable}
+              activeOpacity={0.7}
+              onPress={() => navigation.navigate("AdminCustomersScreen")}
+            >
+              <AppCard variant="outlined" padding="md" style={styles.metricCard}>
+                <View style={styles.metricHeader}>
+                  <AppText variant="caption" color="secondary">
+                    Total Customers
+                  </AppText>
+                  <Ionicons name="people-outline" size={18} color={colors.primary} />
+                </View>
+                <AppText variant="h1" color="primary" style={styles.metricValue}>
+                  {stats?.totalCustomers ?? 0}
+                </AppText>
+                <AppText variant="caption" color="muted">
+                  {stats?.activeCustomers ?? 0} active accounts
+                </AppText>
+              </AppCard>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.metricCardTouchable}
+              activeOpacity={0.7}
+              onPress={() => navigation.navigate("AdminPartnersScreen")}
+            >
+              <AppCard variant="outlined" padding="md" style={styles.metricCard}>
+                <View style={styles.metricHeader}>
+                  <AppText variant="caption" color="secondary">
+                    Delivery Partners
+                  </AppText>
+                  <Ionicons name="bicycle-outline" size={18} color={colors.primary} />
+                </View>
+                <AppText variant="h1" color="primary" style={styles.metricValue}>
+                  {stats?.totalPartners ?? 0}
+                </AppText>
+                <AppText variant="caption" color="muted">
+                  {stats?.activePartners ?? 0} active fleet
+                </AppText>
+              </AppCard>
+            </TouchableOpacity>
+          </View>
+
           <View style={styles.metricGrid}>
             <AppCard variant="outlined" padding="md" style={styles.metricCard}>
               <View style={styles.metricHeader}>
@@ -137,10 +185,10 @@ export const AdminDashboardScreen: React.FC<Props> = ({ navigation }) => {
                 <Ionicons name="receipt-outline" size={18} color={colors.primary} />
               </View>
               <AppText variant="h1" color="primary" style={styles.metricValue}>
-                {activeOrders.length}
+                {stats?.activeOrders ?? activeOrders.length}
               </AppText>
               <AppText variant="caption" color="muted">
-                {orders.length} total orders
+                {stats?.totalOrders ?? orders.length} total orders
               </AppText>
             </AppCard>
 
@@ -152,7 +200,7 @@ export const AdminDashboardScreen: React.FC<Props> = ({ navigation }) => {
                 <Ionicons name="checkmark-done-circle-outline" size={18} color={colors.success} />
               </View>
               <AppText variant="h1" color="success" style={styles.metricValue}>
-                {completedOrders.length}
+                {stats?.completedOrders ?? completedOrders.length}
               </AppText>
               <AppText variant="caption" color="muted">
                 Fulfilled deliveries
@@ -209,12 +257,165 @@ export const AdminDashboardScreen: React.FC<Props> = ({ navigation }) => {
             </View>
           </AppCard>
 
+          {/* CATALOG MANAGEMENT QUICK ACCESS */}
+          <View style={styles.sectionHeaderRow}>
+            <AppText variant="label" color="secondary" style={styles.sectionTitle}>
+              CATALOG MANAGEMENT
+            </AppText>
+          </View>
+
+          <View style={styles.catalogGrid}>
+            <TouchableOpacity
+              style={styles.catalogCardTouchable}
+              activeOpacity={0.7}
+              onPress={() =>
+                navigation.navigate("AdminCatalogScreen", { initialTab: "categories" })
+              }
+            >
+              <AppCard variant="outlined" padding="sm" style={styles.catalogCard}>
+                <View style={[styles.catalogIconCircle, { backgroundColor: colors.primarySurface }]}>
+                  <Ionicons name="file-tray-stacked-outline" size={20} color={colors.primary} />
+                </View>
+                <View style={styles.catalogCardTextCol}>
+                  <AppText variant="bodyBold" color="primary">
+                    Categories
+                  </AppText>
+                  <AppText variant="caption" color="secondary">
+                    View, create & reorder
+                  </AppText>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+              </AppCard>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.catalogCardTouchable}
+              activeOpacity={0.7}
+              onPress={() =>
+                navigation.navigate("AdminCatalogScreen", { initialTab: "garments" })
+              }
+            >
+              <AppCard variant="outlined" padding="sm" style={styles.catalogCard}>
+                <View style={[styles.catalogIconCircle, { backgroundColor: colors.primarySurface }]}>
+                  <Ionicons name="shirt-outline" size={20} color={colors.primary} />
+                </View>
+                <View style={styles.catalogCardTextCol}>
+                  <AppText variant="bodyBold" color="primary">
+                    Garments
+                  </AppText>
+                  <AppText variant="caption" color="secondary">
+                    Items & category filter
+                  </AppText>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+              </AppCard>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.catalogCardTouchable}
+              activeOpacity={0.7}
+              onPress={() =>
+                navigation.navigate("AdminCatalogScreen", { initialTab: "services" })
+              }
+            >
+              <AppCard variant="outlined" padding="sm" style={styles.catalogCard}>
+                <View style={[styles.catalogIconCircle, { backgroundColor: colors.primarySurface }]}>
+                  <Ionicons name="water-outline" size={20} color={colors.primary} />
+                </View>
+                <View style={styles.catalogCardTextCol}>
+                  <AppText variant="bodyBold" color="primary">
+                    Services
+                  </AppText>
+                  <AppText variant="caption" color="secondary">
+                    Wash, iron & dry clean
+                  </AppText>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+              </AppCard>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.catalogCardTouchable}
+              activeOpacity={0.7}
+              onPress={() =>
+                navigation.navigate("AdminCatalogScreen", { initialTab: "pricing" })
+              }
+            >
+              <AppCard variant="outlined" padding="sm" style={styles.catalogCard}>
+                <View style={[styles.catalogIconCircle, { backgroundColor: colors.primarySurface }]}>
+                  <Ionicons name="pricetags-outline" size={20} color={colors.primary} />
+                </View>
+                <View style={styles.catalogCardTextCol}>
+                  <AppText variant="bodyBold" color="primary">
+                    Pricing Matrix
+                  </AppText>
+                  <AppText variant="caption" color="secondary">
+                    Garment × service rates
+                  </AppText>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+              </AppCard>
+            </TouchableOpacity>
+          </View>
+
+          {/* USER & FLEET MANAGEMENT QUICK ACCESS */}
+          <View style={styles.sectionHeaderRow}>
+            <AppText variant="label" color="secondary" style={styles.sectionTitle}>
+              USER & FLEET MANAGEMENT
+            </AppText>
+          </View>
+
+          <View style={styles.catalogGrid}>
+            <TouchableOpacity
+              style={styles.catalogCardTouchable}
+              activeOpacity={0.7}
+              onPress={() => navigation.navigate("AdminCustomersScreen")}
+            >
+              <AppCard variant="outlined" padding="sm" style={styles.catalogCard}>
+                <View style={[styles.catalogIconCircle, { backgroundColor: colors.primarySurface }]}>
+                  <Ionicons name="people-outline" size={20} color={colors.primary} />
+                </View>
+                <View style={styles.catalogCardTextCol}>
+                  <AppText variant="bodyBold" color="primary">
+                    Customers
+                  </AppText>
+                  <AppText variant="caption" color="secondary">
+                    Accounts & status
+                  </AppText>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+              </AppCard>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.catalogCardTouchable}
+              activeOpacity={0.7}
+              onPress={() => navigation.navigate("AdminPartnersScreen")}
+            >
+              <AppCard variant="outlined" padding="sm" style={styles.catalogCard}>
+                <View style={[styles.catalogIconCircle, { backgroundColor: colors.primarySurface }]}>
+                  <Ionicons name="bicycle-outline" size={20} color={colors.primary} />
+                </View>
+                <View style={styles.catalogCardTextCol}>
+                  <AppText variant="bodyBold" color="primary">
+                    Delivery Partners
+                  </AppText>
+                  <AppText variant="caption" color="secondary">
+                    Fleet & assignments
+                  </AppText>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+              </AppCard>
+            </TouchableOpacity>
+          </View>
+
           {/* RECENT ORDERS FEED */}
           <View style={styles.sectionHeaderRow}>
             <AppText variant="label" color="secondary" style={styles.sectionTitle}>
               RECENT ORDERS ({orders.length})
             </AppText>
           </View>
+
 
           {orders.length === 0 ? (
             <AppCard variant="outlined" padding="md" style={styles.emptyCard}>
@@ -328,6 +529,9 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     marginBottom: spacing.md,
   },
+  metricCardTouchable: {
+    flex: 1,
+  },
   metricCard: {
     flex: 1,
   },
@@ -384,5 +588,27 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.borderLight,
     paddingTop: spacing.xs,
+  },
+  catalogGrid: {
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+  },
+  catalogCardTouchable: {
+    width: "100%",
+  },
+  catalogCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+  catalogIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  catalogCardTextCol: {
+    flex: 1,
   },
 });

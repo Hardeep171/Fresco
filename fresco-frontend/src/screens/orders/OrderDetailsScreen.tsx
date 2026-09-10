@@ -6,6 +6,7 @@ import {
   RefreshControl,
   ScrollView,
   TouchableOpacity,
+  Modal,
 } from "react-native";
 
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -15,8 +16,13 @@ import {
   ORDER_STATUS_LABELS,
   isOrderCancellable,
 } from "../../constants/order.constants";
+import { ADMIN_ROLES } from "../../constants/user.constants";
 import { useOrders } from "../../hooks/useOrders";
 import { usePayment } from "../../hooks/usePayment";
+import { useAuth } from "../../hooks/useAuth";
+import { userApi } from "../../api/user.api";
+import { assignmentApi } from "../../api/assignment.api";
+import { User } from "../../types/auth.types";
 import {
   AppText,
   AppButton,
@@ -40,10 +46,28 @@ import {
 import { useTheme, colors, spacing, radius, shadows } from "../../theme";
 import { formatDate, formatDateTime, formatPhone } from "../../utils/formatters";
 
+const ALLOWED_ADMIN_STATUSES: Record<string, string[]> = {
+  PLACED: ["CONFIRMED", "CANCELLED"],
+  CONFIRMED: ["PICKUP_ASSIGNED", "CANCELLED"],
+  PICKUP_ASSIGNED: ["PICKED_UP"],
+  PICKED_UP: ["UNDER_INSPECTION"],
+  UNDER_INSPECTION: ["IN_PROCESS"],
+  IN_PROCESS: ["READY_FOR_DELIVERY"],
+  READY_FOR_DELIVERY: ["OUT_FOR_DELIVERY"],
+  OUT_FOR_DELIVERY: ["DELIVERED"],
+  DELIVERED: [],
+  CANCELLED: [],
+};
+
 type Props = NativeStackScreenProps<OrdersStackParamList, "OrderDetailsScreen">;
 
 export const OrderDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
   const { colors } = useTheme();
+  const { user } = useAuth();
+  const isAdmin = Boolean(
+    user?.role && (ADMIN_ROLES as readonly string[]).includes(user.role)
+  );
+
   const { orderId } = route.params;
   const {
     currentOrder,
@@ -53,6 +77,8 @@ export const OrderDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
     cancelError,
     loadOrderById,
     cancelOrder,
+    updateOrderStatus,
+    updatePaymentStatus,
     clearCancel,
   } = useOrders();
 
@@ -64,6 +90,10 @@ export const OrderDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
   } = usePayment();
 
   const [refreshing, setRefreshing] = useState(false);
+  const [isAssignModalVisible, setIsAssignModalVisible] = useState(false);
+  const [partners, setPartners] = useState<User[]>([]);
+  const [isLoadingPartners, setIsLoadingPartners] = useState(false);
+  const [isAssigning, setIsAssigning] = useState(false);
   const isCancellingRef = useRef(false);
 
   // Fetch order details & payment on mount
@@ -81,6 +111,93 @@ export const OrderDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
     ]);
     setRefreshing(false);
   }, [orderId, loadOrderById, loadPaymentByOrderId]);
+
+  const handleOpenAssignModal = useCallback(async () => {
+    setIsLoadingPartners(true);
+    setIsAssignModalVisible(true);
+    try {
+      const list = await userApi.getUsers({ role: "DELIVERY_PARTNER", status: "ACTIVE" });
+      setPartners(list);
+    } catch {
+      setPartners([]);
+    } finally {
+      setIsLoadingPartners(false);
+    }
+  }, []);
+
+  const handleAssignPartner = useCallback(
+    async (partner: User) => {
+      setIsAssigning(true);
+      try {
+        const assignmentType =
+          currentOrder?.status === "READY_FOR_DELIVERY" || currentOrder?.status === "OUT_FOR_DELIVERY"
+            ? "DELIVERY"
+            : "PICKUP";
+        await assignmentApi.assignPartner({
+          orderId,
+          partnerId: partner._id,
+          deliveryPartnerId: partner._id,
+          assignmentType,
+        });
+        setIsAssignModalVisible(false);
+        Alert.alert(
+          "Partner Assigned",
+          `Assigned ${partner.firstName} ${partner.lastName} successfully!`
+        );
+        await loadOrderById(orderId);
+      } catch (err: any) {
+        Alert.alert("Assignment Error", err?.message || "Failed to assign partner.");
+      } finally {
+        setIsAssigning(false);
+      }
+    },
+    [orderId, loadOrderById]
+  );
+
+  const handleAdminUpdateStatus = useCallback(
+    (nextStatus: string) => {
+      Alert.alert(
+        "Update Order Status",
+        `Transition order to "${nextStatus}"?`,
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Update Status",
+            onPress: async () => {
+              const success = await updateOrderStatus(orderId, nextStatus);
+              if (success) {
+                await loadOrderById(orderId);
+              }
+            },
+          },
+        ]
+      );
+    },
+    [orderId, updateOrderStatus, loadOrderById]
+  );
+
+  const handleAdminUpdatePayment = useCallback(
+    (paymentStatus: string) => {
+      Alert.alert(
+        "Update Payment Status",
+        `Set payment status to "${paymentStatus}"?`,
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Update Payment",
+            onPress: async () => {
+              const success = await updatePaymentStatus(orderId, paymentStatus);
+              if (success) {
+                await loadOrderById(orderId);
+                await loadPaymentByOrderId(orderId);
+              }
+            },
+          },
+        ]
+      );
+    },
+    [orderId, updatePaymentStatus, loadOrderById, loadPaymentByOrderId]
+  );
 
   // Cancel order with confirmation modal
   const handleCancelOrder = useCallback(() => {
@@ -418,43 +535,266 @@ export const OrderDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
             ) : null}
           </AppCard>
 
-          {/* CANCELLATION ACTIONS */}
-          {canCancel ? (
-            <AppCard variant="outlined" padding="md" style={styles.cancelCard}>
-              <View style={styles.cancelContent}>
-                <AppText variant="bodyBold" color="error">
-                  Need to cancel this order?
+          {/* ADMIN OPERATIONS PANEL OR CUSTOMER CANCELLATION */}
+          {isAdmin ? (
+            <AppCard variant="elevated" padding="md" style={styles.adminPanelCard}>
+              <View style={styles.adminPanelHeader}>
+                <Ionicons name="shield-checkmark" size={20} color={colors.primary} />
+                <AppText variant="h3" color="primary" style={styles.adminPanelTitle}>
+                  Admin Operations & Dispatch
                 </AppText>
-                <AppText variant="caption" color="secondary" style={styles.cancelNotice}>
-                  You can cancel your order free of charge before pickup partner assignment.
+              </View>
+
+              <AppDivider spacing="sm" />
+
+              {/* CUSTOMER CONTACT OPERATIONS */}
+              <View style={styles.adminField}>
+                <AppText variant="caption" color="muted">
+                  Customer Operations Contact:
                 </AppText>
+                <AppText variant="bodyBold" color="primary">
+                  {order.deliveryAddress?.fullName || "Customer"} • {order.deliveryAddress?.phone ? formatPhone(order.deliveryAddress.phone) : "No Phone"}
+                </AppText>
+              </View>
+
+              <AppDivider spacing="xs" />
+
+              {/* ADVANCE ORDER STATUS */}
+              <View style={styles.adminField}>
+                <AppText variant="caption" color="muted">
+                  Current Status:
+                </AppText>
+                <View style={styles.statusBadgeRow}>
+                  <AppBadge label={order.status} variant="primary" size="md" />
+                </View>
+
+                {(() => {
+                  const allowedNext = ALLOWED_ADMIN_STATUSES[order.status] || [];
+                  if (allowedNext.length === 0) {
+                    return (
+                      <AppText variant="caption" color="secondary" style={{ marginTop: 4 }}>
+                        Lifecycle complete or terminal state.
+                      </AppText>
+                    );
+                  }
+                  return (
+                    <View style={{ marginTop: 8 }}>
+                      <AppText variant="captionMedium" color="secondary" style={{ marginBottom: 6 }}>
+                        Advance Status To:
+                      </AppText>
+                      <View style={styles.adminActionButtonsRow}>
+                        {allowedNext.map((st) => (
+                          <TouchableOpacity
+                            key={st}
+                            style={[
+                              styles.adminActionButton,
+                              {
+                                backgroundColor:
+                                  st === "CANCELLED"
+                                    ? colors.errorSurface
+                                    : colors.primarySurface,
+                                borderColor:
+                                  st === "CANCELLED"
+                                    ? colors.error
+                                    : colors.primary,
+                              },
+                            ]}
+                            onPress={() => handleAdminUpdateStatus(st)}
+                          >
+                            <AppText
+                              variant="caption"
+                              color={st === "CANCELLED" ? "error" : "primary"}
+                              style={{ fontWeight: "700" }}
+                            >
+                              {st.replace(/_/g, " ")}
+                            </AppText>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    </View>
+                  );
+                })()}
+              </View>
+
+              <AppDivider spacing="xs" />
+
+              {/* MANAGE PAYMENT STATUS */}
+              <View style={styles.adminField}>
+                <AppText variant="caption" color="muted">
+                  Payment Status ({order.paymentStatus || "PENDING"}):
+                </AppText>
+                <View style={[styles.adminActionButtonsRow, { marginTop: 6 }]}>
+                  {(["PAID", "PENDING", "REFUNDED", "FAILED"] as const).map((ps) => {
+                    const isCurrent = order.paymentStatus === ps;
+                    return (
+                      <TouchableOpacity
+                        key={ps}
+                        style={[
+                          styles.adminActionButton,
+                          {
+                            backgroundColor: isCurrent
+                              ? colors.primary
+                              : colors.surfaceMuted,
+                            borderColor: isCurrent
+                              ? colors.primary
+                              : colors.border,
+                          },
+                        ]}
+                        disabled={isCurrent}
+                        onPress={() => handleAdminUpdatePayment(ps)}
+                      >
+                        <AppText
+                          variant="caption"
+                          color={isCurrent ? "inverse" : "primary"}
+                          style={{ fontWeight: "600" }}
+                        >
+                          {ps}
+                        </AppText>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </View>
+
+              <AppDivider spacing="sm" />
+
+              {/* PARTNER ASSIGNMENT & INSPECTION */}
+              <View style={styles.adminActionButtonsRow}>
                 <AppButton
-                  title="Cancel Order"
-                  variant="danger"
+                  title="Assign Partner"
+                  variant="primary"
                   size="md"
-                  loading={isCancellingOrder}
-                  disabled={isCancellingOrder}
-                  onPress={handleCancelOrder}
-                  style={styles.cancelButton}
-                  leftIcon={<Ionicons name="close-circle-outline" size={18} color={colors.textInverse} />}
+                  onPress={handleOpenAssignModal}
+                  style={{ flex: 1 }}
+                  leftIcon={
+                    <Ionicons
+                      name="bicycle-outline"
+                      size={18}
+                      color={colors.textInverse}
+                    />
+                  }
+                />
+
+                <AppButton
+                  title="Inspection"
+                  variant="outline"
+                  size="md"
+                  onPress={() =>
+                    (navigation as any).navigate("InspectionReviewScreen", {
+                      orderId: order._id,
+                    })
+                  }
+                  style={{ flex: 1 }}
+                  leftIcon={
+                    <Ionicons
+                      name="search-outline"
+                      size={18}
+                      color={colors.primary}
+                    />
+                  }
                 />
               </View>
             </AppCard>
-          ) : order.status !== "CANCELLED" && order.status !== "DELIVERED" ? (
-            <View style={styles.inProgressNotice}>
-              <Ionicons
-                name="information-circle-outline"
-                size={18}
-                color={colors.textSecondary}
-                style={styles.infoIcon}
-              />
-              <AppText variant="caption" color="secondary" style={styles.infoText}>
-                This order is in active processing. To make changes or request support, please contact our support team.
-              </AppText>
-            </View>
-          ) : null}
+          ) : (
+            <>
+              {/* CANCELLATION ACTIONS */}
+              {canCancel ? (
+                <AppCard variant="outlined" padding="md" style={styles.cancelCard}>
+                  <View style={styles.cancelContent}>
+                    <AppText variant="bodyBold" color="error">
+                      Need to cancel this order?
+                    </AppText>
+                    <AppText variant="caption" color="secondary" style={styles.cancelNotice}>
+                      You can cancel your order free of charge before pickup partner assignment.
+                    </AppText>
+                    <AppButton
+                      title="Cancel Order"
+                      variant="danger"
+                      size="md"
+                      loading={isCancellingOrder}
+                      disabled={isCancellingOrder}
+                      onPress={handleCancelOrder}
+                      style={styles.cancelButton}
+                      leftIcon={<Ionicons name="close-circle-outline" size={18} color={colors.textInverse} />}
+                    />
+                  </View>
+                </AppCard>
+              ) : order.status !== "CANCELLED" && order.status !== "DELIVERED" ? (
+                <View style={styles.inProgressNotice}>
+                  <Ionicons
+                    name="information-circle-outline"
+                    size={18}
+                    color={colors.textSecondary}
+                    style={styles.infoIcon}
+                  />
+                  <AppText variant="caption" color="secondary" style={styles.infoText}>
+                    This order is in active processing. To make changes or request support, please contact our support team.
+                  </AppText>
+                </View>
+              ) : null}
+            </>
+          )}
         </ScrollView>
       ) : null}
+
+      {/* DELIVERY PARTNER ASSIGNMENT MODAL */}
+      <Modal
+        visible={isAssignModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setIsAssignModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContainer, { backgroundColor: colors.surface }]}>
+            <View style={styles.modalHeader}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <Ionicons name="bicycle" size={24} color={colors.primary} />
+                <AppText variant="h3" color="primary">
+                  Assign Delivery Partner
+                </AppText>
+              </View>
+              <TouchableOpacity onPress={() => setIsAssignModalVisible(false)}>
+                <Ionicons name="close" size={24} color={colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+
+            <AppDivider spacing="sm" />
+
+            {isLoadingPartners ? (
+              <AppLoader variant="spinner" size="small" message="Loading active partners..." />
+            ) : partners.length === 0 ? (
+              <AppText variant="body" color="secondary" style={{ textAlign: "center", paddingVertical: 16 }}>
+                No active delivery partners currently available.
+              </AppText>
+            ) : (
+              <ScrollView style={{ maxHeight: 300 }}>
+                {partners.map((p) => (
+                  <TouchableOpacity
+                    key={p._id}
+                    style={styles.partnerPickerItem}
+                    activeOpacity={0.7}
+                    disabled={isAssigning}
+                    onPress={() => handleAssignPartner(p)}
+                  >
+                    <View style={styles.partnerPickerAvatar}>
+                      <Ionicons name="person" size={18} color={colors.primary} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <AppText variant="bodyBold" color="primary">
+                        {p.firstName} {p.lastName}
+                      </AppText>
+                      <AppText variant="caption" color="secondary">
+                        {p.phone ? formatPhone(p.phone) : p.email}
+                      </AppText>
+                    </View>
+                    <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            )}
+          </View>
+        </View>
+      </Modal>
     </ScreenContainer>
   );
 };
@@ -587,6 +927,74 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.sm,
+  },
+  adminPanelCard: {
+    marginBottom: spacing.md,
+    ...shadows.card,
+    borderRadius: radius.md,
+  },
+  adminPanelHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
+  },
+  adminPanelTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  adminField: {
+    paddingVertical: spacing.xxs,
+  },
+  statusBadgeRow: {
+    flexDirection: "row",
+    marginTop: 4,
+  },
+  adminActionButtonsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.xs,
+    marginTop: 4,
+  },
+  adminActionButton: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: spacing.screenPadding,
+  },
+  modalContainer: {
+    width: "100%",
+    maxWidth: 440,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+    ...shadows.modal,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  partnerPickerItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    gap: spacing.sm,
+  },
+  partnerPickerAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.round,
+    backgroundColor: colors.surfaceMuted,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

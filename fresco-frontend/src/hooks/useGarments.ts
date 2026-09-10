@@ -3,20 +3,37 @@ import { useAppDispatch } from "./useAppDispatch";
 import { useAppSelector } from "./useAppSelector";
 import {
   fetchGarments,
+  fetchAllGarmentsAdmin,
   fetchGarmentById,
+  createGarmentThunk,
+  updateGarmentThunk,
+  enableGarmentThunk,
+  disableGarmentThunk,
   setSelectedGarment,
   clearGarmentErrors,
+  clearGarmentMutationState,
 } from "../store/slices/garmentSlice";
-import { Garment, GetGarmentsParams } from "../types/catalog.types";
+import {
+  Garment,
+  GetGarmentsParams,
+  CreateGarmentInput,
+  UpdateGarmentInput,
+} from "../types/catalog.types";
 
 /**
  * Custom hook providing access to Garment state and actions.
  */
 export function useGarments() {
   const dispatch = useAppDispatch();
-  const { garments, selectedGarment, isLoading, error } = useAppSelector(
-    (state) => state.garment
-  );
+  const {
+    garments,
+    selectedGarment,
+    isLoading,
+    isMutating,
+    error,
+    mutationError,
+    mutationSuccess,
+  } = useAppSelector((state) => state.garment);
 
   const loadGarments = useCallback(
     async (params?: GetGarmentsParams) => {
@@ -26,10 +43,50 @@ export function useGarments() {
     [dispatch]
   );
 
+  const loadAllGarmentsAdmin = useCallback(
+    async (categoryId?: string) => {
+      const result = await dispatch(fetchAllGarmentsAdmin(categoryId));
+      return fetchAllGarmentsAdmin.fulfilled.match(result);
+    },
+    [dispatch]
+  );
+
   const loadGarmentById = useCallback(
     async (id: string) => {
       const result = await dispatch(fetchGarmentById(id));
       return fetchGarmentById.fulfilled.match(result);
+    },
+    [dispatch]
+  );
+
+  const createGarment = useCallback(
+    async (data: CreateGarmentInput) => {
+      const result = await dispatch(createGarmentThunk(data));
+      return createGarmentThunk.fulfilled.match(result);
+    },
+    [dispatch]
+  );
+
+  const updateGarment = useCallback(
+    async (id: string, data: UpdateGarmentInput) => {
+      const result = await dispatch(updateGarmentThunk({ id, data }));
+      return updateGarmentThunk.fulfilled.match(result);
+    },
+    [dispatch]
+  );
+
+  const enableGarment = useCallback(
+    async (id: string) => {
+      const result = await dispatch(enableGarmentThunk(id));
+      return enableGarmentThunk.fulfilled.match(result);
+    },
+    [dispatch]
+  );
+
+  const disableGarment = useCallback(
+    async (id: string) => {
+      const result = await dispatch(disableGarmentThunk(id));
+      return disableGarmentThunk.fulfilled.match(result);
     },
     [dispatch]
   );
@@ -45,14 +102,28 @@ export function useGarments() {
     dispatch(clearGarmentErrors());
   }, [dispatch]);
 
+  const clearMutation = useCallback(() => {
+    dispatch(clearGarmentMutationState());
+  }, [dispatch]);
+
   return {
     garments,
     selectedGarment,
     isLoading,
+    isMutating,
     error,
+    mutationError,
+    mutationSuccess,
     loadGarments,
+    loadAllGarmentsAdmin,
     loadGarmentById,
+    createGarment,
+    updateGarment,
+    enableGarment,
+    disableGarment,
     selectGarment,
     clearErrors,
+    clearMutation,
   };
 }
+

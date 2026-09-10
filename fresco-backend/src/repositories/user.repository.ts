@@ -1,4 +1,5 @@
 import { UserModel } from "../models/user.model.js";
+import { OrderModel } from "../models/order.model.js";
 import type { UpdateProfileInput } from "../validators/user.validator.js";
 
 /** Repository handling database operations for User module. */
@@ -176,5 +177,82 @@ export const userRepository = {
       { returnDocument: "after" },
     ).exec();
   },
+
+  /**
+   * Finds users matching optional query filters (role, status, search string).
+   * Excludes password and refresh token.
+   */
+  async findUsers(filters: { role?: string; status?: string; search?: string } = {}) {
+    const query: Record<string, any> = {};
+    if (filters.role) query.role = filters.role;
+    if (filters.status) query.status = filters.status;
+    if (filters.search) {
+      const searchRegex = new RegExp(filters.search, "i");
+      query.$or = [
+        { firstName: searchRegex },
+        { lastName: searchRegex },
+        { email: searchRegex },
+        { phone: searchRegex },
+      ];
+    }
+    return UserModel.find(query)
+      .select("-password -refreshToken")
+      .sort({ createdAt: -1 })
+      .lean()
+      .exec();
+  },
+
+  /**
+   * Updates user account status (ACTIVE, INACTIVE, SUSPENDED).
+   */
+  async updateUserStatus(userId: string, status: string) {
+    return UserModel.findByIdAndUpdate(
+      userId,
+      { status },
+      { returnDocument: "after" },
+    )
+      .select("-password -refreshToken")
+      .exec();
+  },
+
+  /**
+   * Aggregates live platform operational statistics for admin dashboard.
+   */
+  async getAdminStats() {
+    const [
+      totalCustomers,
+      totalPartners,
+      activeCustomers,
+      activePartners,
+      orders,
+    ] = await Promise.all([
+      UserModel.countDocuments({ role: "CUSTOMER" }),
+      UserModel.countDocuments({ role: "DELIVERY_PARTNER" }),
+      UserModel.countDocuments({ role: "CUSTOMER", status: "ACTIVE" }),
+      UserModel.countDocuments({ role: "DELIVERY_PARTNER", status: "ACTIVE" }),
+      OrderModel.find({}, { status: 1, "pricing.totalAmount": 1 }).lean(),
+    ]);
+
+    const totalOrders = orders.length;
+    const pendingOrders = orders.filter((o) => o.status === "PLACED" || o.status === "CONFIRMED").length;
+    const activeOrders = orders.filter((o) => o.status !== "DELIVERED" && o.status !== "CANCELLED").length;
+    const completedOrders = orders.filter((o) => o.status === "DELIVERED").length;
+    const totalRevenue = orders
+      .filter((o) => o.status !== "CANCELLED")
+      .reduce((sum: number, o: any) => sum + (Number(o.pricing?.totalAmount) || 0), 0);
+
+    return {
+      totalCustomers,
+      totalPartners,
+      activeCustomers,
+      activePartners,
+      totalOrders,
+      pendingOrders,
+      activeOrders,
+      completedOrders,
+      totalRevenue,
+    };
+  },
 };
+
 

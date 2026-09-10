@@ -97,6 +97,16 @@ export type PartnerTabParamList = {
 // ADMIN NAVIGATION TYPES
 // ==========================================
 
+export type AdminCatalogTabType = "categories" | "garments" | "services" | "pricing";
+
+export type AdminCatalogStackParamList = {
+  AdminCatalogScreen: { initialTab?: AdminCatalogTabType } | undefined;
+  AdminCategoriesScreen: undefined;
+  AdminGarmentsScreen: { categoryId?: string } | undefined;
+  AdminServicesScreen: undefined;
+  AdminPricingScreen: undefined;
+};
+
 export type AdminStackParamList = {
   AdminDashboardScreen: undefined;
   OrderDetailsScreen: { orderId: string };
@@ -104,6 +114,13 @@ export type AdminStackParamList = {
   DeliveryTaskDetailsScreen: { taskId: string };
   InspectionReviewScreen: { orderId: string; inspectionId?: string };
   InspectionFormScreen: { orderId: string; inspectionId?: string };
+  AdminCatalogScreen?: { initialTab?: AdminCatalogTabType };
+  AdminCategoriesScreen?: undefined;
+  AdminGarmentsScreen?: { categoryId?: string };
+  AdminServicesScreen?: undefined;
+  AdminPricingScreen?: undefined;
+  AdminCustomersScreen?: undefined;
+  AdminPartnersScreen?: undefined;
 };
 
 export type AdminOrdersStackParamList = {
@@ -127,8 +144,10 @@ export type AdminProfileStackParamList = {
 export type AdminTabParamList = {
   AdminDashboardTab: NavigatorScreenParams<AdminStackParamList>;
   AdminOrdersTab: NavigatorScreenParams<AdminOrdersStackParamList>;
+  AdminCatalogTab: NavigatorScreenParams<AdminCatalogStackParamList>;
   AdminAssignmentsTab: NavigatorScreenParams<AdminAssignmentsStackParamList>;
   AdminProfileTab: NavigatorScreenParams<AdminProfileStackParamList>;
 };
+
 
 

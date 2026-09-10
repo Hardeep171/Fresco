@@ -17,6 +17,7 @@ import { PricingModel } from "../models/pricing.model.js";
 import { ServiceModel } from "../models/service.model.js";
 import { UserModel } from "../models/user.model.js";
 import { generateAccessToken } from "../utils/jwt.js";
+import { hashPassword } from "../utils/password.js";
 
 let server: Server;
 let baseUrl: string;
@@ -136,12 +137,14 @@ async function setupFixtures() {
   await InspectionModel.deleteMany({});
 
   // Seed Users
+  const defaultHashedPassword = await hashPassword("Password@123");
+
   adminUser = await UserModel.create({
     firstName: "Admin",
     lastName: "Inspector",
     email: "admin@fresco.com",
     phone: "+12345678901",
-    password: "hashedpassword123",
+    password: defaultHashedPassword,
     role: "ADMIN",
     status: "ACTIVE",
   });
@@ -155,7 +158,7 @@ async function setupFixtures() {
     lastName: "Admin",
     email: "superadmin@fresco.com",
     phone: "+12345678902",
-    password: "hashedpassword123",
+    password: defaultHashedPassword,
     role: "SUPER_ADMIN",
     status: "ACTIVE",
   });
@@ -169,7 +172,7 @@ async function setupFixtures() {
     lastName: "Manager",
     email: "citymanager@fresco.com",
     phone: "+12345678903",
-    password: "hashedpassword123",
+    password: defaultHashedPassword,
     role: "CITY_MANAGER",
     status: "ACTIVE",
   });
@@ -183,7 +186,7 @@ async function setupFixtures() {
     lastName: "Manager",
     email: "branchmanager@fresco.com",
     phone: "+12345678904",
-    password: "hashedpassword123",
+    password: defaultHashedPassword,
     role: "BRANCH_MANAGER",
     status: "ACTIVE",
   });
@@ -197,7 +200,7 @@ async function setupFixtures() {
     lastName: "Partner",
     email: "partner@fresco.com",
     phone: "+12345678905",
-    password: "hashedpassword123",
+    password: defaultHashedPassword,
     role: "DELIVERY_PARTNER",
     status: "ACTIVE",
   });
@@ -211,7 +214,7 @@ async function setupFixtures() {
     lastName: "User",
     email: "customer@fresco.com",
     phone: "+12345678906",
-    password: "hashedpassword123",
+    password: defaultHashedPassword,
     role: "CUSTOMER",
     status: "ACTIVE",
   });
@@ -225,7 +228,7 @@ async function setupFixtures() {
     lastName: "Admin",
     email: "inactiveadmin@fresco.com",
     phone: "+12345678907",
-    password: "hashedpassword123",
+    password: defaultHashedPassword,
     role: "ADMIN",
     status: "INACTIVE",
   });

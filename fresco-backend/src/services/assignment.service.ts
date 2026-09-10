@@ -232,11 +232,17 @@ export const assignmentService = {
     // 3. Verify delivery partner exists, is active, and has DELIVERY_PARTNER role
     await ensureDeliveryPartner(data.partnerId);
 
+    const assignmentType = data.assignmentType || (
+      order.status === "READY_FOR_DELIVERY" || order.status === "OUT_FOR_DELIVERY"
+        ? "DELIVERY"
+        : "PICKUP"
+    );
+
     // 4. Verify an active assignment for (orderId + assignmentType) does not already exist
     const existingAssignment =
       await assignmentRepository.findAssignmentByOrder(
         data.orderId,
-        data.assignmentType,
+        assignmentType,
       );
 
     if (existingAssignment && existingAssignment.isActive) {
@@ -249,7 +255,7 @@ export const assignmentService = {
     const assignmentData = {
       orderId: new Types.ObjectId(data.orderId),
       partnerId: new Types.ObjectId(data.partnerId),
-      assignmentType: data.assignmentType,
+      assignmentType,
       assignedBy: new Types.ObjectId(adminId),
       assignedAt: new Date(),
       status: "ASSIGNED" as const,

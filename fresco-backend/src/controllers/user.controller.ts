@@ -8,8 +8,10 @@ import { asyncHandler } from "../utils/async-handler.js";
 import {
   changePasswordSchema,
   forgotPasswordSchema,
+  getUsersQuerySchema,
   resetPasswordSchema,
   updateProfileSchema,
+  updateUserStatusSchema,
   verifyEmailSchema,
 } from "../validators/user.validator.js";
 
@@ -126,5 +128,64 @@ export const userController = {
       undefined,
     );
   }),
+
+  /** Admin: Retrieve all users matching query filters. */
+  getUsers: asyncHandler(async (req: Request, res: Response) => {
+    const filters = getUsersQuerySchema.parse(req.query);
+    const users = await userService.getUsers(filters);
+
+    ApiResponse.send(
+      res,
+      StatusCodes.OK,
+      "Users fetched successfully",
+      { users },
+    );
+  }),
+
+  /** Admin: Retrieve user by ID. */
+  getUserById: asyncHandler(async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    if (!id) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "User ID is required");
+    }
+    const user = await userService.getCurrentUser(id);
+
+    ApiResponse.send(
+      res,
+      StatusCodes.OK,
+      "User details fetched successfully",
+      { user },
+    );
+  }),
+
+  /** Admin: Update user account status (ACTIVE, INACTIVE, SUSPENDED). */
+  updateUserStatus: asyncHandler(async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    if (!id) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "User ID is required");
+    }
+    const { status } = updateUserStatusSchema.parse(req.body);
+    const user = await userService.updateUserStatus(id, status);
+
+    ApiResponse.send(
+      res,
+      StatusCodes.OK,
+      "User status updated successfully",
+      { user },
+    );
+  }),
+
+  /** Admin: Get platform statistics. */
+  getAdminStats: asyncHandler(async (_req: Request, res: Response) => {
+    const stats = await userService.getAdminStats();
+
+    ApiResponse.send(
+      res,
+      StatusCodes.OK,
+      "Admin stats fetched successfully",
+      { stats },
+    );
+  }),
 };
+
 

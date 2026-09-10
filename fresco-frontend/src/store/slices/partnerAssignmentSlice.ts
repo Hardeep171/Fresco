@@ -8,6 +8,7 @@ import { Order } from "../../types/order.types";
 import {
   AssignmentFilterTab,
 } from "../../constants/assignment.constants";
+import { ADMIN_ROLES } from "../../constants/user.constants";
 import { logoutUser, logoutSuccess } from "./authSlice";
 
 
@@ -40,14 +41,19 @@ const initialState: PartnerAssignmentState = {
 };
 
 /**
- * Fetches all assignments belonging to the authenticated delivery partner.
+ * Fetches all assignments belonging to the authenticated delivery partner or all assignments for admin.
  */
 export const fetchPartnerAssignments = createAsyncThunk<
   Assignment[],
   void,
   { rejectValue: NormalizedApiError }
->("partnerAssignment/fetchPartnerAssignments", async (_, { rejectWithValue }) => {
+>("partnerAssignment/fetchPartnerAssignments", async (_, { getState, rejectWithValue }) => {
   try {
+    const state = getState() as any;
+    const userRole = state?.auth?.user?.role;
+    if (userRole && (ADMIN_ROLES as readonly string[]).includes(userRole)) {
+      return await assignmentApi.getAllAssignments();
+    }
     return await assignmentApi.getPartnerAssignments();
   } catch (err: unknown) {
     return rejectWithValue(normalizeApiError(err));

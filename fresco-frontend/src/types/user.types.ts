@@ -21,3 +21,22 @@ export interface ResetPasswordInput {
 export interface VerifyEmailInput {
   token: string;
 }
+
+export interface AdminStats {
+  totalCustomers: number;
+  totalPartners: number;
+  activeCustomers: number;
+  activePartners: number;
+  totalOrders: number;
+  pendingOrders: number;
+  activeOrders: number;
+  completedOrders: number;
+  totalRevenue: number;
+}
+
+export interface UserFilters {
+  role?: string;
+  status?: string;
+  search?: string;
+}
+

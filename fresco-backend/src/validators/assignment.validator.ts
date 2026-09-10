@@ -8,18 +8,30 @@ import {
 import { booleanQuerySchema, objectIdSchema } from "../lib/validation.js";
 
 /** Reusable Zod validation schema for creating a new assignment. */
-export const createAssignmentSchema = z.object({
-  orderId: objectIdSchema,
-  partnerId: objectIdSchema,
-  assignmentType: z.enum(ASSIGNMENT_TYPES),
-  notes: z
-    .string()
-    .trim()
-    .max(ASSIGNMENT_NOTES_MAX_LENGTH, {
-      error: `Notes cannot exceed ${ASSIGNMENT_NOTES_MAX_LENGTH} characters.`,
-    })
-    .optional(),
-});
+export const createAssignmentSchema = z
+  .object({
+    orderId: objectIdSchema,
+    partnerId: objectIdSchema.optional(),
+    deliveryPartnerId: objectIdSchema.optional(),
+    assignmentType: z.enum(ASSIGNMENT_TYPES).optional(),
+    notes: z
+      .string()
+      .trim()
+      .max(ASSIGNMENT_NOTES_MAX_LENGTH, {
+        message: `Notes cannot exceed ${ASSIGNMENT_NOTES_MAX_LENGTH} characters.`,
+      })
+      .optional(),
+  })
+  .transform((data) => ({
+    orderId: data.orderId,
+    partnerId: (data.partnerId || data.deliveryPartnerId) as string,
+    assignmentType: data.assignmentType,
+    notes: data.notes,
+  }))
+  .refine((data) => Boolean(data.partnerId), {
+    message: "partnerId or deliveryPartnerId is required.",
+    path: ["partnerId"],
+  });
 
 /** Reusable Zod validation schema for updating assignment status. */
 export const updateAssignmentStatusSchema = z.object({

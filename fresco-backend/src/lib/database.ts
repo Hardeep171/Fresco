@@ -1,4 +1,10 @@
+import { webcrypto } from "node:crypto";
+if (typeof globalThis.crypto === "undefined" || !(globalThis as any).crypto?.getRandomValues) {
+  (globalThis as any).crypto = webcrypto;
+}
+
 import mongoose from "mongoose";
+
 
 import { env } from "../config/env.js";
 import { logger } from "../config/logger.js";

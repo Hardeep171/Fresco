@@ -131,16 +131,16 @@ export const OrderHistoryScreen: React.FC<Props> = ({ navigation }) => {
         description="Your laundry journey starts here. Explore our dry cleaning, wash & fold, and steam press services."
         actionTitle="Browse Catalog"
         onActionPress={() => {
-          (navigation.getParent() as any)?.navigate("CatalogTab");
+          (navigation.getParent() as any)?.navigate(isAdmin ? "AdminCatalogTab" : "CatalogTab");
         }}
       />
     );
-  }, [selectedStatusFilter, setStatusFilter, navigation]);
+  }, [selectedStatusFilter, setStatusFilter, navigation, isAdmin]);
 
   return (
     <ScreenContainer scrollable={false}>
       <AppHeader
-        title="My Orders"
+        title={isAdmin ? "Orders Management" : "My Orders"}
         showBack={false}
       />
 
@@ -155,9 +155,9 @@ export const OrderHistoryScreen: React.FC<Props> = ({ navigation }) => {
       {ordersError && !refreshing && orders.length === 0 ? (
         <ErrorState
           title="Unable to Load Orders"
-          message={ordersError.message || "Failed to retrieve your order history."}
+          message={ordersError.message || "Failed to retrieve orders."}
           retryText="Try Again"
-          onRetry={loadUserOrders}
+          onRetry={fetchOrders}
         />
       ) : isFetchingOrders && !refreshing && orders.length === 0 ? (
         /* LOADING STATE */

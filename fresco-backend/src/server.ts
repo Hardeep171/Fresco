@@ -1,4 +1,10 @@
+import { webcrypto } from "node:crypto";
+if (typeof globalThis.crypto === "undefined" || !(globalThis as any).crypto?.getRandomValues) {
+  (globalThis as any).crypto = webcrypto;
+}
+
 import type { Server } from "node:http";
+
 
 import app from "./app.js";
 import { env } from "./config/env.js";

@@ -47,4 +47,64 @@ export const assignmentApi = {
     return response.data.data.assignment;
   },
 
+  /**
+   * Admin: Retrieve all assignments across the system with optional filters.
+   * Calls: GET /assignments
+   */
+  async getAllAssignments(filters?: {
+    orderId?: string;
+    deliveryPartnerId?: string;
+    status?: string;
+  }): Promise<Assignment[]> {
+    const response = await apiClient.get<ApiResponse<AssignmentsResponse>>(
+      "/assignments",
+      { params: filters }
+    );
+    return response.data.data.assignments;
+  },
+
+  /**
+   * Admin: Assign a delivery partner to an order.
+   * Calls: POST /assignments
+   */
+  async assignPartner(data: {
+    orderId: string;
+    partnerId?: string;
+    deliveryPartnerId?: string;
+    assignmentType?: "PICKUP" | "DELIVERY";
+    notes?: string;
+  }): Promise<Assignment> {
+    const payload = {
+      orderId: data.orderId,
+      partnerId: data.partnerId || data.deliveryPartnerId,
+      deliveryPartnerId: data.deliveryPartnerId || data.partnerId,
+      assignmentType: data.assignmentType,
+      notes: data.notes,
+    };
+    const response = await apiClient.post<ApiResponse<AssignmentResponse>>(
+      "/assignments",
+      payload
+    );
+    return response.data.data.assignment;
+  },
+
+  /**
+   * Admin: Update assignment status.
+   * Calls: PATCH /assignments/:id/status
+   */
+  async updateAssignmentStatus(id: string, status: string): Promise<Assignment> {
+    const response = await apiClient.patch<ApiResponse<AssignmentResponse>>(
+      `/assignments/${id}/status`,
+      { status }
+    );
+    return response.data.data.assignment;
+  },
+
+  /**
+   * Admin: Disable/cancel assignment.
+   * Calls: DELETE /assignments/:id
+   */
+  async disableAssignment(id: string): Promise<void> {
+    await apiClient.delete(`/assignments/${id}`);
+  },
 };

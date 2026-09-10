@@ -79,3 +79,57 @@ export interface ServiceOptionWithPrice {
   service: Service;
   pricing: Pricing;
 }
+
+// ============================================================================
+// ADMIN CATALOG MUTATION INPUT INTERFACES (Matching Backend Zod Validators)
+// ============================================================================
+
+/** Input schema for creating a new Category */
+export interface CreateCategoryInput {
+  name: string;
+  description?: string;
+  icon?: string;
+  displayOrder?: number;
+  isActive?: boolean;
+}
+
+/** Input schema for updating an existing Category */
+export type UpdateCategoryInput = Partial<CreateCategoryInput>;
+
+/** Input schema for creating a new Garment */
+export interface CreateGarmentInput {
+  categoryId: string;
+  name: string;
+  description?: string;
+  icon?: string;
+  displayOrder?: number;
+  isActive?: boolean;
+}
+
+/** Input schema for updating an existing Garment */
+export type UpdateGarmentInput = Partial<CreateGarmentInput>;
+
+/** Input schema for creating a new Service */
+export interface CreateServiceInput {
+  name: string;
+  description?: string;
+  icon?: string;
+  displayOrder?: number;
+  isActive?: boolean;
+}
+
+/** Input schema for updating an existing Service */
+export type UpdateServiceInput = Partial<CreateServiceInput>;
+
+/** Input schema for creating a new Pricing pair */
+export interface CreatePricingInput {
+  garmentId: string;
+  serviceId: string;
+  price: number;
+  currency?: string;
+  isActive?: boolean;
+}
+
+/** Input schema for updating an existing Pricing pair */
+export type UpdatePricingInput = Partial<CreatePricingInput>;
+

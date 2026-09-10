@@ -105,3 +105,26 @@ export const verifyEmailSchema = z.object({
 
 /** Strongly typed interface inferred from `verifyEmailSchema`. */
 export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
+
+/**
+ * Reusable Zod validation schema for admin querying users.
+ */
+export const getUsersQuerySchema = z.object({
+  role: z.string().optional(),
+  status: z.string().optional(),
+  search: z.string().trim().optional(),
+});
+
+export type GetUsersQuery = z.infer<typeof getUsersQuerySchema>;
+
+/**
+ * Reusable Zod validation schema for admin updating user account status.
+ */
+export const updateUserStatusSchema = z.object({
+  status: z.enum(["ACTIVE", "INACTIVE", "SUSPENDED", "PENDING_VERIFICATION"], {
+    error: "Invalid user status.",
+  }),
+});
+
+export type UpdateUserStatusInput = z.infer<typeof updateUserStatusSchema>;
+

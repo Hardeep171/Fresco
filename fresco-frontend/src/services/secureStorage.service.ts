@@ -32,7 +32,10 @@ export const secureStorage = {
     inMemoryAccessToken = accessToken;
     inMemoryRefreshToken = refreshToken;
     try {
-      if (platformOS !== "web" && platformOS !== "node" && secureStoreModule) {
+      if (typeof window !== "undefined" && window.localStorage) {
+        window.localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+        window.localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+      } else if (platformOS !== "web" && platformOS !== "node" && secureStoreModule) {
         await secureStoreModule.setItemAsync(ACCESS_TOKEN_KEY, accessToken);
         await secureStoreModule.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
       }
@@ -49,7 +52,9 @@ export const secureStorage = {
       return inMemoryAccessToken;
     }
     try {
-      if (platformOS !== "web" && platformOS !== "node" && secureStoreModule) {
+      if (typeof window !== "undefined" && window.localStorage) {
+        inMemoryAccessToken = window.localStorage.getItem(ACCESS_TOKEN_KEY);
+      } else if (platformOS !== "web" && platformOS !== "node" && secureStoreModule) {
         inMemoryAccessToken = await secureStoreModule.getItemAsync(ACCESS_TOKEN_KEY);
       }
       return inMemoryAccessToken;
@@ -67,7 +72,9 @@ export const secureStorage = {
       return inMemoryRefreshToken;
     }
     try {
-      if (platformOS !== "web" && platformOS !== "node" && secureStoreModule) {
+      if (typeof window !== "undefined" && window.localStorage) {
+        inMemoryRefreshToken = window.localStorage.getItem(REFRESH_TOKEN_KEY);
+      } else if (platformOS !== "web" && platformOS !== "node" && secureStoreModule) {
         inMemoryRefreshToken = await secureStoreModule.getItemAsync(REFRESH_TOKEN_KEY);
       }
       return inMemoryRefreshToken;
@@ -84,7 +91,10 @@ export const secureStorage = {
     inMemoryAccessToken = null;
     inMemoryRefreshToken = null;
     try {
-      if (platformOS !== "web" && platformOS !== "node" && secureStoreModule) {
+      if (typeof window !== "undefined" && window.localStorage) {
+        window.localStorage.removeItem(ACCESS_TOKEN_KEY);
+        window.localStorage.removeItem(REFRESH_TOKEN_KEY);
+      } else if (platformOS !== "web" && platformOS !== "node" && secureStoreModule) {
         await secureStoreModule.deleteItemAsync(ACCESS_TOKEN_KEY);
         await secureStoreModule.deleteItemAsync(REFRESH_TOKEN_KEY);
       }

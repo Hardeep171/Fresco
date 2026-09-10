@@ -67,4 +67,29 @@ export const orderApi = {
     );
     return response.data.data.order;
   },
+
+  /**
+   * Admin: Update order lifecycle status by ID.
+   * Backend endpoint: PATCH /api/v1/orders/:id/status
+   */
+  async updateOrderStatus(id: string, status: string): Promise<Order> {
+    const response = await apiClient.patch<ApiResponse<{ order: Order }>>(
+      `/orders/${id}/status`,
+      { status }
+    );
+    return response.data.data.order;
+  },
+
+  /**
+   * Admin: Update order payment status by ID.
+   * Backend endpoint: PATCH /api/v1/orders/:id/payment-status
+   */
+  async updatePaymentStatus(id: string, paymentStatus: string): Promise<Order> {
+    const response = await apiClient.patch<ApiResponse<{ order: Order }>>(
+      `/orders/${id}/payment-status`,
+      { paymentStatus }
+    );
+    return response.data.data.order;
+  },
 };
+

@@ -100,7 +100,7 @@ export const errorMiddleware: ErrorRequestHandler = (error, request, response, _
     method: request.method,
     path: request.originalUrl,
     statusCode: apiError.statusCode,
-    error,
+    error: error instanceof Error ? { message: error.message, stack: error.stack } : error,
   });
 
   const message =
