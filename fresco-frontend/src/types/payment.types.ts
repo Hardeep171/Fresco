@@ -23,11 +23,17 @@ export interface Payment {
   _id: string;
   orderId: string;
   customerId: string;
-  receivedByPartnerId?: string;
+  receivedByPartnerId?: any;
   amount: number;
   paymentMethod: PaymentMethod;
   status: PaymentStatus;
   receivedAt?: string;
+  collectionReported?: boolean;
+  collectedByPartnerId?: any;
+  collectedAt?: string;
+  verificationStatus?: "NOT_REQUESTED" | "PENDING" | "VERIFIED" | "REJECTED";
+  verifiedByAdminId?: any;
+  verifiedAt?: string;
   refunds: RefundTransaction[];
   createdAt: string;
   updatedAt: string;
@@ -40,6 +46,25 @@ export interface Payment {
 export interface CreatePaymentInput {
   orderId: string;
   paymentMethod: PaymentMethod;
+}
+
+/**
+ * Input payload for delivery partner reporting payment collection.
+ * POST /api/v1/payments/:id/report-collected or POST /api/v1/payments/report-collected
+ */
+export interface ReportPaymentCollectedInput {
+  orderId?: string;
+  paymentMethod?: PaymentMethod;
+  notes?: string;
+}
+
+/**
+ * Input payload for admin payment verification.
+ * POST /api/v1/payments/:id/verify
+ */
+export interface VerifyPaymentInput {
+  orderId?: string;
+  notes?: string;
 }
 
 /**

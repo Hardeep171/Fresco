@@ -78,6 +78,30 @@ export const PaymentSchema = new Schema(
     receivedAt: {
       type: Date,
     },
+    collectionReported: {
+      type: Boolean,
+      default: false,
+    },
+    collectedByPartnerId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      index: true,
+    },
+    collectedAt: {
+      type: Date,
+    },
+    verificationStatus: {
+      type: String,
+      enum: ["NOT_REQUESTED", "PENDING", "VERIFIED", "REJECTED"],
+      default: "NOT_REQUESTED",
+    },
+    verifiedByAdminId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+    verifiedAt: {
+      type: Date,
+    },
     refunds: {
       type: [RefundTransactionSchema],
       default: [],

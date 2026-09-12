@@ -8,7 +8,7 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "seed": "tsx src/scripts/seed.ts",
-    "test": "MONGO_URI=mongodb://127.0.0.1:27017/fresco_test tsx src/tests/duplicate-prevention.e2e.ts && MONGO_URI=mongodb://127.0.0.1:27017/fresco_test tsx src/tests/security.e2e.ts && MONGO_URI=mongodb://127.0.0.1:27017/fresco_test tsx src/tests/inspection.e2e.ts && MONGO_URI=mongodb://127.0.0.1:27017/fresco_test tsx src/tests/payment.e2e.ts"
+    "test": "MONGO_URI=mongodb://127.0.0.1:27017/fresco_test tsx src/tests/duplicate-prevention.e2e.ts && MONGO_URI=mongodb://127.0.0.1:27017/fresco_test tsx src/tests/security.e2e.ts && MONGO_URI=mongodb://127.0.0.1:27017/fresco_test tsx src/tests/inspection.e2e.ts && MONGO_URI=mongodb://127.0.0.1:27017/fresco_test tsx src/tests/payment.e2e.ts && MONGO_URI=mongodb://127.0.0.1:27017/fresco_test tsx src/tests/operational-lifecycle.e2e.ts"
   },
   "keywords": [],
   "author": "",

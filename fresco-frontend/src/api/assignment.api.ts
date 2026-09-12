@@ -55,6 +55,8 @@ export const assignmentApi = {
     orderId?: string;
     deliveryPartnerId?: string;
     status?: string;
+    isActive?: boolean;
+    assignmentType?: "PICKUP" | "DELIVERY";
   }): Promise<Assignment[]> {
     const response = await apiClient.get<ApiResponse<AssignmentsResponse>>(
       "/assignments",

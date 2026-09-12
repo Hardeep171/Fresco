@@ -45,6 +45,7 @@ export const assignmentIdParamSchema = z.object({
 
 /** Reusable Zod validation schema for querying assignments. */
 export const getAssignmentsQuerySchema = z.object({
+  orderId: objectIdSchema.optional(),
   partnerId: objectIdSchema.optional(),
   assignmentType: z.enum(ASSIGNMENT_TYPES).optional(),
   status: z.enum(ASSIGNMENT_STATUSES).optional(),

@@ -149,7 +149,7 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
             />
           ) : assignment.status === "ACCEPTED" && onComplete ? (
             <AppButton
-              title={isPickup ? "Complete Pickup" : "Complete Delivery"}
+              title={isPickup ? "Clothes Picked Up" : "Complete Delivery"}
               variant="primary"
               size="sm"
               loading={isActionLoading}

@@ -15,6 +15,7 @@ import {
   setSelectedStatusFilter,
   clearCancelState,
   clearDetailsError,
+  clearUpdateStatusState,
 } from "../store/slices/orderSlice";
 import { CreateOrderInput, Order, OrderFilters } from "../types/order.types";
 import { OrderFilterTab } from "../constants/order.constants";
@@ -40,6 +41,9 @@ export function useOrders() {
     placeOrderError,
     cancelSuccess,
     placeOrderSuccess,
+    isUpdatingStatus,
+    updateStatusError,
+    updateStatusSuccess,
     selectedStatusFilter,
   } = useAppSelector((state) => state.order);
 
@@ -135,6 +139,10 @@ export function useOrders() {
     dispatch(clearOrderErrors());
   }, [dispatch]);
 
+  const clearUpdateStatus = useCallback(() => {
+    dispatch(clearUpdateStatusState());
+  }, [dispatch]);
+
   return {
     orders,
     currentOrder,
@@ -151,6 +159,9 @@ export function useOrders() {
     placeOrderError,
     cancelSuccess,
     placeOrderSuccess,
+    isUpdatingStatus,
+    updateStatusError,
+    updateStatusSuccess,
     selectedStatusFilter,
 
     placeOrder,
@@ -166,6 +177,7 @@ export function useOrders() {
     clearDetailsErr,
     clearCreated,
     clearErrors,
+    clearUpdateStatus,
   };
 }
 

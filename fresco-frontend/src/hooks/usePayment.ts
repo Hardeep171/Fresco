@@ -8,6 +8,8 @@ import {
   fetchPaymentRefunds,
   recordPaymentThunk,
   retryPaymentThunk,
+  reportPaymentCollectedThunk,
+  verifyPaymentThunk,
   setCurrentPayment,
   clearPaymentErrors,
   clearPaymentSuccess,
@@ -17,6 +19,8 @@ import {
   Payment,
   CreatePaymentInput,
   RetryPaymentInput,
+  ReportPaymentCollectedInput,
+  VerifyPaymentInput,
 } from "../types/payment.types";
 
 /**
@@ -34,13 +38,19 @@ export function usePayment() {
     isFetchingPayments,
     isRecordingPayment,
     isRetryingPayment,
+    isReportingPayment,
+    isVerifyingPayment,
     isFetchingRefunds,
     error,
     recordError,
     retryError,
+    reportPaymentError,
+    verifyPaymentError,
     refundsError,
     recordSuccess,
     retrySuccess,
+    reportPaymentSuccess,
+    verifyPaymentSuccess,
   } = useAppSelector((state) => state.payment);
 
   const loadPaymentByOrderId = useCallback(
@@ -105,6 +115,32 @@ export function usePayment() {
     [dispatch]
   );
 
+  const reportPaymentCollected = useCallback(
+    async (paymentIdOrOrderId: string, data: ReportPaymentCollectedInput) => {
+      const result = await dispatch(
+        reportPaymentCollectedThunk({ paymentIdOrOrderId, data })
+      );
+      if (reportPaymentCollectedThunk.fulfilled.match(result)) {
+        return result.payload;
+      }
+      return null;
+    },
+    [dispatch]
+  );
+
+  const verifyPayment = useCallback(
+    async (paymentIdOrOrderId: string, data?: VerifyPaymentInput) => {
+      const result = await dispatch(
+        verifyPaymentThunk({ paymentIdOrOrderId, data })
+      );
+      if (verifyPaymentThunk.fulfilled.match(result)) {
+        return result.payload;
+      }
+      return null;
+    },
+    [dispatch]
+  );
+
   const selectPayment = useCallback(
     (payment: Payment | null) => {
       dispatch(setCurrentPayment(payment));
@@ -133,13 +169,19 @@ export function usePayment() {
     isFetchingPayments,
     isRecordingPayment,
     isRetryingPayment,
+    isReportingPayment,
+    isVerifyingPayment,
     isFetchingRefunds,
     error,
     recordError,
     retryError,
+    reportPaymentError,
+    verifyPaymentError,
     refundsError,
     recordSuccess,
     retrySuccess,
+    reportPaymentSuccess,
+    verifyPaymentSuccess,
 
     loadPaymentByOrderId,
     loadPaymentById,
@@ -147,6 +189,8 @@ export function usePayment() {
     loadPaymentRefunds,
     recordPayment,
     retryPayment,
+    reportPaymentCollected,
+    verifyPayment,
     selectPayment,
     clearErrors,
     clearSuccess,

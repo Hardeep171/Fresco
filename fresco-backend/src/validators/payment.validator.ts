@@ -64,11 +64,36 @@ export const getPaymentsQuerySchema = z.object({
   receivedByPartnerId: objectIdSchema.optional(),
 });
 
+/** Reusable Zod schema for reporting payment collection by delivery partner. */
+export const reportPaymentCollectedSchema = z.object({
+  paymentMethod: z
+    .enum(PAYMENT_METHODS, {
+      error: "Invalid payment method. Only CASH and UPI are supported.",
+    })
+    .optional(),
+  orderId: objectIdSchema.optional(),
+  notes: z.string().trim().max(500).optional(),
+});
+
+/** Reusable Zod schema for admin payment verification. */
+export const verifyPaymentSchema = z.object({
+  orderId: objectIdSchema.optional(),
+  notes: z.string().trim().max(500).optional(),
+});
+
 /** Strongly typed interface inferred from `createPaymentSchema`. */
 export type CreatePaymentInput = z.infer<typeof createPaymentSchema>;
 
 /** Strongly typed interface inferred from `receivePaymentSchema`. */
 export type ReceivePaymentInput = z.infer<typeof receivePaymentSchema>;
+
+/** Strongly typed interface inferred from `reportPaymentCollectedSchema`. */
+export type ReportPaymentCollectedInput = z.infer<
+  typeof reportPaymentCollectedSchema
+>;
+
+/** Strongly typed interface inferred from `verifyPaymentSchema`. */
+export type VerifyPaymentInput = z.infer<typeof verifyPaymentSchema>;
 
 /** Strongly typed interface inferred from `createRefundSchema`. */
 export type CreateRefundInput = z.infer<typeof createRefundSchema>;

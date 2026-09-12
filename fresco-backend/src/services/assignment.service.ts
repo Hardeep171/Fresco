@@ -16,6 +16,7 @@ import type { CreateAssignmentInput } from "../validators/assignment.validator.j
 
 /** Filter options for querying assignments. */
 export interface AssignmentFilters {
+  orderId?: string;
   partnerId?: string;
   assignmentType?: AssignmentType;
   status?: AssignmentStatus;
@@ -238,17 +239,18 @@ export const assignmentService = {
         : "PICKUP"
     );
 
-    // 4. Verify an active assignment for (orderId + assignmentType) does not already exist
-    const existingAssignment =
-      await assignmentRepository.findAssignmentByOrder(
+    // 4. If an active assignment already exists for this order + assignment type,
+    // safely cancel/deactivate existing assignment(s) preserving history while avoiding duplicate active assignments.
+    const existingActiveAssignment =
+      await assignmentRepository.findActiveAssignmentByOrder(
         data.orderId,
         assignmentType,
       );
 
-    if (existingAssignment && existingAssignment.isActive) {
-      throw new ApiError(
-        StatusCodes.CONFLICT,
-        "Assignment already exists for this order and assignment type",
+    if (existingActiveAssignment) {
+      await assignmentRepository.deactivateAssignmentsByOrder(
+        data.orderId,
+        assignmentType,
       );
     }
 
@@ -259,10 +261,21 @@ export const assignmentService = {
       assignedBy: new Types.ObjectId(adminId),
       assignedAt: new Date(),
       status: "ASSIGNED" as const,
+      isActive: true,
       ...(data.notes && { notes: data.notes }),
     };
 
-    return assignmentRepository.createAssignment(assignmentData);
+    try {
+      return await assignmentRepository.createAssignment(assignmentData);
+    } catch (error: any) {
+      if (error?.code === 11000) {
+        throw new ApiError(
+          StatusCodes.CONFLICT,
+          "An active assignment for this order and assignment type already exists",
+        );
+      }
+      throw error;
+    }
   },
 
   /**
@@ -272,10 +285,13 @@ export const assignmentService = {
    * @returns Promise resolving to an array of matching assignment plain objects.
    */
   async getAssignments(filters: AssignmentFilters = {}) {
-    const { partnerId, assignmentType, status, isActive = true } = filters;
+    const { orderId, partnerId, assignmentType, status, isActive } = filters;
 
     const queryFilters: FilterQuery<Assignment> = {
       ...(isActive !== undefined && { isActive }),
+      ...(orderId !== undefined && {
+        orderId: new Types.ObjectId(orderId),
+      }),
       ...(partnerId !== undefined && {
         partnerId: new Types.ObjectId(partnerId),
       }),

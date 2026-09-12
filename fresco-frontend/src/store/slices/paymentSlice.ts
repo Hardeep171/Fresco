@@ -8,6 +8,8 @@ import {
   CreatePaymentInput,
   RetryPaymentInput,
   RefundTransaction,
+  ReportPaymentCollectedInput,
+  VerifyPaymentInput,
 } from "../../types/payment.types";
 import { paymentApi } from "../../api/payment.api";
 import { normalizeApiError } from "../../api/error";
@@ -23,13 +25,19 @@ export interface PaymentState {
   isFetchingPayments: boolean;
   isRecordingPayment: boolean;
   isRetryingPayment: boolean;
+  isReportingPayment: boolean;
+  isVerifyingPayment: boolean;
   isFetchingRefunds: boolean;
   error: NormalizedApiError | null;
   recordError: NormalizedApiError | null;
   retryError: NormalizedApiError | null;
+  reportPaymentError: NormalizedApiError | null;
+  verifyPaymentError: NormalizedApiError | null;
   refundsError: NormalizedApiError | null;
   recordSuccess: boolean;
   retrySuccess: boolean;
+  reportPaymentSuccess: boolean;
+  verifyPaymentSuccess: boolean;
 }
 
 const initialState: PaymentState = {
@@ -41,13 +49,19 @@ const initialState: PaymentState = {
   isFetchingPayments: false,
   isRecordingPayment: false,
   isRetryingPayment: false,
+  isReportingPayment: false,
+  isVerifyingPayment: false,
   isFetchingRefunds: false,
   error: null,
   recordError: null,
   retryError: null,
+  reportPaymentError: null,
+  verifyPaymentError: null,
   refundsError: null,
   recordSuccess: false,
   retrySuccess: false,
+  reportPaymentSuccess: false,
+  verifyPaymentSuccess: false,
 };
 
 /**
@@ -140,6 +154,38 @@ export const retryPaymentThunk = createAsyncThunk<
 >("payment/retryPayment", async ({ paymentId, data }, { rejectWithValue }) => {
   try {
     const payment = await paymentApi.retryPayment(paymentId, data);
+    return payment;
+  } catch (error: unknown) {
+    return rejectWithValue(normalizeApiError(error));
+  }
+});
+
+/**
+ * Async thunk for delivery partner to report payment collection.
+ */
+export const reportPaymentCollectedThunk = createAsyncThunk<
+  Payment,
+  { paymentIdOrOrderId: string; data: ReportPaymentCollectedInput },
+  { rejectValue: NormalizedApiError }
+>("payment/reportPaymentCollected", async ({ paymentIdOrOrderId, data }, { rejectWithValue }) => {
+  try {
+    const payment = await paymentApi.reportPaymentCollected(paymentIdOrOrderId, data);
+    return payment;
+  } catch (error: unknown) {
+    return rejectWithValue(normalizeApiError(error));
+  }
+});
+
+/**
+ * Async thunk for admin to verify and approve partner-reported payment.
+ */
+export const verifyPaymentThunk = createAsyncThunk<
+  Payment,
+  { paymentIdOrOrderId: string; data?: VerifyPaymentInput },
+  { rejectValue: NormalizedApiError }
+>("payment/verifyPayment", async ({ paymentIdOrOrderId, data }, { rejectWithValue }) => {
+  try {
+    const payment = await paymentApi.verifyPayment(paymentIdOrOrderId, data);
     return payment;
   } catch (error: unknown) {
     return rejectWithValue(normalizeApiError(error));
@@ -308,6 +354,56 @@ export const paymentSlice = createSlice({
       state.isRetryingPayment = false;
       state.retrySuccess = false;
       state.retryError = action.payload || null;
+    });
+
+    // REPORT PAYMENT COLLECTED
+    builder.addCase(reportPaymentCollectedThunk.pending, (state) => {
+      state.isReportingPayment = true;
+      state.reportPaymentError = null;
+      state.reportPaymentSuccess = false;
+    });
+    builder.addCase(reportPaymentCollectedThunk.fulfilled, (state, action) => {
+      state.currentPayment = action.payload;
+      const index = state.payments.findIndex(
+        (p) => p._id === action.payload._id
+      );
+      if (index !== -1) {
+        state.payments[index] = action.payload;
+      } else {
+        state.payments.unshift(action.payload);
+      }
+      state.isReportingPayment = false;
+      state.reportPaymentSuccess = true;
+      state.reportPaymentError = null;
+    });
+    builder.addCase(reportPaymentCollectedThunk.rejected, (state, action) => {
+      state.isReportingPayment = false;
+      state.reportPaymentSuccess = false;
+      state.reportPaymentError = action.payload || null;
+    });
+
+    // VERIFY PAYMENT
+    builder.addCase(verifyPaymentThunk.pending, (state) => {
+      state.isVerifyingPayment = true;
+      state.verifyPaymentError = null;
+      state.verifyPaymentSuccess = false;
+    });
+    builder.addCase(verifyPaymentThunk.fulfilled, (state, action) => {
+      state.currentPayment = action.payload;
+      const index = state.payments.findIndex(
+        (p) => p._id === action.payload._id
+      );
+      if (index !== -1) {
+        state.payments[index] = action.payload;
+      }
+      state.isVerifyingPayment = false;
+      state.verifyPaymentSuccess = true;
+      state.verifyPaymentError = null;
+    });
+    builder.addCase(verifyPaymentThunk.rejected, (state, action) => {
+      state.isVerifyingPayment = false;
+      state.verifyPaymentSuccess = false;
+      state.verifyPaymentError = action.payload || null;
     });
 
     // LOGOUT RESET

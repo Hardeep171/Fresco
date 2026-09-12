@@ -24,6 +24,9 @@ export interface OrderState {
   placeOrderError: NormalizedApiError | null;
   cancelSuccess: boolean;
   placeOrderSuccess: boolean;
+  isUpdatingStatus: boolean;
+  updateStatusError: NormalizedApiError | null;
+  updateStatusSuccess: boolean;
   selectedStatusFilter: OrderFilterTab;
 }
 
@@ -43,6 +46,9 @@ const initialState: OrderState = {
   placeOrderError: null,
   cancelSuccess: false,
   placeOrderSuccess: false,
+  isUpdatingStatus: false,
+  updateStatusError: null,
+  updateStatusSuccess: false,
   selectedStatusFilter: "ALL",
 };
 
@@ -203,8 +209,13 @@ export const orderSlice = createSlice({
       state.placeOrderError = null;
       state.detailsError = null;
       state.cancelError = null;
+      state.updateStatusError = null;
     },
-
+    clearUpdateStatusState: (state) => {
+      state.isUpdatingStatus = false;
+      state.updateStatusError = null;
+      state.updateStatusSuccess = false;
+    },
   },
   extraReducers: (builder) => {
     // CREATE ORDER
@@ -317,12 +328,26 @@ export const orderSlice = createSlice({
     });
 
     // ADMIN UPDATE ORDER STATUS
+    builder.addCase(updateOrderStatusAction.pending, (state) => {
+      state.isUpdatingStatus = true;
+      state.updateStatusError = null;
+      state.updateStatusSuccess = false;
+    });
     builder.addCase(updateOrderStatusAction.fulfilled, (state, action) => {
+      state.isUpdatingStatus = false;
+      state.updateStatusSuccess = true;
+      state.updateStatusError = null;
       state.currentOrder = action.payload;
       const index = state.orders.findIndex((o) => o._id === action.payload._id);
       if (index !== -1) {
         state.orders[index] = action.payload;
       }
+    });
+    builder.addCase(updateOrderStatusAction.rejected, (state, action) => {
+      state.isUpdatingStatus = false;
+      state.updateStatusSuccess = false;
+      state.updateStatusError = action.payload || null;
+      state.error = action.payload || null;
     });
 
     // ADMIN UPDATE PAYMENT STATUS
@@ -347,6 +372,7 @@ export const {
   clearCancelState,
   clearDetailsError,
   clearOrderErrors,
+  clearUpdateStatusState,
 } = orderSlice.actions;
 
 export default orderSlice.reducer;

@@ -5,6 +5,8 @@ import {
   RetryPaymentInput,
   PaymentFilters,
   RefundTransaction,
+  ReportPaymentCollectedInput,
+  VerifyPaymentInput,
 } from "../types/payment.types";
 import { ApiResponse } from "../types/api.types";
 
@@ -94,5 +96,38 @@ export const paymentApi = {
       { params: filters }
     );
     return response.data.data.payments;
+  },
+
+  /**
+   * Report payment collection by delivery partner (pending admin verification).
+   * Backend endpoint: POST /api/v1/payments/:id/report-collected or /payments/report-collected
+   */
+  async reportPaymentCollected(
+    paymentIdOrOrderId: string,
+    data: ReportPaymentCollectedInput
+  ): Promise<Payment> {
+    const endpoint = paymentIdOrOrderId
+      ? `/payments/${paymentIdOrOrderId}/report-collected`
+      : `/payments/report-collected`;
+    const response = await apiClient.post<ApiResponse<{ payment: Payment }>>(
+      endpoint,
+      data
+    );
+    return response.data.data.payment;
+  },
+
+  /**
+   * Verify and approve partner-reported payment (admin only).
+   * Backend endpoint: POST /api/v1/payments/:id/verify
+   */
+  async verifyPayment(
+    paymentIdOrOrderId: string,
+    data?: VerifyPaymentInput
+  ): Promise<Payment> {
+    const response = await apiClient.post<ApiResponse<{ payment: Payment }>>(
+      `/payments/${paymentIdOrOrderId}/verify`,
+      data || {}
+    );
+    return response.data.data.payment;
   },
 };

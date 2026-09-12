@@ -12,7 +12,9 @@ import {
   orderIdParamSchema,
   paymentIdParamSchema,
   receivePaymentSchema,
+  reportPaymentCollectedSchema,
   retryPaymentSchema,
+  verifyPaymentSchema,
 } from "../validators/payment.validator.js";
 
 /**
@@ -72,6 +74,50 @@ export const paymentController = {
       res,
       StatusCodes.OK,
       "Payment received successfully",
+      { payment },
+    );
+  }),
+
+  /** Report payment collection by delivery partner (pending admin verification). */
+  reportPaymentCollected: asyncHandler(async (req: Request, res: Response) => {
+    const partnerId = getAuthenticatedUserId(req);
+
+    const paramId = typeof req.params.id === "string" ? req.params.id : undefined;
+    const targetId = paramId || (req.body?.orderId as string | undefined);
+    const validatedData = reportPaymentCollectedSchema.parse(req.body);
+
+    const payment = await paymentService.reportPaymentCollected(
+      partnerId,
+      targetId,
+      validatedData,
+    );
+
+    ApiResponse.send(
+      res,
+      StatusCodes.OK,
+      "Payment collection reported successfully. Awaiting admin verification.",
+      { payment },
+    );
+  }),
+
+  /** Verify and approve partner-reported payment (admin only). */
+  verifyPayment: asyncHandler(async (req: Request, res: Response) => {
+    const adminId = getAuthenticatedUserId(req);
+
+    const paramId = typeof req.params.id === "string" ? req.params.id : undefined;
+    const targetId = paramId || (req.body?.orderId as string | undefined);
+    const validatedData = verifyPaymentSchema.parse(req.body || {});
+
+    const payment = await paymentService.verifyPayment(
+      adminId,
+      targetId,
+      validatedData,
+    );
+
+    ApiResponse.send(
+      res,
+      StatusCodes.OK,
+      "Payment verified and approved successfully",
       { payment },
     );
   }),

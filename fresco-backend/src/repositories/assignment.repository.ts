@@ -60,18 +60,70 @@ export const assignmentRepository = {
    *
    * @param orderId - The order's unique identifier.
    * @param assignmentType - The type of assignment to look up (PICKUP or DELIVERY).
+   * @param filters - Optional additional query filters.
    * @returns Promise resolving to the matching assignment plain object if found, or null.
    */
   async findAssignmentByOrder(
+    orderId: string | Types.ObjectId,
+    assignmentType: AssignmentType,
+    filters: FilterQuery<Assignment> = {},
+  ) {
+    return AssignmentModel.findOne({
+      orderId,
+      assignmentType,
+      ...filters,
+    })
+      .sort({ createdAt: -1 })
+      .lean()
+      .exec();
+  },
+
+  /**
+   * Finds the currently active assignment document for the specified order and assignment type.
+   *
+   * @param orderId - The order's unique identifier.
+   * @param assignmentType - The type of assignment to look up (PICKUP or DELIVERY).
+   * @returns Promise resolving to the matching active assignment plain object if found, or null.
+   */
+  async findActiveAssignmentByOrder(
     orderId: string | Types.ObjectId,
     assignmentType: AssignmentType,
   ) {
     return AssignmentModel.findOne({
       orderId,
       assignmentType,
+      isActive: true,
     })
+      .sort({ createdAt: -1 })
       .lean()
       .exec();
+  },
+
+  /**
+   * Safely deactivates and cancels all active assignments for a given order and assignment type,
+   * preserving assignment history.
+   *
+   * @param orderId - The order's unique identifier.
+   * @param assignmentType - The type of assignment to deactivate.
+   * @returns Promise resolving to the update result.
+   */
+  async deactivateAssignmentsByOrder(
+    orderId: string | Types.ObjectId,
+    assignmentType: AssignmentType,
+  ) {
+    return AssignmentModel.updateMany(
+      {
+        orderId,
+        assignmentType,
+        isActive: true,
+      },
+      {
+        $set: {
+          status: "CANCELLED",
+          isActive: false,
+        },
+      },
+    ).exec();
   },
 
   /**

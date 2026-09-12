@@ -1,7 +1,8 @@
 import { Router } from "express";
 
 import { paymentController } from "../controllers/payment.controller.js";
-import { authenticate } from "../middlewares/auth.middleware.js";
+import { ADMIN_ROLES } from "../constants/user.constants.js";
+import { authenticate, authorize } from "../middlewares/auth.middleware.js";
 
 /** Express router for Payment + Refund endpoints. */
 const router = Router();
@@ -11,6 +12,12 @@ router.use(authenticate);
 
 // Create a new payment record
 router.post("/", paymentController.createPayment);
+
+// Report payment collected by delivery partner (without :id)
+router.post("/report-collected", paymentController.reportPaymentCollected);
+
+// Verify payment by admin (without :id)
+router.post("/verify", authorize(ADMIN_ROLES), paymentController.verifyPayment);
 
 // Get all payments with optional query filters
 router.get("/", paymentController.getPayments);
@@ -29,6 +36,12 @@ router.get("/:id/refunds", paymentController.getPaymentRefunds);
 
 // Mark payment as received by delivery partner
 router.post("/:id/receive", paymentController.receivePayment);
+
+// Report payment collected by delivery partner (pending admin verification)
+router.post("/:id/report-collected", paymentController.reportPaymentCollected);
+
+// Verify and approve partner-reported payment (admin only)
+router.post("/:id/verify", authorize(ADMIN_ROLES), paymentController.verifyPayment);
 
 // Mark payment attempt as failed by delivery partner
 router.post("/:id/fail", paymentController.markPaymentFailed);

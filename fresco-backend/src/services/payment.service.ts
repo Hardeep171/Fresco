@@ -17,7 +17,9 @@ import type {
   CreatePaymentInput,
   CreateRefundInput,
   ReceivePaymentInput,
+  ReportPaymentCollectedInput,
   RetryPaymentInput,
+  VerifyPaymentInput,
 } from "../validators/payment.validator.js";
 
 /** Filter options for querying payments. */
@@ -170,10 +172,15 @@ async function ensureAuthorizedDeliveryPartnerForOrder(
 ) {
   await ensureDeliveryPartner(partnerId);
 
-  const assignment = await assignmentRepository.findAssignmentByOrder(
-    orderId,
-    "DELIVERY",
-  );
+  const assignment =
+    (await assignmentRepository.findActiveAssignmentByOrder(
+      orderId,
+      "DELIVERY",
+    )) ||
+    (await assignmentRepository.findActiveAssignmentByOrder(
+      orderId,
+      "PICKUP",
+    ));
 
   if (
     !assignment ||
@@ -410,6 +417,164 @@ export const paymentService = {
       );
       throw error;
     }
+
+    return updatedPayment;
+  },
+
+  /**
+   * Reports payment collection by an authorized delivery partner (for pickup or delivery).
+   * Sets verificationStatus to PENDING awaiting final admin verification/approval.
+   * Does NOT mark payment as final verified PAID.
+   *
+   * @param partnerId - Authenticated delivery partner user ID.
+   * @param targetId - Payment ID or Order ID.
+   * @param data - Optional collection reporting payload (paymentMethod, notes).
+   * @returns Promise resolving to updated payment plain object.
+   */
+  async reportPaymentCollected(
+    partnerId: string,
+    targetId?: string,
+    data?: ReportPaymentCollectedInput,
+  ) {
+    await ensureDeliveryPartner(partnerId);
+
+    const orderIdCandidate = data?.orderId || targetId;
+    if (!orderIdCandidate) {
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        "Payment ID or Order ID is required to report payment collection",
+      );
+    }
+
+    // Try finding payment by ID, or by Order ID
+    let existingPayment = await paymentRepository.findPaymentById(orderIdCandidate);
+    if (!existingPayment) {
+      existingPayment = await paymentRepository.findPaymentByOrder(orderIdCandidate);
+    }
+
+    let orderIdStr: string;
+    if (existingPayment) {
+      orderIdStr = String(existingPayment.orderId);
+    } else {
+      // Payment document not yet initialized; verify order exists and initialize
+      const order = await orderService.getOrderById(orderIdCandidate);
+      orderIdStr = String(order._id);
+    }
+
+    // Verify partner has active assignment for this order (PICKUP or DELIVERY)
+    await ensureAuthorizedDeliveryPartnerForOrder(orderIdStr, partnerId);
+
+    if (existingPayment) {
+      if (existingPayment.status === "PAID") {
+        throw new ApiError(
+          StatusCodes.CONFLICT,
+          "Payment has already been paid and verified",
+        );
+      }
+
+      const updateData: Record<string, unknown> = {
+        collectionReported: true,
+        verificationStatus: "PENDING",
+        collectedByPartnerId: new Types.ObjectId(partnerId),
+        collectedAt: new Date(),
+        receivedByPartnerId: new Types.ObjectId(partnerId),
+        ...(data?.paymentMethod && { paymentMethod: data.paymentMethod }),
+      };
+
+      const updatedPayment = await paymentRepository.updatePayment(
+        existingPayment._id.toString(),
+        updateData,
+      );
+
+      if (!updatedPayment) {
+        throw new ApiError(
+          StatusCodes.NOT_FOUND,
+          "Payment not found for update",
+        );
+      }
+
+      return updatedPayment;
+    }
+
+    // Initialize new payment document with collectionReported: true and verificationStatus: PENDING
+    const order = await orderService.getOrderById(orderIdStr);
+    const newPaymentData = {
+      orderId: order._id,
+      customerId: order.userId,
+      amount: Number(order.pricing?.totalAmount ?? 0),
+      paymentMethod: data?.paymentMethod || "CASH",
+      status: "PENDING" as const,
+      collectionReported: true,
+      verificationStatus: "PENDING" as const,
+      collectedByPartnerId: new Types.ObjectId(partnerId),
+      collectedAt: new Date(),
+      receivedByPartnerId: new Types.ObjectId(partnerId),
+    };
+
+    return paymentRepository.createPayment(newPaymentData);
+  },
+
+  /**
+   * Verifies and approves a partner-reported payment (admin only).
+   * Transitions payment status to PAID and synchronizes order paymentStatus to PAID.
+   *
+   * @param adminId - Authenticated admin user ID.
+   * @param targetId - Payment ID or Order ID.
+   * @param data - Optional verification payload (e.g. notes).
+   * @returns Promise resolving to the verified payment plain object.
+   */
+  async verifyPayment(
+    adminId: string,
+    targetId?: string,
+    data?: VerifyPaymentInput,
+  ) {
+    await ensureAdmin(adminId);
+
+    const orderIdCandidate = data?.orderId || targetId;
+    if (!orderIdCandidate) {
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        "Payment ID or Order ID is required to verify payment",
+      );
+    }
+
+    let existingPayment = await paymentRepository.findPaymentById(orderIdCandidate);
+    if (!existingPayment) {
+      existingPayment = await paymentRepository.findPaymentByOrder(orderIdCandidate);
+    }
+
+    if (!existingPayment) {
+      throw new ApiError(StatusCodes.NOT_FOUND, "Payment record not found");
+    }
+
+    if (existingPayment.status === "PAID") {
+      return existingPayment;
+    }
+
+    const orderIdStr = String(existingPayment.orderId);
+
+    const updateData: Record<string, unknown> = {
+      status: "PAID",
+      verificationStatus: "VERIFIED",
+      verifiedByAdminId: new Types.ObjectId(adminId),
+      verifiedAt: new Date(),
+      receivedAt: new Date(),
+      receivedByPartnerId:
+        existingPayment.collectedByPartnerId ||
+        existingPayment.receivedByPartnerId ||
+        new Types.ObjectId(adminId),
+    };
+
+    const updatedPayment = await paymentRepository.updatePayment(
+      existingPayment._id.toString(),
+      updateData,
+    );
+
+    if (!updatedPayment) {
+      throw new ApiError(StatusCodes.NOT_FOUND, "Payment not found");
+    }
+
+    await orderService.updatePaymentStatus(orderIdStr, "PAID");
 
     return updatedPayment;
   },

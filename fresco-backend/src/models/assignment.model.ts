@@ -85,6 +85,13 @@ AssignmentSchema.index({ isActive: 1 });
 // Compound indexes optimizing assignment lookups while preserving assignment history
 AssignmentSchema.index({ partnerId: 1, status: 1 });
 AssignmentSchema.index({ orderId: 1, assignmentType: 1, isActive: 1 });
+AssignmentSchema.index(
+  { orderId: 1, assignmentType: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { isActive: true },
+  },
+);
 
 export type Assignment = InferSchemaType<typeof AssignmentSchema>;
 
