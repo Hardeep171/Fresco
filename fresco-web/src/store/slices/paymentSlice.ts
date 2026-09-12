@@ -1,0 +1,393 @@
+import {
+  createSlice,
+  createAsyncThunk,
+  PayloadAction,
+} from "@reduxjs/toolkit";
+import {
+  Payment,
+  CreatePaymentInput,
+  RetryPaymentInput,
+  RefundTransaction,
+  ReportPaymentCollectedInput,
+  VerifyPaymentInput,
+} from "../../types/payment.types";
+import { paymentApi } from "../../api/payment.api";
+import { normalizeApiError } from "../../api/error";
+import { NormalizedApiError } from "../../types/api.types";
+import { logoutUser, logoutSuccess } from "./authSlice";
+
+export interface PaymentState {
+  currentPayment: Payment | null;
+  payments: Payment[];
+  refunds: RefundTransaction[];
+  isLoading: boolean;
+  isFetchingPayment: boolean;
+  isFetchingPayments: boolean;
+  isRecordingPayment: boolean;
+  isRetryingPayment: boolean;
+  isReportingPayment: boolean;
+  isVerifyingPayment: boolean;
+  isFetchingRefunds: boolean;
+  error: NormalizedApiError | null;
+  recordError: NormalizedApiError | null;
+  retryError: NormalizedApiError | null;
+  reportPaymentError: NormalizedApiError | null;
+  verifyPaymentError: NormalizedApiError | null;
+  refundsError: NormalizedApiError | null;
+  recordSuccess: boolean;
+  retrySuccess: boolean;
+  reportPaymentSuccess: boolean;
+  verifyPaymentSuccess: boolean;
+}
+
+const initialState: PaymentState = {
+  currentPayment: null,
+  payments: [],
+  refunds: [],
+  isLoading: false,
+  isFetchingPayment: false,
+  isFetchingPayments: false,
+  isRecordingPayment: false,
+  isRetryingPayment: false,
+  isReportingPayment: false,
+  isVerifyingPayment: false,
+  isFetchingRefunds: false,
+  error: null,
+  recordError: null,
+  retryError: null,
+  reportPaymentError: null,
+  verifyPaymentError: null,
+  refundsError: null,
+  recordSuccess: false,
+  retrySuccess: false,
+  reportPaymentSuccess: false,
+  verifyPaymentSuccess: false,
+};
+
+export const fetchPaymentByOrderId = createAsyncThunk<
+  Payment,
+  string,
+  { rejectValue: NormalizedApiError }
+>("payment/fetchPaymentByOrderId", async (orderId, { rejectWithValue }) => {
+  try {
+    const payment = await paymentApi.getPaymentByOrderId(orderId);
+    return payment;
+  } catch (error: unknown) {
+    return rejectWithValue(normalizeApiError(error));
+  }
+});
+
+export const fetchPaymentById = createAsyncThunk<
+  Payment,
+  string,
+  { rejectValue: NormalizedApiError }
+>("payment/fetchPaymentById", async (paymentId, { rejectWithValue }) => {
+  try {
+    const payment = await paymentApi.getPaymentById(paymentId);
+    return payment;
+  } catch (error: unknown) {
+    return rejectWithValue(normalizeApiError(error));
+  }
+});
+
+export const fetchCustomerPayments = createAsyncThunk<
+  Payment[],
+  void,
+  { rejectValue: NormalizedApiError }
+>("payment/fetchCustomerPayments", async (_, { rejectWithValue }) => {
+  try {
+    const payments = await paymentApi.getCustomerPayments();
+    return payments;
+  } catch (error: unknown) {
+    return rejectWithValue(normalizeApiError(error));
+  }
+});
+
+export const fetchPaymentRefunds = createAsyncThunk<
+  RefundTransaction[],
+  string,
+  { rejectValue: NormalizedApiError }
+>("payment/fetchPaymentRefunds", async (paymentId, { rejectWithValue }) => {
+  try {
+    const refunds = await paymentApi.getPaymentRefunds(paymentId);
+    return refunds;
+  } catch (error: unknown) {
+    return rejectWithValue(normalizeApiError(error));
+  }
+});
+
+export const recordPaymentThunk = createAsyncThunk<
+  Payment,
+  CreatePaymentInput,
+  { rejectValue: NormalizedApiError }
+>("payment/recordPayment", async (input, { rejectWithValue }) => {
+  try {
+    const payment = await paymentApi.createPayment(input);
+    return payment;
+  } catch (error: unknown) {
+    return rejectWithValue(normalizeApiError(error));
+  }
+});
+
+export const retryPaymentThunk = createAsyncThunk<
+  Payment,
+  { paymentId: string; data: RetryPaymentInput },
+  { rejectValue: NormalizedApiError }
+>("payment/retryPayment", async ({ paymentId, data }, { rejectWithValue }) => {
+  try {
+    const payment = await paymentApi.retryPayment(paymentId, data);
+    return payment;
+  } catch (error: unknown) {
+    return rejectWithValue(normalizeApiError(error));
+  }
+});
+
+export const reportPaymentCollectedThunk = createAsyncThunk<
+  Payment,
+  { paymentIdOrOrderId: string; data: ReportPaymentCollectedInput },
+  { rejectValue: NormalizedApiError }
+>("payment/reportPaymentCollected", async ({ paymentIdOrOrderId, data }, { rejectWithValue }) => {
+  try {
+    const payment = await paymentApi.reportPaymentCollected(paymentIdOrOrderId, data);
+    return payment;
+  } catch (error: unknown) {
+    return rejectWithValue(normalizeApiError(error));
+  }
+});
+
+export const verifyPaymentThunk = createAsyncThunk<
+  Payment,
+  { paymentIdOrOrderId: string; data?: VerifyPaymentInput },
+  { rejectValue: NormalizedApiError }
+>("payment/verifyPayment", async ({ paymentIdOrOrderId, data }, { rejectWithValue }) => {
+  try {
+    const payment = await paymentApi.verifyPayment(paymentIdOrOrderId, data);
+    return payment;
+  } catch (error: unknown) {
+    return rejectWithValue(normalizeApiError(error));
+  }
+});
+
+export const paymentSlice = createSlice({
+  name: "payment",
+  initialState,
+  reducers: {
+    setCurrentPayment: (state, action: PayloadAction<Payment | null>) => {
+      state.currentPayment = action.payload;
+    },
+    clearPaymentErrors: (state) => {
+      state.error = null;
+      state.recordError = null;
+      state.retryError = null;
+      state.refundsError = null;
+      state.reportPaymentError = null;
+      state.verifyPaymentError = null;
+    },
+    clearPaymentSuccess: (state) => {
+      state.recordSuccess = false;
+      state.retrySuccess = false;
+      state.reportPaymentSuccess = false;
+      state.verifyPaymentSuccess = false;
+    },
+    resetPaymentState: () => initialState,
+  },
+  extraReducers: (builder) => {
+    builder.addCase(fetchPaymentByOrderId.pending, (state) => {
+      state.isFetchingPayment = true;
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(fetchPaymentByOrderId.fulfilled, (state, action) => {
+      state.currentPayment = action.payload;
+      if (action.payload.refunds) {
+        state.refunds = action.payload.refunds;
+      }
+      const index = state.payments.findIndex(
+        (p) => p._id === action.payload._id
+      );
+      if (index !== -1) {
+        state.payments[index] = action.payload;
+      } else {
+        state.payments.unshift(action.payload);
+      }
+      state.isFetchingPayment = false;
+      state.isLoading = false;
+      state.error = null;
+    });
+    builder.addCase(fetchPaymentByOrderId.rejected, (state, action) => {
+      state.isFetchingPayment = false;
+      state.isLoading = false;
+      state.error = action.payload || null;
+    });
+
+    builder.addCase(fetchPaymentById.pending, (state) => {
+      state.isFetchingPayment = true;
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(fetchPaymentById.fulfilled, (state, action) => {
+      state.currentPayment = action.payload;
+      if (action.payload.refunds) {
+        state.refunds = action.payload.refunds;
+      }
+      const index = state.payments.findIndex(
+        (p) => p._id === action.payload._id
+      );
+      if (index !== -1) {
+        state.payments[index] = action.payload;
+      } else {
+        state.payments.unshift(action.payload);
+      }
+      state.isFetchingPayment = false;
+      state.isLoading = false;
+      state.error = null;
+    });
+    builder.addCase(fetchPaymentById.rejected, (state, action) => {
+      state.isFetchingPayment = false;
+      state.isLoading = false;
+      state.error = action.payload || null;
+    });
+
+    builder.addCase(fetchCustomerPayments.pending, (state) => {
+      state.isFetchingPayments = true;
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(fetchCustomerPayments.fulfilled, (state, action) => {
+      state.payments = action.payload;
+      state.isFetchingPayments = false;
+      state.isLoading = false;
+      state.error = null;
+    });
+    builder.addCase(fetchCustomerPayments.rejected, (state, action) => {
+      state.isFetchingPayments = false;
+      state.isLoading = false;
+      state.error = action.payload || null;
+    });
+
+    builder.addCase(fetchPaymentRefunds.pending, (state) => {
+      state.isFetchingRefunds = true;
+      state.refundsError = null;
+    });
+    builder.addCase(fetchPaymentRefunds.fulfilled, (state, action) => {
+      state.refunds = action.payload;
+      if (state.currentPayment) {
+        state.currentPayment.refunds = action.payload;
+      }
+      state.isFetchingRefunds = false;
+      state.refundsError = null;
+    });
+    builder.addCase(fetchPaymentRefunds.rejected, (state, action) => {
+      state.isFetchingRefunds = false;
+      state.refundsError = action.payload || null;
+    });
+
+    builder.addCase(recordPaymentThunk.pending, (state) => {
+      state.isRecordingPayment = true;
+      state.recordError = null;
+      state.recordSuccess = false;
+    });
+    builder.addCase(recordPaymentThunk.fulfilled, (state, action) => {
+      state.currentPayment = action.payload;
+      const index = state.payments.findIndex(
+        (p) => p._id === action.payload._id
+      );
+      if (index !== -1) {
+        state.payments[index] = action.payload;
+      } else {
+        state.payments.unshift(action.payload);
+      }
+      state.isRecordingPayment = false;
+      state.recordSuccess = true;
+      state.recordError = null;
+    });
+    builder.addCase(recordPaymentThunk.rejected, (state, action) => {
+      state.isRecordingPayment = false;
+      state.recordSuccess = false;
+      state.recordError = action.payload || null;
+    });
+
+    builder.addCase(retryPaymentThunk.pending, (state) => {
+      state.isRetryingPayment = true;
+      state.retryError = null;
+      state.retrySuccess = false;
+    });
+    builder.addCase(retryPaymentThunk.fulfilled, (state, action) => {
+      state.currentPayment = action.payload;
+      const index = state.payments.findIndex(
+        (p) => p._id === action.payload._id
+      );
+      if (index !== -1) {
+        state.payments[index] = action.payload;
+      }
+      state.isRetryingPayment = false;
+      state.retrySuccess = true;
+      state.retryError = null;
+    });
+    builder.addCase(retryPaymentThunk.rejected, (state, action) => {
+      state.isRetryingPayment = false;
+      state.retrySuccess = false;
+      state.retryError = action.payload || null;
+    });
+
+    builder.addCase(reportPaymentCollectedThunk.pending, (state) => {
+      state.isReportingPayment = true;
+      state.reportPaymentError = null;
+      state.reportPaymentSuccess = false;
+    });
+    builder.addCase(reportPaymentCollectedThunk.fulfilled, (state, action) => {
+      state.currentPayment = action.payload;
+      const index = state.payments.findIndex(
+        (p) => p._id === action.payload._id
+      );
+      if (index !== -1) {
+        state.payments[index] = action.payload;
+      } else {
+        state.payments.unshift(action.payload);
+      }
+      state.isReportingPayment = false;
+      state.reportPaymentSuccess = true;
+      state.reportPaymentError = null;
+    });
+    builder.addCase(reportPaymentCollectedThunk.rejected, (state, action) => {
+      state.isReportingPayment = false;
+      state.reportPaymentSuccess = false;
+      state.reportPaymentError = action.payload || null;
+    });
+
+    builder.addCase(verifyPaymentThunk.pending, (state) => {
+      state.isVerifyingPayment = true;
+      state.verifyPaymentError = null;
+      state.verifyPaymentSuccess = false;
+    });
+    builder.addCase(verifyPaymentThunk.fulfilled, (state, action) => {
+      state.currentPayment = action.payload;
+      const index = state.payments.findIndex(
+        (p) => p._id === action.payload._id
+      );
+      if (index !== -1) {
+        state.payments[index] = action.payload;
+      }
+      state.isVerifyingPayment = false;
+      state.verifyPaymentSuccess = true;
+      state.verifyPaymentError = null;
+    });
+    builder.addCase(verifyPaymentThunk.rejected, (state, action) => {
+      state.isVerifyingPayment = false;
+      state.verifyPaymentSuccess = false;
+      state.verifyPaymentError = action.payload || null;
+    });
+
+    builder.addCase(logoutUser.fulfilled, () => initialState);
+    builder.addCase(logoutSuccess, () => initialState);
+  },
+});
+
+export const {
+  setCurrentPayment,
+  clearPaymentErrors,
+  clearPaymentSuccess,
+  resetPaymentState,
+} = paymentSlice.actions;
+
+export default paymentSlice.reducer;
