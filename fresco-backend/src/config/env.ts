@@ -74,18 +74,13 @@ if (!parsedEnvironment.success) {
 }
 
 const configuredOrigins = parsedEnvironment.data.CORS_ORIGIN.split(",")
-  .map((origin) => origin.trim())
+  .map((origin) => origin.trim().replace(/\/+$/, ""))
   .filter((origin) => origin.length > 0);
 
-const resolvedOrigins: string[] = [];
-
-if (parsedEnvironment.data.NODE_ENV === "production") {
-  resolvedOrigins.push(...configuredOrigins.filter((origin) => origin !== "*"));
-} else {
-  const explicitOrigins = configuredOrigins.filter((origin) => origin !== "*");
-  const combined = Array.from(new Set([...DEFAULT_DEV_ORIGINS, ...explicitOrigins]));
-  resolvedOrigins.push(...combined);
-}
+const explicitOrigins = configuredOrigins.filter((origin) => origin !== "*");
+const resolvedOrigins: string[] = Array.from(
+  new Set([...DEFAULT_DEV_ORIGINS, ...explicitOrigins]),
+);
 
 export const env = Object.freeze({
   nodeEnv: parsedEnvironment.data.NODE_ENV,

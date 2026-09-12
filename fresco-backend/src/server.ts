@@ -56,9 +56,11 @@ const exitAfterShutdown = (signal: string): void => {
 const startServer = async (): Promise<void> => {
   await connectDatabase();
 
-  server = app.listen(env.port, () => {
+  const host = "0.0.0.0";
+  server = app.listen(env.port, host, () => {
     logger.info("FRESCO backend started", {
       port: env.port,
+      host,
       environment: env.nodeEnv,
       nodeVersion: process.version,
       pid: process.pid,

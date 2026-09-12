@@ -2,15 +2,21 @@
 node_modules/
 fresco-backend/node_modules/
 fresco-frontend/node_modules/
+fresco-web/node_modules/
 fresco-frontend/.expo/
 
 # Build output
 fresco-backend/dist/
 fresco-frontend/dist/
+fresco-web/dist/
 
 # Environment
 fresco-backend/.env
 fresco-frontend/.env
+fresco-web/.env
+fresco-web/.env.local
+.env.local
+.env.*.local
 
 # Logs
 fresco-backend/logs/
