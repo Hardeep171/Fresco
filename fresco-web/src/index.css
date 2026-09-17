@@ -52,6 +52,11 @@
   padding: 0;
 }
 
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 body {
   font-family: var(--font-family);
   background-color: var(--background);
@@ -395,3 +400,101 @@ button, input, select, textarea {
 .animate-spin {
   animation: spin 1s linear infinite;
 }
+
+/* ==========================================================================
+   Responsive Utilities & Layout Enhancements
+   ========================================================================== */
+
+/* Responsive Card Grid for Admin screens */
+.admin-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+}
+
+.admin-card-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+}
+
+.admin-card-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 1.25rem;
+}
+
+@media (min-width: 1280px) {
+  .admin-card-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .admin-card-grid-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1279px) {
+  .admin-card-grid,
+  .admin-card-grid-3,
+  .admin-card-grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .admin-card-grid,
+  .admin-card-grid-3,
+  .admin-card-grid-4 {
+    grid-template-columns: 1fr !important;
+    gap: 0.875rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .catalog-header-actions {
+    width: 100%;
+  }
+  .catalog-header-actions button {
+    flex: 1;
+    justify-content: center;
+  }
+  .catalog-search-wrapper {
+    max-width: 100% !important;
+  }
+  .admin-main-content {
+    padding: 1rem 0.75rem !important;
+  }
+  .admin-header {
+    padding: 0 0.875rem !important;
+  }
+  .checkout-payment-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .modal-overlay {
+    padding: 0.75rem !important;
+  }
+  .modal-header {
+    padding: 1rem 1.25rem !important;
+  }
+  .modal-body {
+    padding: 1.25rem 1rem !important;
+  }
+  .modal-footer {
+    padding: 1rem 1.25rem !important;
+    flex-wrap: wrap !important;
+  }
+  .catalog-toast {
+    right: 1rem !important;
+    left: 1rem !important;
+    bottom: 1rem !important;
+    justify-content: space-between !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-status-text {
+    display: none;
+  }
+}
+

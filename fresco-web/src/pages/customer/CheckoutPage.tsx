@@ -224,7 +224,7 @@ export const CheckoutPage: React.FC = () => {
             title="2. Payment Preference"
             subtitle="Choose how you would like to settle your order amount"
           >
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+            <div className="checkout-payment-grid">
               <div
                 onClick={() => setPaymentMethod("CASH")}
                 style={{

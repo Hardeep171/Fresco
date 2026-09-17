@@ -163,6 +163,7 @@ export const AdminOrdersPage: React.FC = () => {
               fontWeight: 600,
               cursor: "pointer",
               whiteSpace: "nowrap",
+              flexShrink: 0,
               transition: "all 0.15s ease",
               backgroundColor:
                 activeTab === tab.value ? "var(--primary)" : "var(--card-bg)",
@@ -186,7 +187,7 @@ export const AdminOrdersPage: React.FC = () => {
             gap: "1rem",
           }}
         >
-          <div style={{ flex: "1 1 300px", maxWidth: "450px" }}>
+          <div style={{ flex: "1 1 300px", maxWidth: "450px", width: "100%" }}>
             <Input
               type="text"
               placeholder="Search by Order ID, Customer Name, Email, Phone..."
@@ -202,13 +203,13 @@ export const AdminOrdersPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* Orders Table */}
-      <Card className="fresco-card">
-        {isLoading ? (
-          <div style={{ display: "flex", justifyContent: "center", padding: "4rem 0" }}>
-            <Spinner size="lg" color="var(--primary)" />
-          </div>
-        ) : filteredOrders.length === 0 ? (
+      {/* Orders Cards Grid */}
+      {isLoading ? (
+        <div style={{ display: "flex", justifyContent: "center", padding: "4rem 0" }}>
+          <Spinner size="lg" color="var(--primary)" />
+        </div>
+      ) : filteredOrders.length === 0 ? (
+        <Card className="fresco-card">
           <div style={{ padding: "4rem 1rem", textAlign: "center", color: "var(--text-muted)" }}>
             <ShoppingBag size={48} style={{ margin: "0 auto 1rem", opacity: 0.4 }} />
             <h3 style={{ fontSize: "1.125rem", fontWeight: 600, margin: "0 0 0.5rem 0", color: "var(--text-primary)" }}>
@@ -220,130 +221,126 @@ export const AdminOrdersPage: React.FC = () => {
                 : `No orders currently in "${activeTab}" status.`}
             </p>
           </div>
-        ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table className="fresco-table" style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ textAlign: "left", borderBottom: "1px solid var(--border-color)" }}>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Order ID & Date
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Customer
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Items Breakdown
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Total Amount
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Order Status
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Payment
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase", textAlign: "right" }}>
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredOrders.map((order) => {
-                  const customerName =
-                    typeof order.userId === "object" && order.userId
-                      ? `${order.userId.firstName || ""} ${order.userId.lastName || ""}`.trim() || "Customer"
-                      : "Customer";
-                  const customerEmail =
-                    typeof order.userId === "object" ? order.userId?.email : "";
-                  const customerPhone =
-                    typeof order.userId === "object" ? order.userId?.phone : "";
+        </Card>
+      ) : (
+        <div className="admin-card-grid-3">
+          {filteredOrders.map((order) => {
+            const customerName =
+              typeof order.userId === "object" && order.userId
+                ? `${order.userId.firstName || ""} ${order.userId.lastName || ""}`.trim() || "Customer"
+                : "Customer";
+            const customerEmail =
+              typeof order.userId === "object" ? order.userId?.email : "";
+            const customerPhone =
+              typeof order.userId === "object" ? order.userId?.phone : "";
 
-                  const totalGarments =
-                    order.items?.reduce((sum, it) => sum + it.quantity, 0) || 0;
-                  const displayAmount = order.pricing?.totalAmount ?? order.totalAmount ?? 0;
-                  const dateStr = new Date(order.createdAt).toLocaleDateString("en-IN", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  });
+            const totalGarments =
+              order.items?.reduce((sum, it) => sum + it.quantity, 0) || 0;
+            const displayAmount = order.pricing?.totalAmount ?? order.totalAmount ?? 0;
+            const dateStr = new Date(order.createdAt).toLocaleDateString("en-IN", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            });
 
-                  return (
-                    <tr
-                      key={order._id}
-                      style={{
-                        borderBottom: "1px solid var(--border-color)",
-                        transition: "background 0.15s ease",
-                      }}
-                    >
-                      <td style={{ padding: "0.875rem 1rem" }}>
-                        <div style={{ fontWeight: 700, fontSize: "0.875rem", color: "var(--text-primary)" }}>
-                          #{order._id.substring(order._id.length - 8).toUpperCase()}
-                        </div>
-                        <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
-                          {dateStr}
-                        </div>
-                      </td>
+            return (
+              <Card
+                key={order._id}
+                className="fresco-card-hover"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  height: "100%",
+                  padding: "1.25rem",
+                  backgroundColor: "var(--surface)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "var(--radius-md)",
+                }}
+              >
+                <div>
+                  {/* Card Header: Order ID + Badges */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem", marginBottom: "0.75rem" }}>
+                    <div>
+                      <span style={{ fontSize: "0.6875rem", color: "var(--text-muted)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em" }}>
+                        Order ID
+                      </span>
+                      <div style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--text-primary)" }}>
+                        #{order._id.substring(order._id.length - 8).toUpperCase()}
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.35rem" }}>
+                      <OrderStatusBadge status={order.orderStatus || order.status} />
+                      <PaymentStatusBadge status={order.paymentStatus} />
+                    </div>
+                  </div>
 
-                      <td style={{ padding: "0.875rem 1rem" }}>
-                        <div style={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--text-primary)" }}>
-                          {customerName}
-                        </div>
-                        {customerEmail && (
-                          <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
-                            {customerEmail}
-                          </div>
-                        )}
-                        {customerPhone && (
-                          <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
-                            {customerPhone}
-                          </div>
-                        )}
-                      </td>
+                  {/* Customer Box */}
+                  <div style={{ padding: "0.75rem", backgroundColor: "var(--surface-muted)", borderRadius: "var(--radius-sm)", marginBottom: "0.75rem" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontWeight: 700, fontSize: "0.875rem", color: "var(--text-primary)", marginBottom: "0.25rem" }}>
+                      <User size={14} color="var(--primary)" />
+                      <span style={{ wordBreak: "break-word" }}>{customerName}</span>
+                    </div>
+                    {customerPhone && (
+                      <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", marginBottom: "0.125rem" }}>
+                        📞 {customerPhone}
+                      </div>
+                    )}
+                    {customerEmail && (
+                      <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", wordBreak: "break-word" }}>
+                        ✉ {customerEmail}
+                      </div>
+                    )}
+                  </div>
 
-                      <td style={{ padding: "0.875rem 1rem", fontSize: "0.875rem" }}>
-                        <span style={{ fontWeight: 600 }}>{totalGarments} items</span>
-                        <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
-                          {order.items?.length || 0} unique services
-                        </div>
-                      </td>
+                  {/* Order Details Metrics */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", marginBottom: "0.75rem", fontSize: "0.8125rem" }}>
+                    <div>
+                      <span style={{ color: "var(--text-muted)", fontSize: "0.75rem", display: "block" }}>Garments & Care</span>
+                      <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>{totalGarments} items</span>
+                      <div style={{ fontSize: "0.6875rem", color: "var(--text-muted)" }}>{order.items?.length || 0} unique services</div>
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      <span style={{ color: "var(--text-muted)", fontSize: "0.75rem", display: "block" }}>Total ({order.paymentMethod || "CASH"})</span>
+                      <span style={{ fontWeight: 800, fontSize: "1.1875rem", color: "var(--primary)" }}>₹{displayAmount}</span>
+                    </div>
+                  </div>
 
-                      <td style={{ padding: "0.875rem 1rem" }}>
-                        <div style={{ fontWeight: 800, fontSize: "0.9375rem", color: "var(--text-primary)" }}>
-                          ₹{displayAmount}
-                        </div>
-                        <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
-                          {order.paymentMethod || "CASH"}
-                        </div>
-                      </td>
+                  {/* Date */}
+                  <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "0.375rem", marginBottom: "1rem" }}>
+                    <Calendar size={13} />
+                    <span>{dateStr}</span>
+                  </div>
+                </div>
 
-                      <td style={{ padding: "0.875rem 1rem" }}>
-                        <OrderStatusBadge status={order.orderStatus || order.status} />
-                      </td>
-
-                      <td style={{ padding: "0.875rem 1rem" }}>
-                        <PaymentStatusBadge status={order.paymentStatus} />
-                      </td>
-
-                      <td style={{ padding: "0.875rem 1rem", textAlign: "right" }}>
-                        <Link
-                          to={`/admin/orders/${order._id}`}
-                          className="btn btn-primary btn-sm"
-                          style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}
-                        >
-                          <Eye size={14} /> Manage
-                        </Link>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
+                {/* Card Action */}
+                <div style={{ borderTop: "1px solid var(--border-light)", paddingTop: "0.75rem" }}>
+                  <Link
+                    to={`/admin/orders/${order._id}`}
+                    className="btn btn-primary"
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.375rem",
+                      padding: "0.625rem 1rem",
+                      minHeight: "40px",
+                      fontWeight: 600,
+                      textDecoration: "none",
+                      fontSize: "0.875rem",
+                    }}
+                  >
+                    <Eye size={15} /> Manage Order & Lifecycle
+                  </Link>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

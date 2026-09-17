@@ -125,7 +125,16 @@ export const AdminPaymentsPage: React.FC = () => {
       )}
 
       {/* Tabs */}
-      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem", overflowX: "auto" }}>
+      <div
+        style={{
+          display: "flex",
+          gap: "0.5rem",
+          marginBottom: "1rem",
+          overflowX: "auto",
+          paddingBottom: "0.25rem",
+          WebkitOverflowScrolling: "touch",
+        }}
+      >
         {[
           { label: "All Payments", value: "ALL" },
           { label: "Pending Verification", value: "PENDING_VERIFICATION" },
@@ -145,6 +154,7 @@ export const AdminPaymentsPage: React.FC = () => {
               fontWeight: 600,
               cursor: "pointer",
               whiteSpace: "nowrap",
+              flexShrink: 0,
               backgroundColor: selectedFilter === tab.value ? "var(--primary)" : "var(--card-bg)",
               color: selectedFilter === tab.value ? "#ffffff" : "var(--text-secondary)",
               boxShadow: selectedFilter === tab.value ? "var(--shadow-sm)" : "none",
@@ -156,7 +166,7 @@ export const AdminPaymentsPage: React.FC = () => {
       </div>
 
       {/* Search Bar */}
-      <div style={{ maxWidth: "360px", marginBottom: "1.5rem" }}>
+      <div className="catalog-search-wrapper" style={{ marginBottom: "1.5rem" }}>
         <Input
           placeholder="Search by Order ID..."
           value={searchQuery}
@@ -165,13 +175,13 @@ export const AdminPaymentsPage: React.FC = () => {
         />
       </div>
 
-      {/* Table */}
-      <Card className="fresco-card">
-        {isLoading ? (
-          <div style={{ display: "flex", justifyContent: "center", padding: "4rem 0" }}>
-            <Spinner size="lg" color="var(--primary)" />
-          </div>
-        ) : filteredPayments.length === 0 ? (
+      {/* Payment Cards Grid */}
+      {isLoading ? (
+        <div style={{ display: "flex", justifyContent: "center", padding: "4rem 0" }}>
+          <Spinner size="lg" color="var(--primary)" />
+        </div>
+      ) : filteredPayments.length === 0 ? (
+        <Card className="fresco-card">
           <div style={{ padding: "4rem 1rem", textAlign: "center", color: "var(--text-muted)" }}>
             <CreditCard size={48} style={{ margin: "0 auto 1rem", opacity: 0.4 }} />
             <h3 style={{ fontSize: "1.125rem", fontWeight: 600, margin: "0 0 0.5rem 0", color: "var(--text-primary)" }}>
@@ -181,129 +191,176 @@ export const AdminPaymentsPage: React.FC = () => {
               No transaction entries match the current filter.
             </p>
           </div>
-        ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table className="fresco-table" style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ textAlign: "left", borderBottom: "1px solid var(--border-color)" }}>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Order ID
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Amount
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Method
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Status
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Verification
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Collector
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase", textAlign: "right" }}>
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredPayments.map((payment) => {
-                  const orderId =
-                    typeof payment.orderId === "object" ? payment.orderId._id : payment.orderId;
-                  const collectorName =
-                    typeof payment.collectedBy === "object" && payment.collectedBy
-                      ? `${payment.collectedBy.firstName} ${payment.collectedBy.lastName}`
-                      : "—";
+        </Card>
+      ) : (
+        <div className="admin-card-grid-3">
+          {filteredPayments.map((payment) => {
+            const orderId =
+              typeof payment.orderId === "object" ? payment.orderId._id : payment.orderId;
+            const collectorName =
+              typeof payment.collectedBy === "object" && payment.collectedBy
+                ? `${payment.collectedBy.firstName} ${payment.collectedBy.lastName}`
+                : "—";
 
-                  const isPendingVerification =
-                    payment.verificationStatus === "PENDING" ||
-                    (payment.status === "PENDING" && payment.collectionReported);
+            const isPendingVerification =
+              payment.verificationStatus === "PENDING" ||
+              (payment.status === "PENDING" && payment.collectionReported);
 
-                  return (
-                    <tr key={payment._id} style={{ borderBottom: "1px solid var(--border-color)" }}>
-                      <td style={{ padding: "0.875rem 1rem", fontWeight: 700, fontSize: "0.875rem" }}>
-                        <Link
-                          to={`/admin/orders/${orderId}`}
-                          style={{ color: "var(--primary)", textDecoration: "none" }}
-                        >
-                          #{orderId?.substring(orderId.length - 8).toUpperCase()}
-                        </Link>
-                      </td>
+            return (
+              <Card
+                key={payment._id}
+                className="fresco-card fresco-card-hover"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  padding: "1.25rem",
+                  gap: "1rem",
+                }}
+              >
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+                  {/* Top: Order ID & Payment Method */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem" }}>
+                    <div>
+                      <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontWeight: 500 }}>
+                        Order Reference
+                      </div>
+                      <Link
+                        to={`/admin/orders/${orderId}`}
+                        style={{
+                          fontWeight: 700,
+                          fontSize: "1.0625rem",
+                          color: "var(--primary)",
+                          display: "inline-block",
+                          marginTop: "0.15rem",
+                        }}
+                      >
+                        #{orderId?.substring(orderId.length - 8).toUpperCase()}
+                      </Link>
+                    </div>
 
-                      <td style={{ padding: "0.875rem 1rem", fontWeight: 800, fontSize: "0.9375rem" }}>
+                    <span
+                      style={{
+                        fontSize: "0.75rem",
+                        fontWeight: 700,
+                        padding: "0.25rem 0.6rem",
+                        borderRadius: "var(--radius-sm)",
+                        backgroundColor: "rgba(30, 58, 138, 0.08)",
+                        color: "var(--primary)",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {payment.paymentMethod || "CASH"}
+                    </span>
+                  </div>
+
+                  {/* Financial & Status Metrics */}
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1.2fr 1fr",
+                      gap: "0.75rem",
+                      padding: "0.75rem",
+                      backgroundColor: "var(--surface-muted)",
+                      borderRadius: "var(--radius-sm)",
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontWeight: 500 }}>
+                        Amount
+                      </div>
+                      <div style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--text-primary)", marginTop: "0.15rem" }}>
                         ₹{payment.amount}
-                      </td>
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontWeight: 500, marginBottom: "0.25rem" }}>
+                        Payment Status
+                      </div>
+                      <PaymentStatusBadge status={payment.status} />
+                    </div>
+                  </div>
 
-                      <td style={{ padding: "0.875rem 1rem", fontSize: "0.8125rem", color: "var(--text-secondary)" }}>
-                        {payment.paymentMethod || "CASH"}
-                      </td>
+                  {/* Verification & Collector row */}
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.5rem",
+                      fontSize: "0.8125rem",
+                      padding: "0.625rem 0.75rem",
+                      borderRadius: "var(--radius-sm)",
+                      border: "1px solid var(--border-light)",
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ color: "var(--text-muted)" }}>Verification:</span>
+                      <span
+                        style={{
+                          fontSize: "0.6875rem",
+                          fontWeight: 700,
+                          padding: "0.15rem 0.45rem",
+                          borderRadius: "var(--radius-sm)",
+                          backgroundColor:
+                            payment.verificationStatus === "VERIFIED"
+                              ? "rgba(16, 185, 129, 0.15)"
+                              : isPendingVerification
+                              ? "rgba(245, 158, 11, 0.15)"
+                              : "rgba(107, 114, 128, 0.15)",
+                          color:
+                            payment.verificationStatus === "VERIFIED"
+                              ? "var(--success)"
+                              : isPendingVerification
+                              ? "var(--warning)"
+                              : "var(--text-muted)",
+                        }}
+                      >
+                        {payment.verificationStatus || (payment.collectionReported ? "REPORTED" : "NONE")}
+                      </span>
+                    </div>
 
-                      <td style={{ padding: "0.875rem 1rem" }}>
-                        <PaymentStatusBadge status={payment.status} />
-                      </td>
-
-                      <td style={{ padding: "0.875rem 1rem" }}>
-                        <span
-                          style={{
-                            fontSize: "0.75rem",
-                            fontWeight: 700,
-                            padding: "0.2rem 0.5rem",
-                            borderRadius: "var(--radius-sm)",
-                            backgroundColor:
-                              payment.verificationStatus === "VERIFIED"
-                                ? "rgba(16, 185, 129, 0.15)"
-                                : isPendingVerification
-                                ? "rgba(245, 158, 11, 0.15)"
-                                : "rgba(107, 114, 128, 0.15)",
-                            color:
-                              payment.verificationStatus === "VERIFIED"
-                                ? "var(--success)"
-                                : isPendingVerification
-                                ? "var(--warning)"
-                                : "var(--text-muted)",
-                          }}
-                        >
-                          {payment.verificationStatus || (payment.collectionReported ? "REPORTED" : "NONE")}
-                        </span>
-                      </td>
-
-                      <td style={{ padding: "0.875rem 1rem", fontSize: "0.8125rem", color: "var(--text-secondary)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                        <User size={13} /> Collector:
+                      </span>
+                      <span style={{ fontWeight: 600, color: "var(--text-secondary)" }}>
                         {collectorName}
-                      </td>
+                      </span>
+                    </div>
+                  </div>
+                </div>
 
-                      <td style={{ padding: "0.875rem 1rem", textAlign: "right" }}>
-                        {isPendingVerification ? (
-                          <Button
-                            variant="success"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedPayment(payment);
-                              setIsVerifyModalOpen(true);
-                            }}
-                            leftIcon={<ShieldCheck size={14} />}
-                          >
-                            Verify
-                          </Button>
-                        ) : (
-                          <Link
-                            to={`/admin/orders/${orderId}`}
-                            className="btn btn-secondary btn-sm"
-                          >
-                            Order Details
-                          </Link>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
+                {/* Bottom Actions */}
+                <div style={{ paddingTop: "0.75rem", borderTop: "1px solid var(--border-light)" }}>
+                  {isPendingVerification ? (
+                    <Button
+                      variant="success"
+                      size="sm"
+                      fullWidth
+                      onClick={() => {
+                        setSelectedPayment(payment);
+                        setIsVerifyModalOpen(true);
+                      }}
+                      leftIcon={<ShieldCheck size={14} />}
+                      style={{ minHeight: "40px" }}
+                    >
+                      Verify & Approve
+                    </Button>
+                  ) : (
+                    <Link
+                      to={`/admin/orders/${orderId}`}
+                      className="btn btn-secondary btn-sm"
+                      style={{ width: "100%", justifyContent: "center", minHeight: "40px" }}
+                    >
+                      View Order Details
+                    </Link>
+                  )}
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      )}
 
       {/* Verification Modal */}
       <PaymentVerificationModal

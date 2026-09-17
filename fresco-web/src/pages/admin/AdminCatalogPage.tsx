@@ -179,10 +179,21 @@ export const AdminCatalogPage: React.FC = () => {
     }
   };
 
+  const filteredCategories = categories.filter((c) =>
+    c.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  const filteredGarments = garments.filter((g) =>
+    g.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  const filteredServices = services.filter((s) =>
+    s.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
       {/* Header */}
       <div
+        className="catalog-header"
         style={{
           display: "flex",
           justifyContent: "space-between",
@@ -201,7 +212,7 @@ export const AdminCatalogPage: React.FC = () => {
           </p>
         </div>
 
-        <div style={{ display: "flex", gap: "0.5rem" }}>
+        <div className="catalog-header-actions" style={{ display: "flex", gap: "0.5rem" }}>
           <Button variant="secondary" size="sm" onClick={loadData} leftIcon={<RefreshCw size={14} />}>
             Refresh
           </Button>
@@ -224,7 +235,16 @@ export const AdminCatalogPage: React.FC = () => {
       )}
 
       {/* Tabs */}
-      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem" }}>
+      <div
+        style={{
+          display: "flex",
+          gap: "0.5rem",
+          marginBottom: "1.5rem",
+          overflowX: "auto",
+          paddingBottom: "0.25rem",
+          WebkitOverflowScrolling: "touch",
+        }}
+      >
         <button
           onClick={() => { setActiveTab("categories"); setSearchQuery(""); }}
           style={{
@@ -237,7 +257,9 @@ export const AdminCatalogPage: React.FC = () => {
             display: "flex",
             alignItems: "center",
             gap: "0.5rem",
-            backgroundColor: activeTab === "categories" ? "var(--primary)" : "var(--card-bg)",
+            whiteSpace: "nowrap",
+            flexShrink: 0,
+            backgroundColor: activeTab === "categories" ? "var(--primary)" : "var(--card-bg, #ffffff)",
             color: activeTab === "categories" ? "#ffffff" : "var(--text-secondary)",
             boxShadow: activeTab === "categories" ? "var(--shadow-sm)" : "none",
           }}
@@ -256,7 +278,9 @@ export const AdminCatalogPage: React.FC = () => {
             display: "flex",
             alignItems: "center",
             gap: "0.5rem",
-            backgroundColor: activeTab === "garments" ? "var(--primary)" : "var(--card-bg)",
+            whiteSpace: "nowrap",
+            flexShrink: 0,
+            backgroundColor: activeTab === "garments" ? "var(--primary)" : "var(--card-bg, #ffffff)",
             color: activeTab === "garments" ? "#ffffff" : "var(--text-secondary)",
             boxShadow: activeTab === "garments" ? "var(--shadow-sm)" : "none",
           }}
@@ -275,7 +299,9 @@ export const AdminCatalogPage: React.FC = () => {
             display: "flex",
             alignItems: "center",
             gap: "0.5rem",
-            backgroundColor: activeTab === "services" ? "var(--primary)" : "var(--card-bg)",
+            whiteSpace: "nowrap",
+            flexShrink: 0,
+            backgroundColor: activeTab === "services" ? "var(--primary)" : "var(--card-bg, #ffffff)",
             color: activeTab === "services" ? "#ffffff" : "var(--text-secondary)",
             boxShadow: activeTab === "services" ? "var(--shadow-sm)" : "none",
           }}
@@ -285,7 +311,7 @@ export const AdminCatalogPage: React.FC = () => {
       </div>
 
       {/* Search Input */}
-      <div style={{ maxWidth: "360px", marginBottom: "1rem" }}>
+      <div className="catalog-search-wrapper" style={{ marginBottom: "1rem" }}>
         <Input
           placeholder={`Search ${activeTab}...`}
           value={searchQuery}
@@ -294,185 +320,268 @@ export const AdminCatalogPage: React.FC = () => {
         />
       </div>
 
-      {/* Main Table */}
-      <Card className="fresco-card">
-        {isLoading ? (
-          <div style={{ display: "flex", justifyContent: "center", padding: "4rem 0" }}>
-            <Spinner size="lg" color="var(--primary)" />
-          </div>
-        ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table className="fresco-table" style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ textAlign: "left", borderBottom: "1px solid var(--border-color)" }}>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Name
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Description
-                  </th>
-                  {activeTab === "garments" && (
-                    <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                      Category
-                    </th>
-                  )}
-                  {activeTab === "services" && (
-                    <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                      Turnaround
-                    </th>
-                  )}
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Status
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase", textAlign: "right" }}>
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {activeTab === "categories" &&
-                  categories
-                    .filter((c) => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
-                    .map((item) => (
-                      <tr key={item._id} style={{ borderBottom: "1px solid var(--border-color)" }}>
-                        <td style={{ padding: "0.875rem 1rem", fontWeight: 600, fontSize: "0.875rem" }}>
+      {/* Responsive Catalog Cards Grid */}
+      {isLoading ? (
+        <div style={{ display: "flex", justifyContent: "center", padding: "4rem 0" }}>
+          <Spinner size="lg" color="var(--primary)" />
+        </div>
+      ) : (
+        <>
+          {activeTab === "categories" &&
+            (filteredCategories.length === 0 ? (
+              <Card className="fresco-card">
+                <div style={{ padding: "4rem 1rem", textAlign: "center", color: "var(--text-muted)" }}>
+                  <Layers size={48} style={{ margin: "0 auto 1rem", opacity: 0.4 }} />
+                  <h3 style={{ fontSize: "1.125rem", fontWeight: 600, margin: "0 0 0.5rem 0", color: "var(--text-primary)" }}>
+                    No categories found
+                  </h3>
+                  <p style={{ margin: 0, fontSize: "0.875rem" }}>
+                    {searchQuery ? `No categories match "${searchQuery}".` : "No categories defined yet."}
+                  </p>
+                </div>
+              </Card>
+            ) : (
+              <div className="admin-card-grid-3">
+                {filteredCategories.map((item) => (
+                  <Card
+                    key={item._id}
+                    className="fresco-card fresco-card-hover"
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                      padding: "1.25rem",
+                      gap: "1rem",
+                    }}
+                  >
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem" }}>
+                        <div style={{ fontWeight: 700, fontSize: "1.0625rem", color: "var(--text-primary)", wordBreak: "break-word" }}>
                           {item.name}
-                        </td>
-                        <td style={{ padding: "0.875rem 1rem", fontSize: "0.8125rem", color: "var(--text-secondary)" }}>
-                          {item.description || "—"}
-                        </td>
-                        <td style={{ padding: "0.875rem 1rem" }}>
-                          <span
-                            style={{
-                              fontSize: "0.75rem",
-                              fontWeight: 600,
-                              padding: "0.2rem 0.5rem",
-                              borderRadius: "var(--radius-sm)",
-                              backgroundColor: item.isActive ? "rgba(16, 185, 129, 0.15)" : "rgba(107, 114, 128, 0.15)",
-                              color: item.isActive ? "var(--success)" : "var(--text-muted)",
-                            }}
-                          >
-                            {item.isActive ? "ACTIVE" : "INACTIVE"}
-                          </span>
-                        </td>
-                        <td style={{ padding: "0.875rem 1rem", textAlign: "right" }}>
-                          <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
-                            <Button variant="secondary" size="sm" onClick={() => handleOpenEdit(item)}>
-                              <Edit2 size={14} /> Edit
-                            </Button>
-                            <Button
-                              variant={item.isActive ? "danger" : "success"}
-                              size="sm"
-                              onClick={() => handleToggleStatus(item)}
-                            >
-                              {item.isActive ? "Disable" : "Enable"}
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                        </div>
+                        <span
+                          style={{
+                            fontSize: "0.75rem",
+                            fontWeight: 600,
+                            padding: "0.2rem 0.5rem",
+                            borderRadius: "var(--radius-sm)",
+                            whiteSpace: "nowrap",
+                            flexShrink: 0,
+                            backgroundColor: item.isActive ? "rgba(16, 185, 129, 0.15)" : "rgba(107, 114, 128, 0.15)",
+                            color: item.isActive ? "var(--success)" : "var(--text-muted)",
+                          }}
+                        >
+                          {item.isActive ? "ACTIVE" : "INACTIVE"}
+                        </span>
+                      </div>
 
-                {activeTab === "garments" &&
-                  garments
-                    .filter((g) => g.name.toLowerCase().includes(searchQuery.toLowerCase()))
-                    .map((item) => {
-                      const catName =
-                        typeof item.categoryId === "object" && item.categoryId
-                          ? (item.categoryId as any).name
-                          : categories.find((c) => c._id === item.categoryId)?.name || "—";
+                      <p style={{ margin: 0, fontSize: "0.8125rem", color: "var(--text-secondary)", lineHeight: 1.5, wordBreak: "break-word" }}>
+                        {item.description || <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>No description provided</span>}
+                      </p>
+                    </div>
 
-                      return (
-                        <tr key={item._id} style={{ borderBottom: "1px solid var(--border-color)" }}>
-                          <td style={{ padding: "0.875rem 1rem", fontWeight: 600, fontSize: "0.875rem" }}>
-                            {item.name}
-                          </td>
-                          <td style={{ padding: "0.875rem 1rem", fontSize: "0.8125rem", color: "var(--text-secondary)" }}>
-                            {item.description || "—"}
-                          </td>
-                          <td style={{ padding: "0.875rem 1rem", fontSize: "0.8125rem", color: "var(--primary)", fontWeight: 500 }}>
-                            {catName}
-                          </td>
-                          <td style={{ padding: "0.875rem 1rem" }}>
-                            <span
-                              style={{
-                                fontSize: "0.75rem",
-                                fontWeight: 600,
-                                padding: "0.2rem 0.5rem",
-                                borderRadius: "var(--radius-sm)",
-                                backgroundColor: item.isActive ? "rgba(16, 185, 129, 0.15)" : "rgba(107, 114, 128, 0.15)",
-                                color: item.isActive ? "var(--success)" : "var(--text-muted)",
-                              }}
-                            >
-                              {item.isActive ? "ACTIVE" : "INACTIVE"}
-                            </span>
-                          </td>
-                          <td style={{ padding: "0.875rem 1rem", textAlign: "right" }}>
-                            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
-                              <Button variant="secondary" size="sm" onClick={() => handleOpenEdit(item)}>
-                                <Edit2 size={14} /> Edit
-                              </Button>
-                              <Button
-                                variant={item.isActive ? "danger" : "success"}
-                                size="sm"
-                                onClick={() => handleToggleStatus(item)}
-                              >
-                                {item.isActive ? "Disable" : "Enable"}
-                              </Button>
+                    <div style={{ display: "flex", gap: "0.5rem", paddingTop: "0.75rem", borderTop: "1px solid var(--border-light)" }}>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        fullWidth
+                        onClick={() => handleOpenEdit(item)}
+                        leftIcon={<Edit2 size={14} />}
+                        style={{ minHeight: "40px" }}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant={item.isActive ? "danger" : "success"}
+                        size="sm"
+                        fullWidth
+                        onClick={() => handleToggleStatus(item)}
+                        style={{ minHeight: "40px" }}
+                      >
+                        {item.isActive ? "Disable" : "Enable"}
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            ))}
+
+          {activeTab === "garments" &&
+            (filteredGarments.length === 0 ? (
+              <Card className="fresco-card">
+                <div style={{ padding: "4rem 1rem", textAlign: "center", color: "var(--text-muted)" }}>
+                  <Shirt size={48} style={{ margin: "0 auto 1rem", opacity: 0.4 }} />
+                  <h3 style={{ fontSize: "1.125rem", fontWeight: 600, margin: "0 0 0.5rem 0", color: "var(--text-primary)" }}>
+                    No garments found
+                  </h3>
+                  <p style={{ margin: 0, fontSize: "0.875rem" }}>
+                    {searchQuery ? `No garments match "${searchQuery}".` : "No garments defined yet."}
+                  </p>
+                </div>
+              </Card>
+            ) : (
+              <div className="admin-card-grid-3">
+                {filteredGarments.map((item) => {
+                  const catName =
+                    typeof item.categoryId === "object" && item.categoryId
+                      ? (item.categoryId as any).name
+                      : categories.find((c) => c._id === item.categoryId)?.name || "—";
+
+                  return (
+                    <Card
+                      key={item._id}
+                      className="fresco-card fresco-card-hover"
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "space-between",
+                        padding: "1.25rem",
+                        gap: "1rem",
+                      }}
+                    >
+                      <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem" }}>
+                          <div>
+                            <div style={{ fontWeight: 700, fontSize: "1.0625rem", color: "var(--text-primary)", wordBreak: "break-word" }}>
+                              {item.name}
                             </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-
-                {activeTab === "services" &&
-                  services
-                    .filter((s) => s.name.toLowerCase().includes(searchQuery.toLowerCase()))
-                    .map((item) => (
-                      <tr key={item._id} style={{ borderBottom: "1px solid var(--border-color)" }}>
-                        <td style={{ padding: "0.875rem 1rem", fontWeight: 600, fontSize: "0.875rem" }}>
-                          {item.name}
-                        </td>
-                        <td style={{ padding: "0.875rem 1rem", fontSize: "0.8125rem", color: "var(--text-secondary)" }}>
-                          {item.description || "—"}
-                        </td>
-                        <td style={{ padding: "0.875rem 1rem", fontSize: "0.8125rem", color: "var(--text-secondary)" }}>
-                          {item.turnaroundHours || 24} hrs
-                        </td>
-                        <td style={{ padding: "0.875rem 1rem" }}>
+                            <div style={{ fontSize: "0.75rem", display: "inline-flex", alignItems: "center", gap: "0.35rem", marginTop: "0.3rem", padding: "0.2rem 0.5rem", borderRadius: "var(--radius-sm)", backgroundColor: "rgba(30, 58, 138, 0.08)", color: "var(--primary)", fontWeight: 600 }}>
+                              <span>{catName}</span>
+                            </div>
+                          </div>
                           <span
                             style={{
                               fontSize: "0.75rem",
                               fontWeight: 600,
                               padding: "0.2rem 0.5rem",
                               borderRadius: "var(--radius-sm)",
+                              whiteSpace: "nowrap",
+                              flexShrink: 0,
                               backgroundColor: item.isActive ? "rgba(16, 185, 129, 0.15)" : "rgba(107, 114, 128, 0.15)",
                               color: item.isActive ? "var(--success)" : "var(--text-muted)",
                             }}
                           >
                             {item.isActive ? "ACTIVE" : "INACTIVE"}
                           </span>
-                        </td>
-                        <td style={{ padding: "0.875rem 1rem", textAlign: "right" }}>
-                          <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
-                            <Button variant="secondary" size="sm" onClick={() => handleOpenEdit(item)}>
-                              <Edit2 size={14} /> Edit
-                            </Button>
-                            <Button
-                              variant={item.isActive ? "danger" : "success"}
-                              size="sm"
-                              onClick={() => handleToggleStatus(item)}
-                            >
-                              {item.isActive ? "Disable" : "Enable"}
-                            </Button>
+                        </div>
+
+                        <p style={{ margin: 0, fontSize: "0.8125rem", color: "var(--text-secondary)", lineHeight: 1.5, wordBreak: "break-word" }}>
+                          {item.description || <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>No description provided</span>}
+                        </p>
+                      </div>
+
+                      <div style={{ display: "flex", gap: "0.5rem", paddingTop: "0.75rem", borderTop: "1px solid var(--border-light)" }}>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          fullWidth
+                          onClick={() => handleOpenEdit(item)}
+                          leftIcon={<Edit2 size={14} />}
+                          style={{ minHeight: "40px" }}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant={item.isActive ? "danger" : "success"}
+                          size="sm"
+                          fullWidth
+                          onClick={() => handleToggleStatus(item)}
+                          style={{ minHeight: "40px" }}
+                        >
+                          {item.isActive ? "Disable" : "Enable"}
+                        </Button>
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            ))}
+
+          {activeTab === "services" &&
+            (filteredServices.length === 0 ? (
+              <Card className="fresco-card">
+                <div style={{ padding: "4rem 1rem", textAlign: "center", color: "var(--text-muted)" }}>
+                  <Sparkles size={48} style={{ margin: "0 auto 1rem", opacity: 0.4 }} />
+                  <h3 style={{ fontSize: "1.125rem", fontWeight: 600, margin: "0 0 0.5rem 0", color: "var(--text-primary)" }}>
+                    No services found
+                  </h3>
+                  <p style={{ margin: 0, fontSize: "0.875rem" }}>
+                    {searchQuery ? `No services match "${searchQuery}".` : "No services defined yet."}
+                  </p>
+                </div>
+              </Card>
+            ) : (
+              <div className="admin-card-grid-3">
+                {filteredServices.map((item) => (
+                  <Card
+                    key={item._id}
+                    className="fresco-card fresco-card-hover"
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                      padding: "1.25rem",
+                      gap: "1rem",
+                    }}
+                  >
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem" }}>
+                        <div>
+                          <div style={{ fontWeight: 700, fontSize: "1.0625rem", color: "var(--text-primary)", wordBreak: "break-word" }}>
+                            {item.name}
                           </div>
-                        </td>
-                      </tr>
-                    ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
+                          <div style={{ fontSize: "0.75rem", display: "inline-flex", alignItems: "center", gap: "0.35rem", marginTop: "0.3rem", padding: "0.2rem 0.5rem", borderRadius: "var(--radius-sm)", backgroundColor: "var(--surface-muted)", color: "var(--text-secondary)", fontWeight: 600 }}>
+                            <span>Turnaround: {item.turnaroundHours || 24} hrs</span>
+                          </div>
+                        </div>
+                        <span
+                          style={{
+                            fontSize: "0.75rem",
+                            fontWeight: 600,
+                            padding: "0.2rem 0.5rem",
+                            borderRadius: "var(--radius-sm)",
+                            whiteSpace: "nowrap",
+                            flexShrink: 0,
+                            backgroundColor: item.isActive ? "rgba(16, 185, 129, 0.15)" : "rgba(107, 114, 128, 0.15)",
+                            color: item.isActive ? "var(--success)" : "var(--text-muted)",
+                          }}
+                        >
+                          {item.isActive ? "ACTIVE" : "INACTIVE"}
+                        </span>
+                      </div>
+
+                      <p style={{ margin: 0, fontSize: "0.8125rem", color: "var(--text-secondary)", lineHeight: 1.5, wordBreak: "break-word" }}>
+                        {item.description || <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>No description provided</span>}
+                      </p>
+                    </div>
+
+                    <div style={{ display: "flex", gap: "0.5rem", paddingTop: "0.75rem", borderTop: "1px solid var(--border-light)" }}>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        fullWidth
+                        onClick={() => handleOpenEdit(item)}
+                        leftIcon={<Edit2 size={14} />}
+                        style={{ minHeight: "40px" }}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant={item.isActive ? "danger" : "success"}
+                        size="sm"
+                        fullWidth
+                        onClick={() => handleToggleStatus(item)}
+                        style={{ minHeight: "40px" }}
+                      >
+                        {item.isActive ? "Disable" : "Enable"}
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            ))}
+        </>
+      )}
 
       {/* Add / Edit Modal */}
       <Modal
@@ -484,7 +593,7 @@ export const AdminCatalogPage: React.FC = () => {
             : `Add New ${activeTab === "categories" ? "Category" : activeTab === "garments" ? "Garment" : "Service"}`
         }
         footer={
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem", width: "100%" }}>
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem", width: "100%", flexWrap: "wrap" }}>
             <Button variant="secondary" onClick={() => setIsModalOpen(false)} disabled={isSaving}>
               Cancel
             </Button>

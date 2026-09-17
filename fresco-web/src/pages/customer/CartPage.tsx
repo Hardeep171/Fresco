@@ -116,7 +116,7 @@ export const CartPage: React.FC = () => {
                     }}
                   >
                     {/* Garment & Service Info */}
-                    <div style={{ flex: 1, minWidth: "14rem" }}>
+                    <div style={{ flex: 1, minWidth: "11rem" }}>
                       <div style={{ fontWeight: 700, fontSize: "1.0625rem", color: "var(--text-primary)" }}>
                         {item.garmentName}
                       </div>

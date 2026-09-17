@@ -123,6 +123,7 @@ export const CatalogPage: React.FC = () => {
       {/* Cart Success Alert */}
       {cartSuccessMessage && (
         <div
+          className="catalog-toast"
           style={{
             position: "fixed",
             bottom: "2rem",
@@ -131,11 +132,13 @@ export const CatalogPage: React.FC = () => {
             backgroundColor: "var(--surface)",
             border: "2px solid var(--success)",
             borderRadius: "var(--radius-md)",
-            padding: "1rem 1.25rem",
+            padding: "0.875rem 1.25rem",
             boxShadow: "var(--shadow-xl)",
             display: "flex",
             alignItems: "center",
             gap: "1rem",
+            maxWidth: "calc(100vw - 2rem)",
+            flexWrap: "wrap",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>

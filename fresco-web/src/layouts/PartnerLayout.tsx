@@ -90,6 +90,8 @@ export const PartnerLayout: React.FC = () => {
             gap: "1rem",
             borderTop: "1px solid var(--border-light)",
             paddingTop: "0.25rem",
+            overflowX: "auto",
+            WebkitOverflowScrolling: "touch",
           }}
         >
           {navItems.map((item) => {
@@ -108,6 +110,8 @@ export const PartnerLayout: React.FC = () => {
                   padding: "0.625rem 0.25rem",
                   borderBottom: isActive ? "2px solid var(--primary)" : "2px solid transparent",
                   transition: "all 0.15s",
+                  whiteSpace: "nowrap",
+                  flexShrink: 0,
                 }}
               >
                 {item.icon}

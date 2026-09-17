@@ -9,6 +9,7 @@ import {
   Clock,
   ArrowRight,
   RefreshCw,
+  Eye,
 } from "lucide-react";
 import { userApi } from "../../api/user.api";
 import { orderApi } from "../../api/order.api";
@@ -342,87 +343,80 @@ export const AdminDashboardPage: React.FC = () => {
             <p style={{ margin: 0 }}>No orders placed yet.</p>
           </div>
         ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table className="fresco-table" style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ textAlign: "left", borderBottom: "1px solid var(--border-color)" }}>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Order ID
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Customer
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Items
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Amount
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Order Status
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Payment
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase", textAlign: "right" }}>
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentOrders.map((order) => {
-                  const customerName =
-                    typeof order.userId === "object" && order.userId
-                      ? `${order.userId.firstName} ${order.userId.lastName}`
-                      : "Customer";
-                  const totalItems =
-                    order.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
-                  const displayAmount = order.pricing?.totalAmount ?? order.totalAmount ?? 0;
+          <div style={{ padding: "1.25rem" }}>
+            <div className="admin-card-grid-4">
+              {recentOrders.map((order) => {
+                const customerName =
+                  typeof order.userId === "object" && order.userId
+                    ? `${order.userId.firstName} ${order.userId.lastName}`.trim() || "Customer"
+                    : "Customer";
+                const totalItems =
+                  order.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+                const displayAmount = order.pricing?.totalAmount ?? order.totalAmount ?? 0;
 
-                  return (
-                    <tr
-                      key={order._id}
-                      style={{
-                        borderBottom: "1px solid var(--border-color)",
-                        transition: "background 0.15s ease",
-                      }}
-                    >
-                      <td style={{ padding: "0.875rem 1rem", fontWeight: 600, fontSize: "0.875rem" }}>
-                        #{order._id.substring(order._id.length - 8).toUpperCase()}
-                      </td>
-                      <td style={{ padding: "0.875rem 1rem", fontSize: "0.875rem" }}>
-                        <div style={{ fontWeight: 500, color: "var(--text-primary)" }}>{customerName}</div>
-                        {typeof order.userId === "object" && order.userId?.email && (
-                          <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
-                            {order.userId.email}
-                          </div>
-                        )}
-                      </td>
-                      <td style={{ padding: "0.875rem 1rem", fontSize: "0.875rem", color: "var(--text-secondary)" }}>
-                        {totalItems} garments
-                      </td>
-                      <td style={{ padding: "0.875rem 1rem", fontWeight: 700, fontSize: "0.875rem", color: "var(--text-primary)" }}>
-                        ₹{displayAmount}
-                      </td>
-                      <td style={{ padding: "0.875rem 1rem" }}>
+                return (
+                  <Card
+                    key={order._id}
+                    className="fresco-card-hover"
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                      height: "100%",
+                      padding: "1rem",
+                      backgroundColor: "var(--surface)",
+                      border: "1px solid var(--border)",
+                      borderRadius: "var(--radius-md)",
+                    }}
+                  >
+                    <div>
+                      {/* Top Row: Order ID + Status */}
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem", marginBottom: "0.5rem" }}>
+                        <div style={{ fontWeight: 800, fontSize: "0.9375rem", color: "var(--text-primary)" }}>
+                          #{order._id.substring(order._id.length - 8).toUpperCase()}
+                        </div>
                         <OrderStatusBadge status={order.orderStatus || order.status} />
-                      </td>
-                      <td style={{ padding: "0.875rem 1rem" }}>
+                      </div>
+
+                      {/* Customer */}
+                      <div style={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--text-primary)", marginBottom: "0.375rem", wordBreak: "break-word" }}>
+                        {customerName}
+                      </div>
+
+                      {/* Metrics: Items & Amount */}
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.8125rem", marginBottom: "0.5rem" }}>
+                        <span style={{ color: "var(--text-secondary)" }}>{totalItems} garments</span>
+                        <span style={{ fontWeight: 800, color: "var(--primary)", fontSize: "1.0625rem" }}>₹{displayAmount}</span>
+                      </div>
+
+                      <div style={{ marginBottom: "0.75rem" }}>
                         <PaymentStatusBadge status={order.paymentStatus} />
-                      </td>
-                      <td style={{ padding: "0.875rem 1rem", textAlign: "right" }}>
-                        <Link
-                          to={`/admin/orders/${order._id}`}
-                          className="btn btn-secondary btn-sm"
-                        >
-                          Manage
-                        </Link>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                      </div>
+                    </div>
+
+                    {/* Manage Link */}
+                    <div style={{ borderTop: "1px solid var(--border-light)", paddingTop: "0.625rem" }}>
+                      <Link
+                        to={`/admin/orders/${order._id}`}
+                        className="btn btn-secondary btn-sm"
+                        style={{
+                          width: "100%",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "0.375rem",
+                          minHeight: "36px",
+                          textDecoration: "none",
+                          fontWeight: 600,
+                        }}
+                      >
+                        <Eye size={14} /> Manage
+                      </Link>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
           </div>
         )}
       </Card>

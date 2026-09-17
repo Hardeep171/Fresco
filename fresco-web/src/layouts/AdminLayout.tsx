@@ -187,6 +187,7 @@ export const AdminLayout: React.FC = () => {
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
         {/* Top Navbar */}
         <header
+          className="admin-header"
           style={{
             height: "4rem",
             backgroundColor: "var(--surface)",
@@ -215,21 +216,21 @@ export const AdminLayout: React.FC = () => {
             >
               <Menu size={22} />
             </button>
-            <span style={{ fontSize: "1rem", fontWeight: 700, color: "var(--text-primary)" }}>
-              Admin Operations Portal
+            <span style={{ fontSize: "1rem", fontWeight: 700, color: "var(--text-primary)", whiteSpace: "nowrap" }}>
+              Admin Operations
             </span>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-            <span style={{ fontSize: "0.8125rem", color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: "0.375rem" }}>
-              <span style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: "var(--success)" }} />
-              Live Server Connected
+            <span style={{ fontSize: "0.8125rem", color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: "0.375rem", whiteSpace: "nowrap" }}>
+              <span style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: "var(--success)", flexShrink: 0 }} />
+              <span className="admin-status-text">Live Server Connected</span>
             </span>
           </div>
         </header>
 
         {/* View Container */}
-        <main style={{ flex: 1, padding: "1.75rem", overflowX: "auto" }}>
+        <main className="admin-main-content" style={{ flex: 1, padding: "1.75rem", overflowX: "auto" }}>
           <Outlet />
         </main>
       </div>

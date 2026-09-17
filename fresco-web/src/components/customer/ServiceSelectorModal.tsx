@@ -76,7 +76,7 @@ export const ServiceSelectorModal: React.FC<ServiceSelectorModalProps> = ({
         </div>
       }
       footer={
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", flexWrap: "wrap", gap: "0.75rem" }}>
           <div>
             <span style={{ fontSize: "0.875rem", color: "var(--text-secondary)" }}>Total: </span>
             <span style={{ fontSize: "1.25rem", fontWeight: 700, color: "var(--primary)" }}>

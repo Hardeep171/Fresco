@@ -118,7 +118,16 @@ export const AdminInspectionPage: React.FC = () => {
       )}
 
       {/* Status Tabs */}
-      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
+      <div
+        style={{
+          display: "flex",
+          gap: "0.5rem",
+          marginBottom: "1rem",
+          overflowX: "auto",
+          paddingBottom: "0.25rem",
+          WebkitOverflowScrolling: "touch",
+        }}
+      >
         {[
           { label: "All Inspections", value: "ALL" },
           { label: "Draft", value: "DRAFT" },
@@ -135,6 +144,8 @@ export const AdminInspectionPage: React.FC = () => {
               fontSize: "0.8125rem",
               fontWeight: 600,
               cursor: "pointer",
+              whiteSpace: "nowrap",
+              flexShrink: 0,
               backgroundColor: selectedStatus === tab.value ? "var(--primary)" : "var(--card-bg)",
               color: selectedStatus === tab.value ? "#ffffff" : "var(--text-secondary)",
               boxShadow: selectedStatus === tab.value ? "var(--shadow-sm)" : "none",
@@ -146,7 +157,7 @@ export const AdminInspectionPage: React.FC = () => {
       </div>
 
       {/* Search Input */}
-      <div style={{ maxWidth: "360px", marginBottom: "1.5rem" }}>
+      <div className="catalog-search-wrapper" style={{ marginBottom: "1.5rem" }}>
         <Input
           placeholder="Search by Order ID..."
           value={searchQuery}
@@ -156,12 +167,13 @@ export const AdminInspectionPage: React.FC = () => {
       </div>
 
       {/* Table */}
-      <Card className="fresco-card">
-        {isLoading ? (
-          <div style={{ display: "flex", justifyContent: "center", padding: "4rem 0" }}>
-            <Spinner size="lg" color="var(--primary)" />
-          </div>
-        ) : filteredInspections.length === 0 ? (
+      {/* Inspection Cards Grid */}
+      {isLoading ? (
+        <div style={{ display: "flex", justifyContent: "center", padding: "4rem 0" }}>
+          <Spinner size="lg" color="var(--primary)" />
+        </div>
+      ) : filteredInspections.length === 0 ? (
+        <Card className="fresco-card">
           <div style={{ padding: "4rem 1rem", textAlign: "center", color: "var(--text-muted)" }}>
             <ClipboardCheck size={48} style={{ margin: "0 auto 1rem", opacity: 0.4 }} />
             <h3 style={{ fontSize: "1.125rem", fontWeight: 600, margin: "0 0 0.5rem 0", color: "var(--text-primary)" }}>
@@ -171,106 +183,153 @@ export const AdminInspectionPage: React.FC = () => {
               Inspections are automatically created when orders arrive for cleaning.
             </p>
           </div>
-        ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table className="fresco-table" style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ textAlign: "left", borderBottom: "1px solid var(--border-color)" }}>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Order ID
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Items Count
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Status
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Adjustments
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Created Date
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase", textAlign: "right" }}>
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredInspections.map((ins) => {
-                  const orderId =
-                    typeof ins.orderId === "object" ? ins.orderId._id : ins.orderId;
-                  const adjustment = ins.pricingSummary?.adjustmentAmount || 0;
+        </Card>
+      ) : (
+        <div className="admin-card-grid-3">
+          {filteredInspections.map((ins) => {
+            const orderId =
+              typeof ins.orderId === "object" ? ins.orderId._id : ins.orderId;
+            const adjustment = ins.pricingSummary?.adjustmentAmount || 0;
+            const issueCount =
+              ins.items?.filter((it) => it.condition !== "NORMAL" || Boolean(it.damageNotes)).length || 0;
 
-                  return (
-                    <tr key={ins._id} style={{ borderBottom: "1px solid var(--border-color)" }}>
-                      <td style={{ padding: "0.875rem 1rem", fontWeight: 700, fontSize: "0.875rem" }}>
-                        <Link
-                          to={`/admin/orders/${orderId}`}
-                          style={{ color: "var(--primary)", textDecoration: "none" }}
-                        >
-                          #{orderId?.substring(orderId.length - 8).toUpperCase()}
-                        </Link>
-                      </td>
+            return (
+              <Card
+                key={ins._id}
+                className="fresco-card fresco-card-hover"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  padding: "1.25rem",
+                  gap: "1rem",
+                }}
+              >
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+                  {/* Top: Order Ref + Status */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem" }}>
+                    <div>
+                      <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontWeight: 500 }}>
+                        Order Reference
+                      </div>
+                      <Link
+                        to={`/admin/orders/${orderId}`}
+                        style={{
+                          fontWeight: 700,
+                          fontSize: "1.0625rem",
+                          color: "var(--primary)",
+                          display: "inline-block",
+                          marginTop: "0.15rem",
+                        }}
+                      >
+                        #{orderId?.substring(orderId.length - 8).toUpperCase()}
+                      </Link>
+                    </div>
 
-                      <td style={{ padding: "0.875rem 1rem", fontSize: "0.875rem" }}>
-                        {ins.items?.length || 0} inspected garment(s)
-                      </td>
+                    <span
+                      style={{
+                        fontSize: "0.75rem",
+                        fontWeight: 700,
+                        padding: "0.25rem 0.6rem",
+                        borderRadius: "var(--radius-sm)",
+                        backgroundColor:
+                          ins.status === "APPROVED" || ins.status === "SUBMITTED"
+                            ? "rgba(16, 185, 129, 0.15)"
+                            : ins.status === "DRAFT"
+                            ? "rgba(245, 158, 11, 0.15)"
+                            : "rgba(107, 114, 128, 0.15)",
+                        color:
+                          ins.status === "APPROVED" || ins.status === "SUBMITTED"
+                            ? "var(--success)"
+                            : ins.status === "DRAFT"
+                            ? "var(--warning)"
+                            : "var(--text-muted)",
+                        whiteSpace: "nowrap",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {ins.status}
+                    </span>
+                  </div>
 
-                      <td style={{ padding: "0.875rem 1rem" }}>
-                        <span
-                          style={{
-                            fontSize: "0.75rem",
-                            fontWeight: 700,
-                            padding: "0.2rem 0.5rem",
-                            borderRadius: "var(--radius-sm)",
-                            backgroundColor:
-                              ins.status === "APPROVED" || ins.status === "SUBMITTED"
-                                ? "rgba(16, 185, 129, 0.15)"
-                                : ins.status === "DRAFT"
-                                ? "rgba(245, 158, 11, 0.15)"
-                                : "rgba(107, 114, 128, 0.15)",
-                            color:
-                              ins.status === "APPROVED" || ins.status === "SUBMITTED"
-                                ? "var(--success)"
-                                : ins.status === "DRAFT"
-                                ? "var(--warning)"
-                                : "var(--text-muted)",
-                          }}
-                        >
-                          {ins.status}
-                        </span>
-                      </td>
-
-                      <td style={{ padding: "0.875rem 1rem", fontSize: "0.875rem", fontWeight: 600 }}>
+                  {/* Summary Box */}
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "0.75rem",
+                      padding: "0.75rem",
+                      backgroundColor: "var(--surface-muted)",
+                      borderRadius: "var(--radius-sm)",
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontWeight: 500 }}>
+                        Items Checked
+                      </div>
+                      <div style={{ fontSize: "1.125rem", fontWeight: 700, color: "var(--text-primary)", marginTop: "0.15rem" }}>
+                        {ins.items?.length || 0} garment{ins.items?.length === 1 ? "" : "s"}
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontWeight: 500 }}>
+                        Adjustment
+                      </div>
+                      <div style={{ fontSize: "1.125rem", fontWeight: 700, color: adjustment > 0 ? "var(--warning)" : "var(--text-primary)", marginTop: "0.15rem" }}>
                         {adjustment === 0 ? "₹0" : `₹${adjustment}`}
-                      </td>
+                      </div>
+                    </div>
+                  </div>
 
-                      <td style={{ padding: "0.875rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>
-                        {new Date(ins.createdAt).toLocaleDateString("en-IN")}
-                      </td>
+                  {/* Details metadata */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.8125rem" }}>
+                    <span style={{ color: "var(--text-muted)" }}>Date:</span>
+                    <span style={{ color: "var(--text-secondary)", fontWeight: 500 }}>
+                      {new Date(ins.createdAt).toLocaleDateString("en-IN")}
+                    </span>
+                  </div>
 
-                      <td style={{ padding: "0.875rem 1rem", textAlign: "right" }}>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => {
-                            setActiveInspection(ins);
-                            setIsDetailModalOpen(true);
-                          }}
-                          leftIcon={<Eye size={14} />}
-                        >
-                          Review
-                        </Button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
+                  {issueCount > 0 && (
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.35rem",
+                        fontSize: "0.75rem",
+                        color: "var(--warning)",
+                        fontWeight: 600,
+                        padding: "0.3rem 0.5rem",
+                        backgroundColor: "rgba(245, 158, 11, 0.1)",
+                        borderRadius: "var(--radius-sm)",
+                      }}
+                    >
+                      <AlertTriangle size={13} />
+                      <span>{issueCount} item(s) flagged with damage/stains</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Bottom Actions */}
+                <div style={{ paddingTop: "0.75rem", borderTop: "1px solid var(--border-light)" }}>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    fullWidth
+                    onClick={() => {
+                      setActiveInspection(ins);
+                      setIsDetailModalOpen(true);
+                    }}
+                    leftIcon={<Eye size={14} />}
+                    style={{ minHeight: "40px" }}
+                  >
+                    Audit & Review Details
+                  </Button>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      )}
 
       {/* Review Modal */}
       {activeInspection && (

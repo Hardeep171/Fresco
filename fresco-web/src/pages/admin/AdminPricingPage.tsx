@@ -7,6 +7,8 @@ import {
   Search,
   Layers,
   Filter,
+  Clock,
+  Sparkles,
 } from "lucide-react";
 import { pricingApi } from "../../api/pricing.api";
 import { garmentApi } from "../../api/garment.api";
@@ -182,7 +184,7 @@ export const AdminPricingPage: React.FC = () => {
           </p>
         </div>
 
-        <div style={{ display: "flex", gap: "0.5rem" }}>
+        <div className="catalog-header-actions" style={{ display: "flex", gap: "0.5rem" }}>
           <Button variant="secondary" size="sm" onClick={loadData} leftIcon={<RefreshCw size={14} />}>
             Refresh
           </Button>
@@ -207,7 +209,7 @@ export const AdminPricingPage: React.FC = () => {
       {/* Filter Bar */}
       <Card className="fresco-card" style={{ padding: "1rem", marginBottom: "1.5rem" }}>
         <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", alignItems: "center" }}>
-          <div style={{ flex: "1 1 250px", maxWidth: "350px" }}>
+          <div style={{ flex: "1 1 250px", maxWidth: "350px", width: "100%" }}>
             <Input
               placeholder="Search garment or service..."
               value={searchQuery}
@@ -216,7 +218,7 @@ export const AdminPricingPage: React.FC = () => {
             />
           </div>
 
-          <div style={{ flex: "0 1 220px" }}>
+          <div style={{ flex: "1 1 200px", maxWidth: "250px", width: "100%" }}>
             <Select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
@@ -233,13 +235,13 @@ export const AdminPricingPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* Table */}
-      <Card className="fresco-card">
-        {isLoading ? (
-          <div style={{ display: "flex", justifyContent: "center", padding: "4rem 0" }}>
-            <Spinner size="lg" color="var(--primary)" />
-          </div>
-        ) : filteredPricing.length === 0 ? (
+      {/* Pricing Cards Grid */}
+      {isLoading ? (
+        <div style={{ display: "flex", justifyContent: "center", padding: "4rem 0" }}>
+          <Spinner size="lg" color="var(--primary)" />
+        </div>
+      ) : filteredPricing.length === 0 ? (
+        <Card className="fresco-card">
           <div style={{ padding: "4rem 1rem", textAlign: "center", color: "var(--text-muted)" }}>
             <DollarSign size={48} style={{ margin: "0 auto 1rem", opacity: 0.4 }} />
             <h3 style={{ fontSize: "1.125rem", fontWeight: 600, margin: "0 0 0.5rem 0", color: "var(--text-primary)" }}>
@@ -249,92 +251,131 @@ export const AdminPricingPage: React.FC = () => {
               Click "Add Rate" to define prices for garments and services.
             </p>
           </div>
-        ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table className="fresco-table" style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ textAlign: "left", borderBottom: "1px solid var(--border-color)" }}>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Garment
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Service
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Base Price
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Turnaround (Days)
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                    Status
-                  </th>
-                  <th style={{ padding: "0.875rem 1rem", fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase", textAlign: "right" }}>
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredPricing.map((item) => {
-                  const garmentName =
-                    typeof item.garmentId === "object" && item.garmentId
-                      ? (item.garmentId as any).name
-                      : "Garment";
-                  const serviceName =
-                    typeof item.serviceId === "object" && item.serviceId
-                      ? (item.serviceId as any).name
-                      : "Service";
+        </Card>
+      ) : (
+        <div className="admin-card-grid-3">
+          {filteredPricing.map((item) => {
+            const garmentName =
+              typeof item.garmentId === "object" && item.garmentId
+                ? (item.garmentId as any).name
+                : "Garment";
+            const serviceName =
+              typeof item.serviceId === "object" && item.serviceId
+                ? (item.serviceId as any).name
+                : "Service";
 
-                  return (
-                    <tr key={item._id} style={{ borderBottom: "1px solid var(--border-color)" }}>
-                      <td style={{ padding: "0.875rem 1rem", fontWeight: 600, fontSize: "0.875rem" }}>
+            return (
+              <Card
+                key={item._id}
+                className="fresco-card fresco-card-hover"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  padding: "1.25rem",
+                  gap: "1rem",
+                }}
+              >
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+                  {/* Top: Garment Name & Status */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem" }}>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: "1.0625rem", color: "var(--text-primary)" }}>
                         {garmentName}
-                      </td>
-                      <td style={{ padding: "0.875rem 1rem", fontSize: "0.875rem", color: "var(--primary)", fontWeight: 500 }}>
-                        {serviceName}
-                      </td>
-                      <td style={{ padding: "0.875rem 1rem", fontWeight: 800, fontSize: "0.9375rem", color: "var(--text-primary)" }}>
+                      </div>
+                      <div
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "0.35rem",
+                          marginTop: "0.35rem",
+                          padding: "0.2rem 0.5rem",
+                          borderRadius: "var(--radius-sm)",
+                          backgroundColor: "rgba(30, 58, 138, 0.08)",
+                          color: "var(--primary)",
+                          fontSize: "0.75rem",
+                          fontWeight: 600,
+                        }}
+                      >
+                        <Sparkles size={12} />
+                        <span>{serviceName}</span>
+                      </div>
+                    </div>
+
+                    <span
+                      style={{
+                        fontSize: "0.75rem",
+                        fontWeight: 600,
+                        padding: "0.2rem 0.5rem",
+                        borderRadius: "var(--radius-sm)",
+                        backgroundColor: item.isActive ? "rgba(16, 185, 129, 0.15)" : "rgba(107, 114, 128, 0.15)",
+                        color: item.isActive ? "var(--success)" : "var(--text-muted)",
+                        whiteSpace: "nowrap",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {item.isActive ? "ACTIVE" : "INACTIVE"}
+                    </span>
+                  </div>
+
+                  {/* Pricing and Turnaround metrics */}
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "0.75rem",
+                      padding: "0.75rem",
+                      backgroundColor: "var(--surface-muted)",
+                      borderRadius: "var(--radius-sm)",
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontWeight: 500 }}>
+                        Base Rate
+                      </div>
+                      <div style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--text-primary)", marginTop: "0.15rem" }}>
                         ₹{item.basePrice ?? item.price ?? 0}
-                      </td>
-                      <td style={{ padding: "0.875rem 1rem", fontSize: "0.8125rem", color: "var(--text-secondary)" }}>
-                        {item.minDays || 1} day(s)
-                      </td>
-                      <td style={{ padding: "0.875rem 1rem" }}>
-                        <span
-                          style={{
-                            fontSize: "0.75rem",
-                            fontWeight: 600,
-                            padding: "0.2rem 0.5rem",
-                            borderRadius: "var(--radius-sm)",
-                            backgroundColor: item.isActive ? "rgba(16, 185, 129, 0.15)" : "rgba(107, 114, 128, 0.15)",
-                            color: item.isActive ? "var(--success)" : "var(--text-muted)",
-                          }}
-                        >
-                          {item.isActive ? "ACTIVE" : "INACTIVE"}
-                        </span>
-                      </td>
-                      <td style={{ padding: "0.875rem 1rem", textAlign: "right" }}>
-                        <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
-                          <Button variant="secondary" size="sm" onClick={() => handleOpenEdit(item)}>
-                            <Edit2 size={14} /> Edit
-                          </Button>
-                          <Button
-                            variant={item.isActive ? "danger" : "success"}
-                            size="sm"
-                            onClick={() => handleToggleStatus(item)}
-                          >
-                            {item.isActive ? "Disable" : "Enable"}
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontWeight: 500 }}>
+                        Turnaround
+                      </div>
+                      <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--text-secondary)", marginTop: "0.25rem", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                        <Clock size={14} style={{ color: "var(--text-muted)" }} />
+                        <span>{item.minDays || 1} day(s)</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom Actions */}
+                <div style={{ display: "flex", gap: "0.5rem", paddingTop: "0.75rem", borderTop: "1px solid var(--border-light)" }}>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    fullWidth
+                    onClick={() => handleOpenEdit(item)}
+                    leftIcon={<Edit2 size={14} />}
+                    style={{ minHeight: "40px" }}
+                  >
+                    Edit Rate
+                  </Button>
+                  <Button
+                    variant={item.isActive ? "danger" : "success"}
+                    size="sm"
+                    fullWidth
+                    onClick={() => handleToggleStatus(item)}
+                    style={{ minHeight: "40px" }}
+                  >
+                    {item.isActive ? "Disable" : "Enable"}
+                  </Button>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      )}
 
       {/* Pricing Modal */}
       <Modal
