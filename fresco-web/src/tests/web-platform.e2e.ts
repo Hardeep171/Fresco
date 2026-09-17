@@ -179,8 +179,9 @@ async function runTests() {
   if (customerToken && garments.length > 0 && services.length > 0) {
     storageService.saveTokens(customerToken, "mock-refresh");
 
-    const testGarment = garments[0];
-    const testService = services[0];
+    const activePricingPair = pricingMatrix.find((p) => p.isActive) || { garmentId: garments[0]._id, serviceId: services[0]._id };
+    const testGarment = garments.find((g) => g._id === activePricingPair.garmentId) || garments[0];
+    const testService = services.find((s) => s._id === activePricingPair.serviceId) || services[0];
 
     try {
       // Clear or initialize cart

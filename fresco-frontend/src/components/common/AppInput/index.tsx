@@ -145,6 +145,8 @@ export const AppInput: React.FC<AppInputProps> = ({
             style={styles.rightIconWrapper}
             accessibilityLabel={isPasswordVisible ? "Hide password" : "Show password"}
             accessibilityRole="button"
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            testID="password-visibility-toggle"
           >
             <Ionicons
               name={isPasswordVisible ? "eye-off-outline" : "eye-outline"}
@@ -210,6 +212,7 @@ const styles = StyleSheet.create({
   },
   inputField: {
     flex: 1,
+    fontFamily: typography.fontFamily.regular,
     ...typography.presets.body,
     paddingVertical: spacing.sm,
     ...Platform.select({
@@ -232,6 +235,8 @@ const styles = StyleSheet.create({
     marginLeft: spacing.sm,
     justifyContent: "center",
     alignItems: "center",
+    minWidth: 40,
+    minHeight: 40,
     padding: spacing.xs,
   },
   feedbackRow: {
